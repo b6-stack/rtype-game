@@ -1,0 +1,65 @@
+[gd_scene load_steps=2 format=3 uid="uid://rtype_gameover"]
+
+[ext_resource type="Script" path="res://scenes/game/game_over/GameOverScreen.gd" id="1_go"]
+
+[node name="GameOverScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_go")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.0, 0.0, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+custom_minimum_size = Vector2(500, 0)
+theme_override_constants/separation = 28
+
+[node name="GameOverLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "GAME OVER"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 100
+theme_override_colors/font_color = Color(1.0, 0.15, 0.15, 1)
+
+[node name="ScoreLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "SCORE: 0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 44
+theme_override_colors/font_color = Color(0.2, 1.0, 0.8, 1)
+
+[node name="HiScoreLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "BEST: 0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 30
+theme_override_colors/font_color = Color(1.0, 0.9, 0.3, 1)
+
+[node name="Spacer" type="Control" parent="Center/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+
+[node name="RetryButton" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "TRY AGAIN"
+custom_minimum_size = Vector2(400, 80)
+theme_override_font_sizes/font_size = 36
+
+[node name="MenuButton" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "MAIN MENU"
+custom_minimum_size = Vector2(400, 60)
+theme_override_font_sizes/font_size = 28

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/EnemyData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+enemy_name = "Overseer"
+enemy_type = "overseer"
+max_health = 80
+score_value = 600
+move_speed = 100.0
+shoot_cooldown = 4.0
+enemy_color = Color(1, 0.84, 0, 1)
+bullet_speed = 460.0
+bullet_damage = 18
+description = "Commander unit that buffs nearby enemies."

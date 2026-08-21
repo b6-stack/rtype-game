@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/WeaponData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+weapon_name = "Drill"
+weapon_index = 6
+bullet_color = Color(1, 0, 0, 1)
+fire_rate = 2.0
+bullet_speed = 800.0
+damage = 10
+charge_time = 3.0
+description = "Spinning drill pierces multiple enemies."

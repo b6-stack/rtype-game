@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/BossData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+boss_name = "Abyss Gate"
+boss_scene = "res://scenes/bosses/BossAbyssGate.tscn"
+max_health = 1300
+phase_count = 4
+score_value = 12000
+boss_color = Color(0.25, 0, 0.45, 1)
+size_scale = 1.2
+entry_speed = 160.0
+description = "Teleports unpredictably and summons gravity wells."

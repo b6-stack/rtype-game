@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/EnemyData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+enemy_name = "Turret"
+enemy_type = "turret"
+max_health = 60
+score_value = 300
+move_speed = 0.0
+shoot_cooldown = 0.8
+enemy_color = Color(0.5, 0.5, 0.5, 1)
+bullet_speed = 480.0
+bullet_damage = 12
+description = "Stationary auto-turret."

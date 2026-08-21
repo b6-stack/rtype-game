@@ -1,0 +1,54 @@
+[gd_scene load_steps=2 format=3 uid="uid://rtype_pausemenu"]
+
+[ext_resource type="Script" path="res://scenes/game/pause_menu/PauseMenu.gd" id="1_pm"]
+
+[node name="PauseMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 10
+script = ExtResource("1_pm")
+
+[node name="Overlay" type="ColorRect" parent="."]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.65)
+
+[node name="Panel" type="PanelContainer" parent="Overlay"]
+process_mode = 3
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_right = 220.0
+offset_top = -180.0
+offset_bottom = 180.0
+
+[node name="VBox" type="VBoxContainer" parent="Overlay/Panel"]
+process_mode = 3
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="PausedLabel" type="Label" parent="Overlay/Panel/VBox"]
+layout_mode = 2
+text = "PAUSED"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 56
+theme_override_colors/font_color = Color(0.2, 0.9, 1.0, 1)
+
+[node name="ResumeButton" type="Button" parent="Overlay/Panel/VBox"]
+process_mode = 3
+layout_mode = 2
+text = "RESUME"
+custom_minimum_size = Vector2(340, 72)
+theme_override_font_sizes/font_size = 32
+
+[node name="QuitButton" type="Button" parent="Overlay/Panel/VBox"]
+process_mode = 3
+layout_mode = 2
+text = "QUIT TO MENU"
+custom_minimum_size = Vector2(340, 60)
+theme_override_font_sizes/font_size = 26

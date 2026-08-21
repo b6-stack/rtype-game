@@ -1,0 +1,65 @@
+[gd_scene load_steps=2 format=3 uid="uid://rtype_winscreen"]
+
+[ext_resource type="Script" path="res://scenes/game/win_screen/WinScreen.gd" id="1_ws"]
+
+[node name="WinScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_ws")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.02, 0.04, 0.08, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+custom_minimum_size = Vector2(600, 0)
+theme_override_constants/separation = 28
+
+[node name="YouWinLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "YOU WIN!"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 120
+theme_override_colors/font_color = Color(1.0, 0.85, 0.1, 1)
+
+[node name="FinalScoreLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "FINAL SCORE: 0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 48
+theme_override_colors/font_color = Color(0.2, 1.0, 0.8, 1)
+
+[node name="HiScoreLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "HIGH SCORE: 0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(1.0, 0.9, 0.3, 1)
+
+[node name="Spacer" type="Control" parent="Center/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+
+[node name="PlayAgainButton" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "PLAY AGAIN"
+custom_minimum_size = Vector2(400, 80)
+theme_override_font_sizes/font_size = 36
+
+[node name="MenuButton" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "MAIN MENU"
+custom_minimum_size = Vector2(400, 60)
+theme_override_font_sizes/font_size = 28

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/BossData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+boss_name = "Iron Claw"
+boss_scene = "res://scenes/bosses/BossIronClaw.tscn"
+max_health = 800
+phase_count = 2
+score_value = 5000
+boss_color = Color(0.6, 0.6, 0.65, 1)
+size_scale = 1.0
+entry_speed = 220.0
+description = "Mechanical claw unit with spinning appendages."

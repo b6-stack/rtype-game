@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/EnemyData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+enemy_name = "Shield"
+enemy_type = "shield"
+max_health = 50
+score_value = 350
+move_speed = 90.0
+shoot_cooldown = 0.0
+enemy_color = Color(0.27, 0.51, 0.71, 1)
+bullet_speed = 0.0
+bullet_damage = 0
+description = "Protected by front energy shield."

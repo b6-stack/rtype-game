@@ -1,0 +1,74 @@
+[gd_scene load_steps=3 format=3 uid="uid://rtype_mainmenu"]
+
+[ext_resource type="Script" path="res://scenes/main_menu/MainMenu.gd" id="1_mm"]
+[ext_resource type="Script" path="res://scenes/main_menu/StarContainer.gd" id="2_sc"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_mm")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.02, 0.02, 0.08, 1)
+
+[node name="StarContainer" type="Node2D" parent="."]
+script = ExtResource("2_sc")
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(400, 0)
+theme_override_constants/separation = 30
+
+[node name="TitleLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "R - T Y P E"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 96
+theme_override_colors/font_color = Color(0.2, 0.9, 1.0, 1)
+
+[node name="SubtitleLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "MOBILE ASSAULT"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(0.6, 0.8, 1.0, 1)
+
+[node name="Spacer" type="Control" parent="Center/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+
+[node name="StartButton" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "START GAME"
+custom_minimum_size = Vector2(360, 80)
+theme_override_font_sizes/font_size = 36
+
+[node name="QuitButton" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "QUIT"
+custom_minimum_size = Vector2(360, 60)
+theme_override_font_sizes/font_size = 28
+
+[node name="Spacer2" type="Control" parent="Center/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 20)
+
+[node name="HiScoreLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "HIGH SCORE: 0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1.0, 0.9, 0.3, 1)

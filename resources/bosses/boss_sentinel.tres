@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/BossData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+boss_name = "Sentinel"
+boss_scene = "res://scenes/bosses/BossSentinel.tscn"
+max_health = 1000
+phase_count = 3
+score_value = 7000
+boss_color = Color(0.4, 0.6, 0.8, 1)
+size_scale = 1.1
+entry_speed = 180.0
+description = "Rotating shield ring protects vulnerable core."

@@ -1,0 +1,82 @@
+[gd_scene load_steps=14 format=3 uid="uid://rtype_game"]
+
+[ext_resource type="Script" path="res://scenes/game/Game.gd" id="1_game"]
+[ext_resource type="PackedScene" path="res://scenes/world/ScrollingBackground.tscn" id="2_sbg"]
+[ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/game/hud/HUD.tscn" id="4_hud"]
+[ext_resource type="PackedScene" path="res://scenes/game/pause_menu/PauseMenu.tscn" id="5_pm"]
+[ext_resource type="Script" path="res://scenes/world/LevelGenerator.gd" id="6_lg"]
+[ext_resource type="Script" path="res://scenes/enemies/EnemySpawner.gd" id="7_es"]
+[ext_resource type="Script" path="res://scenes/bosses/BossManager.gd" id="8_bm"]
+[ext_resource type="Script" path="res://scenes/powerups/PowerUpSpawner.gd" id="9_pus"]
+
+[sub_resource type="RectangleShape2D" id="BossBarBG"]
+size = Vector2(800.0, 40.0)
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_game")
+
+[node name="ScrollingBackground" parent="." instance=ExtResource("2_sbg")]
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Chunks" type="Node2D" parent="World"]
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="PlayerBullets" type="Node2D" parent="Entities"]
+
+[node name="EnemyBullets" type="Node2D" parent="Entities"]
+
+[node name="Enemies" type="Node2D" parent="Entities"]
+
+[node name="Bosses" type="Node2D" parent="Entities"]
+
+[node name="PowerUps" type="Node2D" parent="Entities"]
+
+[node name="Player" parent="Entities" instance=ExtResource("3_player")]
+
+[node name="HUD" parent="." instance=ExtResource("4_hud")]
+
+[node name="BossBarPanel" type="PanelContainer" parent="HUD"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = -400.0
+offset_right = 400.0
+offset_top = 88.0
+offset_bottom = 150.0
+visible = false
+
+[node name="VBox" type="VBoxContainer" parent="HUD/BossBarPanel"]
+layout_mode = 2
+
+[node name="BossNameLabel" type="Label" parent="HUD/BossBarPanel/VBox"]
+layout_mode = 2
+text = "BOSS"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+
+[node name="BossBar" type="ProgressBar" parent="HUD/BossBarPanel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(780.0, 22.0)
+value = 100.0
+show_percentage = false
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+
+[node name="PauseMenu" parent="." instance=ExtResource("5_pm")]
+
+[node name="LevelGenerator" type="Node" parent="."]
+script = ExtResource("6_lg")
+
+[node name="EnemySpawner" type="Node" parent="."]
+script = ExtResource("7_es")
+
+[node name="BossManager" type="Node" parent="."]
+script = ExtResource("8_bm")
+
+[node name="PowerUpSpawner" type="Node" parent="."]
+script = ExtResource("9_pus")

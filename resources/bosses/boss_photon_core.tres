@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/BossData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+boss_name = "Photon Core"
+boss_scene = "res://scenes/bosses/BossPhotonCore.tscn"
+max_health = 1100
+phase_count = 3
+score_value = 9000
+boss_color = Color(1, 0.9, 0.1, 1)
+size_scale = 1.0
+entry_speed = 160.0
+description = "Fires sweeping laser arcs that cover the entire arena."

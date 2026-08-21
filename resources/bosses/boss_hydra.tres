@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/BossData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+boss_name = "Hydra"
+boss_scene = "res://scenes/bosses/BossHydra.tscn"
+max_health = 1200
+phase_count = 3
+score_value = 8000
+boss_color = Color(0.1, 0.8, 0.3, 1)
+size_scale = 1.2
+entry_speed = 180.0
+description = "Three-headed beast — destroy each head to advance."

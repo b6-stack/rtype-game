@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/BossData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+boss_name = "Dread Star"
+boss_index = 8
+color = Color(0.9, 0.2, 0.8, 1)
+max_health = 2500
+phase_count = 3
+score_value = 25000
+size_scale = 1.6
+entry_speed = 300.0
+description = "Cosmic Pulsar Dreadnought with rotating particle cannons."

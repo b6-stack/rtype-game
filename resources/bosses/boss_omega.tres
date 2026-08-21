@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/BossData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+boss_name = "Omega"
+boss_scene = "res://scenes/bosses/BossOmega.tscn"
+max_health = 2000
+phase_count = 4
+score_value = 20000
+boss_color = Color(0.6, 0, 0, 1)
+size_scale = 1.5
+entry_speed = 140.0
+description = "The ultimate threat — combines every known attack pattern."

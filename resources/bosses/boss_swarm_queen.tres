@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/BossData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+boss_name = "Swarm Queen"
+boss_scene = "res://scenes/bosses/BossSwarmQueen.tscn"
+max_health = 900
+phase_count = 2
+score_value = 6000
+boss_color = Color(0.6, 0.1, 0.7, 1)
+size_scale = 1.0
+entry_speed = 180.0
+description = "Spawns endless grunt waves while firing spread shots."

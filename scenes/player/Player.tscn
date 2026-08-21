@@ -1,0 +1,52 @@
+[gd_scene load_steps=7 format=3 uid="uid://rtype_player"]
+
+[ext_resource type="Script" path="res://scenes/player/Player.gd" id="1_player"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player_ship.png" id="2_sprite"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_player"]
+radius = 14.0
+height = 36.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hurt"]
+radius = 12.0
+height = 28.0
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 57
+script = ExtResource("1_player")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visual"]
+scale = Vector2(0.065, 0.065)
+texture = ExtResource("2_sprite")
+flip_h = true
+
+[node name="ThrusterPoly" type="Polygon2D" parent="Visual"]
+position = Vector2(-22, 0)
+polygon = PackedVector2Array(-10, -6, 0, -3, 0, 3, -10, 6)
+color = Color(1.0, 0.6, 0.1, 1)
+
+[node name="ShieldRing" type="Polygon2D" parent="Visual"]
+visible = false
+polygon = PackedVector2Array(32, 0, 24, -18, 0, -26, -24, -18, -32, 0, -24, 18, 0, 26, 24, 18)
+color = Color(0.2, 0.8, 1, 0.35)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_player")
+
+[node name="HurtBox" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 57
+
+[node name="HurtBoxShape" type="CollisionShape2D" parent="HurtBox"]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_hurt")
+
+[node name="MuzzlePoint" type="Marker2D" parent="."]
+position = Vector2(36.0, 0.0)
+
+[connection signal="area_entered" from="HurtBox" to="." method="_on_hurtbox_area_entered"]
+[connection signal="body_entered" from="HurtBox" to="." method="_on_hurtbox_body_entered"]

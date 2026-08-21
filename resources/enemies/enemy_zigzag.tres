@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/EnemyData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+enemy_name = "Zigzag"
+enemy_type = "zigzag"
+max_health = 20
+score_value = 120
+move_speed = 220.0
+shoot_cooldown = 0.0
+enemy_color = Color(0, 1, 0, 1)
+bullet_speed = 0.0
+bullet_damage = 0
+description = "Moves in rapid zigzag pattern."

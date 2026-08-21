@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/EnemyData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+enemy_name = "Stalker"
+enemy_type = "stalker"
+max_health = 35
+score_value = 220
+move_speed = 100.0
+shoot_cooldown = 1.5
+enemy_color = Color(1, 0.41, 0.71, 1)
+bullet_speed = 420.0
+bullet_damage = 12
+description = "Mirrors player vertical position."

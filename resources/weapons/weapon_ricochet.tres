@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/WeaponData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+weapon_name = "Ricochet"
+weapon_index = 7
+bullet_color = Color(0.56, 0, 1, 1)
+fire_rate = 2.5
+bullet_speed = 700.0
+damage = 7
+charge_time = 2.8
+description = "Ricochets at angles to hit hidden enemies."

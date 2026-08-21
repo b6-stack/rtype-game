@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/BossData.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+boss_name = "Hyperion Prime"
+boss_index = 9
+color = Color(1.0, 0.85, 0.1, 1)
+max_health = 3500
+phase_count = 4
+score_value = 50000
+size_scale = 1.8
+entry_speed = 280.0
+description = "Titan Flagship with multi-vector apocalypse cannons."
