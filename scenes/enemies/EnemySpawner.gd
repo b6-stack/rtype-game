@@ -60,6 +60,11 @@ var powerup_spawner: PowerUpSpawner = null
 ## Max enemies alive at once (performance cap)
 const MAX_ENEMIES: int = 45
 
+## Difficulty scaling per level above 1 (level 1 = baseline, no scaling).
+const DIFFICULTY_SPEED_PER_LEVEL: float = 0.07     # +7% move speed per level
+const DIFFICULTY_FIRE_RATE_PER_LEVEL: float = 0.09 # +9% fire rate per level
+const DIFFICULTY_MIN_SHOOT_COOLDOWN: float = 0.3   # floor so firing never becomes absurd
+
 const SPRITE_BASIC := preload("res://assets/sprites/enemy_ship.png")
 const SPRITE_BIO := preload("res://assets/sprites/enemy_bio_swarmer.png")
 const SPRITE_ARMORED := preload("res://assets/sprites/enemy_armored_turret.png")
@@ -86,6 +91,8 @@ func _on_enemy_spawn_requested(pos: Vector2, enemy_type_id: int) -> void:
 	if ResourceLoader.exists(data_path):
 		var data: EnemyData = load(data_path)
 		enemy.init_from_data(data)
+
+	_apply_difficulty_scaling(enemy)
 
 	enemy.bullet_container = bullet_container
 	enemy.player_ref = player_ref
@@ -119,6 +126,16 @@ func _on_enemy_spawn_requested(pos: Vector2, enemy_type_id: int) -> void:
 
 	# Wire up died signal for scoring
 	enemy.died.connect(_on_enemy_died)
+
+## Makes enemies more aggressive and shoot more often as the level increases.
+func _apply_difficulty_scaling(enemy: EnemyBase) -> void:
+	var level_above_base: float = float(GameState.level - 1)
+	var speed_mult: float = 1.0 + level_above_base * DIFFICULTY_SPEED_PER_LEVEL
+	var fire_rate_mult: float = 1.0 + level_above_base * DIFFICULTY_FIRE_RATE_PER_LEVEL
+
+	enemy.move_speed *= speed_mult
+	if enemy.shoot_cooldown > 0.0:
+		enemy.shoot_cooldown = max(DIFFICULTY_MIN_SHOOT_COOLDOWN, enemy.shoot_cooldown / fire_rate_mult)
 
 func _on_enemy_died(pos: Vector2, score_val: int) -> void:
 	GameState.add_score(score_val)

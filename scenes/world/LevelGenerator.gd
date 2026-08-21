@@ -15,6 +15,12 @@ const MIN_CORRIDOR: float = 220.0
 const MAX_WALL_THICKNESS: float = 360.0
 const LOOK_AHEAD_CHUNKS: int = 4    # how many chunks ahead to keep ready
 
+## Difficulty scaling per level above 1 (level 1 = baseline density).
+const DENSITY_BONUS_PER_LEVEL: float = 0.4  # extra enemies per chunk per level
+const SPAWN_CHANCE_PER_LEVEL: float = 0.025 # extra spawn-roll chance per level
+const MAX_ENEMIES_PER_CHUNK: int = 6
+const MAX_SPAWN_CHANCE: float = 0.95
+
 # Corridor state (Y values of corridor edges)
 var _corridor_top: float = 200.0
 var _corridor_bottom: float = 880.0
@@ -165,6 +171,11 @@ func _generate_spawn_data(chunk_world_x: float) -> Array:
 		# Standard combat wave: 2-3 enemies
 		enemy_count = _rng.randi_range(2, 3 + int(level / 3))
 		spawn_chance = 0.80
+
+	# Difficulty scaling: higher levels pack in more enemies, more often.
+	var density_bonus: int = int(float(level - 1) * DENSITY_BONUS_PER_LEVEL)
+	enemy_count = mini(enemy_count + density_bonus, MAX_ENEMIES_PER_CHUNK)
+	spawn_chance = minf(MAX_SPAWN_CHANCE, spawn_chance + float(level - 1) * SPAWN_CHANCE_PER_LEVEL)
 
 	for i in range(enemy_count):
 		if _rng.randf() < spawn_chance:
