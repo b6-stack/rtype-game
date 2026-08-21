@@ -164,7 +164,7 @@ func _apply_keyboard_fallback(delta: float) -> void:
 		_target_pos.x = clamp(_target_pos.x, 60.0, 1840.0)
 		_target_pos.y = clamp(_target_pos.y, corridor_top + SHIP_MARGIN, corridor_bottom - SHIP_MARGIN)
 
-const FINGER_OFFSET := Vector2(60.0, 0.0)
+const FINGER_OFFSET := Vector2(100.0, 0.0)
 
 # ── Input handlers ────────────────────────────────────────────
 

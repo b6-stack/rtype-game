@@ -116,6 +116,7 @@ func _die() -> void:
 
 func _spawn_death_flash() -> void:
 	var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
+	fx.process_mode = Node.PROCESS_MODE_ALWAYS
 	var parent_node: Node = get_parent() if get_parent() else get_tree().current_scene
 	if parent_node:
 		parent_node.call_deferred("add_child", fx)

@@ -70,8 +70,13 @@ func _on_cheat_nuke() -> void:
 	GameState.mark_cheats_used()
 	var enemies := get_tree().get_nodes_in_group("enemies")
 	for e in enemies:
-		if is_instance_valid(e) and e.has_method("_die"):
-			e._die()
+		if is_instance_valid(e) and not e.is_queued_for_deletion():
+			if e.has_method("take_damage"):
+				e.take_damage(999999)
+			elif e.has_method("_die"):
+				e.call_deferred("_die")
+			else:
+				e.queue_free()
 	AudioManager.play_superweapon_sfx()
 
 func _on_cheat_max_charge() -> void:

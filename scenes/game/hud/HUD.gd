@@ -118,8 +118,9 @@ func _refresh_weapon() -> void:
 			_weapon_icon_rect = TextureRect.new()
 			_weapon_icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			_weapon_icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			_weapon_icon_rect.custom_minimum_size = Vector2(36, 36)
-			_weapon_icon_rect.position = Vector2(-42, -4)
+			_weapon_icon_rect.custom_minimum_size = Vector2(40, 40)
+			_weapon_icon_rect.size = Vector2(40, 40)
+			_weapon_icon_rect.position = Vector2(270.0, -8.0)
 			_weapon_label.add_child(_weapon_icon_rect)
 			
 		var path := WEAPON_ICON_PATHS[idx] if idx < WEAPON_ICON_PATHS.size() else ""
