@@ -34,17 +34,22 @@ var _arena_x: float = 1400.0     # X position boss stops at (right ~75% of scree
 var _time: float = 0.0
 var _phase_time: float = 0.0
 var _sprite: Sprite2D
+var _entry_start_x: float = 2100.0
+var _base_sprite_scale: Vector2 = Vector2.ONE
 
 func _ready() -> void:
 	current_health = max_health
 	_sprite = $Visual/Sprite2D
-	if _sprite:
-		_sprite.modulate = boss_color
-		_sprite.scale = Vector2(0.165, 0.165) * size_scale
-	# Start offscreen to the right
-	global_position.x = 2100.0
+	_base_sprite_scale = Vector2(0.165, 0.165) * size_scale
+	# Start fully offscreen to the right, whatever the actual screen width is.
+	_entry_start_x = get_viewport_rect().size.x + 250.0
+	global_position.x = _entry_start_x
 	global_position.y = 540.0
 	add_to_group("bosses")
+
+	if _sprite:
+		_sprite.modulate = Color(boss_color.r, boss_color.g, boss_color.b, 0.0)
+		_sprite.scale = _base_sprite_scale * 0.3
 
 func _physics_process(delta: float) -> void:
 	if _is_dead:
@@ -112,12 +117,36 @@ func init_from_data(data: BossData) -> void:
 func _do_entry(delta: float) -> void:
 	velocity.x = -entry_speed
 	move_and_slide()
+
+	# Materialize while flying in: fade + scale up from a small ghostly wisp.
+	var t: float = clamp((_entry_start_x - global_position.x) / (_entry_start_x - _arena_x), 0.0, 1.0)
+	if _sprite:
+		_sprite.modulate = Color(boss_color.r, boss_color.g, boss_color.b, ease(t, 0.5))
+		_sprite.scale = _base_sprite_scale * lerpf(0.3, 1.0, ease(t, 0.4))
+		_sprite.rotation = lerpf(0.6, 0.0, t)
+
 	if global_position.x <= _arena_x:
 		global_position.x = _arena_x
 		velocity = Vector2.ZERO
 		_is_entering = false
 		_phase_time = 0.0
+		if _sprite:
+			_sprite.modulate = boss_color
+			_sprite.scale = _base_sprite_scale
+			_sprite.rotation = 0.0
+		_spawn_arrival_burst()
 		entrance_complete.emit()
+
+func _spawn_arrival_burst() -> void:
+	var parent_node: Node = get_parent() if get_parent() else get_tree().current_scene
+	if parent_node == null:
+		return
+	for i in 4:
+		var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
+		parent_node.call_deferred("add_child", fx)
+		var offset := Vector2(randf_range(-70, 70), randf_range(-50, 50)) * size_scale
+		if fx.has_method("setup"):
+			fx.setup(global_position + offset, boss_color, size_scale * 1.8)
 
 func _check_phase_transition() -> void:
 	if phase_count <= 1:

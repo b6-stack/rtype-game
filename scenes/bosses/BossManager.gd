@@ -91,7 +91,7 @@ func _spawn_boss(index: int) -> void:
 			sprite_node.texture = preload("res://assets/sprites/boss_titan_cruiser.png")
 		else:
 			sprite_node.texture = preload("res://assets/sprites/boss_ship.png")
-		sprite_node.scale = Vector2(0.165, 0.165) * boss.size_scale
+		# Scale is left to BossBase's entrance animation (starts small and grows in).
 
 	# Wire signals
 	boss.died.connect(_on_boss_died)
