@@ -71,7 +71,7 @@ func _shoot() -> void:
 # ── Public API ────────────────────────────────────────────────
 
 func take_damage(amount: int) -> void:
-	if _is_dead:
+	if _is_dead or global_position.x > 1920.0:
 		return
 	current_health -= amount
 	damaged.emit(amount)
@@ -109,6 +109,7 @@ func init_from_data(data: EnemyData) -> void:
 func _die() -> void:
 	_is_dead = true
 	died.emit(global_position, score_value)
+	AudioManager.play_explosion_sfx()
 	# Spawn a small explosion visual
 	_spawn_death_flash()
 	queue_free()
@@ -136,7 +137,7 @@ func _spawn_enemy_bullet(vel: Vector2) -> void:
 	if bullet_container == null:
 		return
 	var b: Bullet = EnemyBulletScene.instantiate()
-	bullet_container.add_child(b)
+	bullet_container.call_deferred("add_child", b)
 	b.global_position = global_position
 	b.setup(vel, bullet_color, bullet_damage, 1.0, true)
 

@@ -14,10 +14,11 @@ func _do_fire(spawn_pos: Vector2) -> void:
 	)
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
-	var giant_size: float = lerpf(2.2, 3.0, charge_level)
+	var giant_size: float = lerpf(2.2, 3.2, charge_level)
 	var giant_speed: float = bullet_speed * lerpf(0.55, 0.45, charge_level)
-	var giant_damage: int = int(damage * 2.2 * charge_level + 10)
-	var giant_col: Color = bullet_color.lightened(0.4)
+	var raw_giant_dmg: float = damage * 2.2 * charge_level + 10.0
+	var giant_damage: int = max(1, int(raw_giant_dmg * get_charge_tier_multiplier(charge_level)))
+	var giant_col: Color = bullet_color.lightened(0.4 if charge_level < 1.0 else 0.75)
 	_spawn_bullet(
 		spawn_pos,
 		Vector2.RIGHT * giant_speed,

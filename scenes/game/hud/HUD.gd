@@ -37,22 +37,35 @@ func _ready() -> void:
 func set_charge(normalized: float) -> void:
 	_charge_level = clamp(normalized, 0.0, 1.0)
 	_charge_bar.value = _charge_level * 100.0
-	_charge_bar.modulate = Color.CYAN.lerp(Color.WHITE, _charge_level)
-	if _charge_level >= 1.0 and _charge_pulse_tween == null:
-		_start_charge_ready_pulse()
-	elif _charge_level < 1.0 and _charge_pulse_tween != null:
-		_charge_pulse_tween.kill()
-		_charge_pulse_tween = null
-		_charge_bar.modulate = Color.CYAN.lerp(Color.WHITE, _charge_level)
+	
+	if _charge_level >= 1.0:
+		if _charge_label:
+			_charge_label.text = "FULL CHARGE MAX 100%!"
+		if _charge_pulse_tween == null:
+			AudioManager.play_full_charge_ready_sfx()
+			_start_charge_ready_pulse()
+	elif _charge_level >= 0.66:
+		_stop_charge_pulse()
+		_charge_bar.modulate = Color(0.2, 1.0, 0.3) # GREEN
+		if _charge_label:
+			_charge_label.text = "CHARGING 95% [GREEN]"
+	elif _charge_level >= 0.33:
+		_stop_charge_pulse()
+		_charge_bar.modulate = Color(1.0, 0.9, 0.1) # YELLOW
+		if _charge_label:
+			_charge_label.text = "CHARGING 90% [YELLOW]"
+	else:
+		_stop_charge_pulse()
+		_charge_bar.modulate = Color(1.0, 0.25, 0.25) # RED
+		if _charge_label:
+			_charge_label.text = "CHARGING 80% [RED]"
 
 func show_charge_bar(visible: bool) -> void:
 	_charge_bar.visible = visible
 	if not visible:
 		_charge_level = 0.0
 		_charge_bar.value = 0.0
-		if _charge_pulse_tween:
-			_charge_pulse_tween.kill()
-			_charge_pulse_tween = null
+		_stop_charge_pulse()
 
 # ── Private ────────────────────────────────────────────────────
 
@@ -78,19 +91,56 @@ func _refresh_lives() -> void:
 		icon.color = Color(0.2, 1.0, 0.5) if i < GameState.lives else Color(0.2, 0.2, 0.2)
 		_lives_container.add_child(icon)
 
+const WEAPON_ICON_PATHS: Array[String] = [
+	"res://assets/sprites/weapons/icon_vulcan.png",
+	"res://assets/sprites/weapons/icon_laser.png",
+	"res://assets/sprites/weapons/icon_plasma.png",
+	"res://assets/sprites/weapons/icon_missile.png",
+	"res://assets/sprites/weapons/icon_wave.png",
+	"res://assets/sprites/weapons/icon_bouncer.png",
+	"res://assets/sprites/weapons/icon_drill.png",
+	"res://assets/sprites/weapons/icon_ricochet.png",
+	"res://assets/sprites/weapons/icon_gravity.png",
+	"res://assets/sprites/weapons/icon_lightning.png",
+]
+
+var _weapon_icon_rect: TextureRect
+
 func _refresh_weapon() -> void:
 	const NAMES := ["VULCAN","LASER","PLASMA","MISSILE","WAVE",
 					"BOUNCER","DRILL","RICOCHET","GRAVITY","LIGHTNING"]
 	var idx := GameState.current_weapon_index
-	_weapon_label.text = "WPN: %s" % (NAMES[idx] if idx < NAMES.size() else "?")
+	if _weapon_label:
+		_weapon_label.text = "WPN: %s" % (NAMES[idx] if idx < NAMES.size() else "?")
+		
+		# Add or update TextureRect icon badge next to weapon label
+		if _weapon_icon_rect == null or not is_instance_valid(_weapon_icon_rect):
+			_weapon_icon_rect = TextureRect.new()
+			_weapon_icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			_weapon_icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			_weapon_icon_rect.custom_minimum_size = Vector2(36, 36)
+			_weapon_icon_rect.position = Vector2(-42, -4)
+			_weapon_label.add_child(_weapon_icon_rect)
+			
+		var path := WEAPON_ICON_PATHS[idx] if idx < WEAPON_ICON_PATHS.size() else ""
+		if ResourceLoader.exists(path):
+			_weapon_icon_rect.texture = load(path)
+			_weapon_icon_rect.visible = true
 
 func _refresh_level() -> void:
 	_level_label.text = "LVL %d" % GameState.level
 
 func _start_charge_ready_pulse() -> void:
+	_stop_charge_pulse()
 	_charge_pulse_tween = create_tween().set_loops()
-	_charge_pulse_tween.tween_property(_charge_bar, "modulate", Color.YELLOW, 0.2)
-	_charge_pulse_tween.tween_property(_charge_bar, "modulate", Color.WHITE, 0.2)
+	_charge_pulse_tween.tween_property(_charge_bar, "modulate", Color(0.2, 1.0, 0.4), 0.08)
+	_charge_pulse_tween.tween_property(_charge_bar, "modulate", Color(1.0, 0.9, 0.2), 0.08)
+	_charge_pulse_tween.tween_property(_charge_bar, "modulate", Color.WHITE, 0.08)
+
+func _stop_charge_pulse() -> void:
+	if _charge_pulse_tween:
+		_charge_pulse_tween.kill()
+		_charge_pulse_tween = null
 
 # ── Signal handlers ───────────────────────────────────────────
 

@@ -57,6 +57,19 @@ func _physics_process(delta: float) -> void:
 	if global_position.x < -100.0:
 		queue_free()
 
+const WEAPON_ICON_PATHS: Array[String] = [
+	"res://assets/sprites/weapons/icon_vulcan.png",
+	"res://assets/sprites/weapons/icon_laser.png",
+	"res://assets/sprites/weapons/icon_plasma.png",
+	"res://assets/sprites/weapons/icon_missile.png",
+	"res://assets/sprites/weapons/icon_wave.png",
+	"res://assets/sprites/weapons/icon_bouncer.png",
+	"res://assets/sprites/weapons/icon_drill.png",
+	"res://assets/sprites/weapons/icon_ricochet.png",
+	"res://assets/sprites/weapons/icon_gravity.png",
+	"res://assets/sprites/weapons/icon_lightning.png",
+]
+
 func _apply_style() -> void:
 	if _sprite == null or _label == null:
 		return
@@ -75,12 +88,18 @@ func _apply_style() -> void:
 		_label.modulate = Color(0.2, 0.9, 1.0)
 	else:
 		powerup_type = "weapon"
-		_sprite.texture = SPRITE_WEAPON
-		var col := WEAPON_COLORS[weapon_index] if weapon_index < WEAPON_COLORS.size() else Color.WHITE
-		_sprite.modulate = col
-		if weapon_index < WEAPON_LETTERS.size():
-			_label.text = WEAPON_LETTERS[weapon_index]
-		_label.modulate = Color.WHITE
+		var icon_path: String = WEAPON_ICON_PATHS[weapon_index] if weapon_index < WEAPON_ICON_PATHS.size() else ""
+		if ResourceLoader.exists(icon_path):
+			_sprite.texture = load(icon_path)
+			_sprite.modulate = Color.WHITE
+			_label.text = ""
+		else:
+			_sprite.texture = SPRITE_WEAPON
+			var col := WEAPON_COLORS[weapon_index] if weapon_index < WEAPON_COLORS.size() else Color.WHITE
+			_sprite.modulate = col
+			if weapon_index < WEAPON_LETTERS.size():
+				_label.text = WEAPON_LETTERS[weapon_index]
+			_label.modulate = Color.WHITE
 
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("player_hurtbox") or area.owner is Player or area.get_parent() is Player:
@@ -91,6 +110,7 @@ func _on_body_entered(body: Node) -> void:
 		_collect()
 
 func _collect() -> void:
+	AudioManager.play_pickup_sfx()
 	if powerup_type == "life":
 		GameState.gain_life()
 	elif powerup_type == "shield":

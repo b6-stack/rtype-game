@@ -34,14 +34,14 @@ theme_override_constants/separation = 30
 
 [node name="TitleLabel" type="Label" parent="Center/VBox"]
 layout_mode = 2
-text = "R - T Y P E"
+text = "S T A R L I G H T   V A N G U A R D"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 96
+theme_override_font_sizes/font_size = 80
 theme_override_colors/font_color = Color(0.2, 0.9, 1.0, 1)
 
 [node name="SubtitleLabel" type="Label" parent="Center/VBox"]
 layout_mode = 2
-text = "MOBILE ASSAULT"
+text = "M O B I L E   E X"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 32
 theme_override_colors/font_color = Color(0.6, 0.8, 1.0, 1)

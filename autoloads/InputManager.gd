@@ -39,13 +39,23 @@ func _input(event: InputEvent) -> void:
 
 # ── Touch handlers ───────────────────────────────────────────
 
+func _is_in_ui_dead_zone(pos: Vector2) -> bool:
+	# Top HUD region (Y < 95.0) containing Pause button, Score, and Goal bar
+	if pos.y < 95.0:
+		return true
+	# Bottom HUD Charge bar region (Y > 1000.0)
+	if pos.y > 1000.0:
+		return true
+	return false
+
 func _on_touch(ev: InputEventScreenTouch) -> void:
 	if ev.pressed:
 		if _primary_id == -1:
 			_primary_id = ev.index
 			_primary_viewport_pos = _screen_to_viewport(ev.position)
 			_is_touching = true
-			move_input.emit(_primary_viewport_pos)
+			if not _is_in_ui_dead_zone(_primary_viewport_pos):
+				move_input.emit(_primary_viewport_pos)
 		elif _secondary_id == -1 and ev.index != _primary_id:
 			_secondary_id = ev.index
 			if not _is_charging:
@@ -64,7 +74,8 @@ func _on_touch(ev: InputEventScreenTouch) -> void:
 func _on_drag(ev: InputEventScreenDrag) -> void:
 	if ev.index == _primary_id:
 		_primary_viewport_pos = _screen_to_viewport(ev.position)
-		move_input.emit(_primary_viewport_pos)
+		if not _is_in_ui_dead_zone(_primary_viewport_pos):
+			move_input.emit(_primary_viewport_pos)
 
 # ── Keyboard/mouse fallback ──────────────────────────────────
 
@@ -92,8 +103,9 @@ func _on_mouse_button(ev: InputEventMouseButton) -> void:
 		if ev.pressed:
 			_mouse_active = true
 			_mouse_pos = ev.position
-			var vp_pos := _screen_to_viewport(ev.position)
-			move_input.emit(vp_pos)
+			var vp_pos := get_viewport().get_mouse_position()
+			if not _is_in_ui_dead_zone(vp_pos):
+				move_input.emit(vp_pos)
 		else:
 			_mouse_active = false
 	elif ev.button_index == MOUSE_BUTTON_RIGHT or ev.button_index == MOUSE_BUTTON_MIDDLE:
@@ -108,8 +120,10 @@ func _on_mouse_button(ev: InputEventMouseButton) -> void:
 
 func _on_mouse_motion(ev: InputEventMouseMotion) -> void:
 	_mouse_pos = ev.position
-	var vp_pos := _screen_to_viewport(ev.position)
-	move_input.emit(vp_pos)
+	if _mouse_active or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		var vp_pos := get_viewport().get_mouse_position()
+		if not _is_in_ui_dead_zone(vp_pos):
+			move_input.emit(vp_pos)
 
 func _on_key(ev: InputEventKey) -> void:
 	pass  # handled by Input.is_action_pressed in _process
@@ -131,9 +145,7 @@ func is_charging() -> bool:
 # ── Helpers ──────────────────────────────────────────────────
 
 func _screen_to_viewport(screen_pos: Vector2) -> Vector2:
-	var window_size := Vector2(DisplayServer.window_get_size())
-	var viewport_size := get_viewport().get_visible_rect().size
-	if window_size.x <= 0 or window_size.y <= 0:
-		return screen_pos
-	var ratio := viewport_size / window_size
-	return screen_pos * ratio
+	var vp := get_viewport()
+	if vp:
+		return vp.get_canvas_transform().affine_inverse() * screen_pos
+	return screen_pos

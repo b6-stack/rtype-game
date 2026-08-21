@@ -10,9 +10,11 @@ func _do_fire(spawn_pos: Vector2) -> void:
 	if b2: _attach_bounce(b2)
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
+	var raw_dmg: float = damage * 1.5
+	var bouncer_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level)))
 	for i in 3:
 		var angle: float = -30.0 + i * 30.0
-		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT.rotated(deg_to_rad(angle)) * bullet_speed, bullet_color.lightened(0.2), int(damage * 1.5), 1.3)
+		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT.rotated(deg_to_rad(angle)) * bullet_speed, bullet_color.lightened(0.2 if charge_level < 1.0 else 0.5), bouncer_dmg, 1.3)
 		if b: _attach_bounce(b)
 
 func _attach_bounce(b: Bullet) -> void:

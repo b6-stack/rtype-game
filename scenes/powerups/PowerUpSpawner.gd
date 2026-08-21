@@ -17,6 +17,6 @@ func spawn_powerup_at(pos: Vector2, weapon_index: int = -1, p_type: String = "we
 	if p_type == "weapon" and weapon_index < 0:
 		weapon_index = randi_range(0, 9)
 	var pu: PowerUp = PowerUpScene.instantiate()
-	powerup_parent.add_child(pu)
+	powerup_parent.call_deferred("add_child", pu)
 	pu.global_position = pos
 	pu.setup(weapon_index, scroll_speed, p_type)

@@ -45,8 +45,8 @@ var corridor_top: float = 120.0
 var corridor_bottom: float = 960.0
 
 # ── Config ────────────────────────────────────────────────────
-const MOVE_SMOOTH: float = 16.0
-const SHIP_MARGIN: float = 24.0
+const MOVE_SMOOTH: float = 35.0
+const SHIP_MARGIN: float = 32.0
 const INVINCIBILITY_TIME: float = 3.0
 const CHARGE_TIME: float = 3.0
 
@@ -102,9 +102,10 @@ func _physics_process(delta: float) -> void:
 	global_position.y = clamp(global_position.y,
 			corridor_top + SHIP_MARGIN, corridor_bottom - SHIP_MARGIN)
 
-	# Primary fire: only when finger/mouse is touching screen and not charging
-	if InputManager.is_touching() and not _is_charging and _current_weapon != null:
-		_current_weapon.fire(_muzzle.global_position)
+	# Primary fire: when finger/mouse is touching screen (firing at 45% rate while charging superweapon)
+	if InputManager.is_touching() and _current_weapon != null:
+		var rate_mult: float = 0.45 if _is_charging else 1.0
+		_current_weapon.fire(_muzzle.global_position, rate_mult)
 
 	# Weapon charge accumulation
 	if _is_charging:
@@ -144,14 +145,15 @@ func _physics_process(delta: float) -> void:
 func _apply_keyboard_fallback(delta: float) -> void:
 	var kb_dir := InputManager.get_kb_direction()
 	if kb_dir != Vector2.ZERO:
-		_target_pos += kb_dir * 650.0 * delta
+		_target_pos += kb_dir * 450.0 * delta
 		_target_pos.x = clamp(_target_pos.x, 60.0, 1840.0)
-		_target_pos.y = clamp(_target_pos.y, corridor_top + 30.0, corridor_bottom - 30.0)
+		_target_pos.y = clamp(_target_pos.y, corridor_top + SHIP_MARGIN, corridor_bottom - SHIP_MARGIN)
 
 # ── Input handlers ────────────────────────────────────────────
 
 func _on_move_input(viewport_pos: Vector2) -> void:
-	_target_pos = viewport_pos
+	_target_pos.x = clamp(viewport_pos.x, 60.0, 1840.0)
+	_target_pos.y = clamp(viewport_pos.y, corridor_top + SHIP_MARGIN, corridor_bottom - SHIP_MARGIN)
 
 func _on_charge_start() -> void:
 	if _is_dead:
@@ -159,6 +161,7 @@ func _on_charge_start() -> void:
 	_is_charging = true
 	_charge_level = 0.0
 	_auto_fire = false
+	AudioManager.play_charge_sfx()
 	if hud:
 		hud.show_charge_bar(true)
 		hud.set_charge(0.0)
@@ -193,6 +196,7 @@ func _take_hit(source: String = "") -> void:
 
 	GameState.lose_life()
 	hit.emit(GameState.lives)
+	AudioManager.play_hit_sfx()
 
 	# Hit spark FX
 	var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()

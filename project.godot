@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="R-Type Mobile"
+config/name="Starlight Vanguard"
 run/main_scene="res://scenes/main_menu/MainMenu.tscn"
 config/features=PackedStringArray("4.5", "Mobile")
 config/icon="res://icon.svg"
@@ -76,3 +76,4 @@ pointing/emulate_touch_from_mouse=true
 [rendering]
 
 renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true

@@ -8,7 +8,9 @@ func _do_fire(spawn_pos: Vector2) -> void:
 		_attach_vortex(b, 160.0, 100.0)
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
-	var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed * 0.6, bullet_color.lightened(0.4), int(damage * 2.2), 2.4, "plasma")
+	var raw_dmg: float = damage * 2.2
+	var gravity_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level)))
+	var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed * 0.6, bullet_color.lightened(0.4 if charge_level < 1.0 else 0.75), gravity_dmg, 2.4, "plasma")
 	if b:
 		_attach_vortex(b, 260.0, 180.0)
 

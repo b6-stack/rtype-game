@@ -1,1 +1,79 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="124" height="124" x="2" y="2" fill="#363d52" stroke="#212532" stroke-width="4" rx="14"/><g fill="#fff" transform="translate(12.322 12.322)scale(.101)"><path d="M105 673v33q407 354 814 0v-33z"/><path fill="#478cbf" d="m105 673 152 14q12 1 15 14l4 67 132 10 8-61q2-11 15-15h162q13 4 15 15l8 61 132-10 4-67q3-13 15-14l152-14V427q30-39 56-81-35-59-83-108-43 20-82 47-40-37-88-64 7-51 8-102-59-28-123-42-26 43-46 89-49-7-98 0-20-46-46-89-64 14-123 42 1 51 8 102-48 27-88 64-39-27-82-47-48 49-83 108 26 42 56 81zm0 33v39c0 276 813 276 814 0v-39l-134 12-5 69q-2 10-14 13l-162 11q-12 0-16-11l-10-65H446l-10 65q-4 11-16 11l-162-11q-12-3-14-13l-5-69z"/><path d="M483 600c0 34 58 34 58 0v-86c0-34-58-34-58 0z"/><circle cx="725" cy="526" r="90"/><circle cx="299" cy="526" r="90"/></g><g fill="#414042" transform="translate(12.322 12.322)scale(.101)"><circle cx="307" cy="532" r="60"/><circle cx="717" cy="532" r="60"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0f1936"/>
+      <stop offset="60%" stop-color="#070a14"/>
+      <stop offset="100%" stop-color="#020307"/>
+    </radialGradient>
+
+    <!-- Shield Glow -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Thruster Fire Gradient -->
+    <linearGradient id="thrusterGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#ff9900" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#ff3300" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#00ffff" stop-opacity="1"/>
+    </linearGradient>
+
+    <!-- Metallic Ship Body -->
+    <linearGradient id="hullGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e6f7ff"/>
+      <stop offset="40%" stop-color="#73a9c6"/>
+      <stop offset="70%" stop-color="#2b4865"/>
+      <stop offset="100%" stop-color="#101d2d"/>
+    </linearGradient>
+
+    <!-- Wing Trim -->
+    <linearGradient id="cyanGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00ffff"/>
+      <stop offset="100%" stop-color="#0088ff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Layer -->
+  <rect width="512" height="512" rx="96" fill="url(#bgGrad)"/>
+
+  <!-- Subtle Tech Grid Lines -->
+  <path d="M0 128 H512 M0 256 H512 M0 384 H512 M128 0 V512 M256 0 V512 M384 0 V512" stroke="#1d2d4d" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Energy Forcefield Ring -->
+  <circle cx="256" cy="256" r="210" stroke="url(#cyanGlow)" stroke-width="4" fill="none" opacity="0.8" filter="url(#glow)"/>
+  <circle cx="256" cy="256" r="210" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="16 24" fill="none" opacity="0.6"/>
+
+  <!-- Stars -->
+  <circle cx="90" cy="110" r="3" fill="#ffffff" opacity="0.9"/>
+  <circle cx="410" cy="90" r="2.5" fill="#00ffff" opacity="0.8"/>
+  <circle cx="430" cy="380" r="3" fill="#ffaa00" opacity="0.7"/>
+  <circle cx="100" cy="400" r="2" fill="#ffffff" opacity="0.8"/>
+  <circle cx="330" cy="440" r="2.5" fill="#ffffff" opacity="0.9"/>
+
+  <!-- Thruster Flame Plume -->
+  <polygon points="40,256 160,225 140,256 160,287" fill="url(#thrusterGrad)" filter="url(#glow)"/>
+  <polygon points="70,256 160,240 145,256 160,272" fill="#ffffff"/>
+
+  <!-- Ship Wings Outer Glow -->
+  <path d="M140 256 L230 140 L390 240 L440 256 L390 272 L230 372 Z" fill="none" stroke="url(#cyanGlow)" stroke-width="8" filter="url(#glow)" opacity="0.9"/>
+
+  <!-- Main Ship Body Hull -->
+  <path d="M140 256 L230 145 L380 240 L450 256 L380 272 L230 367 Z" fill="url(#hullGrad)" stroke="#66a3c7" stroke-width="3"/>
+
+  <!-- Inner Wing Panels -->
+  <path d="M210 256 L260 175 L360 245 L400 256 L360 267 L260 337 Z" fill="#182a3d"/>
+
+  <!-- Glowing Cockpit Canopy -->
+  <polygon points="310,256 360,244 410,256 360,268" fill="#00ffff" filter="url(#glow)"/>
+  <polygon points="330,256 360,248 390,256 360,264" fill="#ffffff"/>
+
+  <!-- Wing Energy Strips -->
+  <line x1="240" y1="180" x2="350" y2="235" stroke="#00ffff" stroke-width="3" filter="url(#glow)"/>
+  <line x1="240" y1="332" x2="350" y2="277" stroke="#00ffff" stroke-width="3" filter="url(#glow)"/>
+
+  <!-- Cannon Muzzles -->
+  <circle cx="365" cy="180" r="6" fill="#00ffff" filter="url(#glow)"/>
+  <circle cx="365" cy="332" r="6" fill="#00ffff" filter="url(#glow)"/>
+</svg>

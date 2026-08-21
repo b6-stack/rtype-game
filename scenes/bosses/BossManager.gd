@@ -59,6 +59,8 @@ func _spawn_boss(index: int) -> void:
 		return
 
 	_fight_active = true
+	AudioManager.play_boss_sfx()
+	AudioManager.play_boss_music()
 
 	# Tell level generator boss is active so it creates open arena chunks
 	if level_generator:
@@ -131,7 +133,6 @@ func _on_boss_died() -> void:
 
 	# Brief pause then level advance
 	await get_tree().create_timer(2.0).timeout
-	GameState.advance_level()
 	GameState.advance_level()
 
 func is_fight_active() -> bool:

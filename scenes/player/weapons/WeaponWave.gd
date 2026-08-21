@@ -9,8 +9,10 @@ func _do_fire(spawn_pos: Vector2) -> void:
 	if b2: _attach_wave(b2, -1.0, 240.0)
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
-	var b1: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed, bullet_color.lightened(0.3), int(damage * 1.8), 1.4)
-	var b2: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed, bullet_color.lightened(0.3), int(damage * 1.8), 1.4)
+	var raw_dmg: float = damage * 1.8
+	var wave_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level)))
+	var b1: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed, bullet_color.lightened(0.3 if charge_level < 1.0 else 0.6), wave_dmg, 1.4)
+	var b2: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed, bullet_color.lightened(0.3 if charge_level < 1.0 else 0.6), wave_dmg, 1.4)
 	if b1: _attach_wave(b1, 1.0, 380.0)
 	if b2: _attach_wave(b2, -1.0, 380.0)
 

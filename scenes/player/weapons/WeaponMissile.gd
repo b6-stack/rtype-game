@@ -8,11 +8,13 @@ func _do_fire(spawn_pos: Vector2) -> void:
 		_attach_homing(b)
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
-	var count: int = 2 + int(charge_level * 2) # 3-4 missiles
+	var count: int = 2 + int(charge_level * 2) # 2-4 missiles
+	var raw_dmg: float = damage * 1.5
+	var missile_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level)))
 	for i in count:
 		var angle: float = randf_range(-30.0, 30.0)
 		var vel: Vector2 = Vector2.RIGHT.rotated(deg_to_rad(angle)) * bullet_speed
-		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.2), int(damage * 1.5), 1.2, "missile")
+		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.2 if charge_level < 1.0 else 0.5), missile_dmg, 1.2, "missile")
 		if b:
 			_attach_homing(b)
 

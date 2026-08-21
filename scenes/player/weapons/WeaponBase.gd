@@ -33,11 +33,12 @@ func can_fire() -> bool:
 
 # ── Override in subclasses ───────────────────────────────────
 
-## Primary fire — called continuously while auto-firing
-func fire(spawn_pos: Vector2) -> void:
+## Primary fire — called continuously while auto-firing (silent regular shots)
+func fire(spawn_pos: Vector2, rate_multiplier: float = 1.0) -> void:
 	if not can_fire():
 		return
-	_fire_cooldown = 1.0 / fire_rate
+	var eff_rate: float = max(0.1, fire_rate * rate_multiplier)
+	_fire_cooldown = 1.0 / eff_rate
 	_do_fire(spawn_pos)
 	fired.emit()
 
@@ -45,28 +46,51 @@ func fire(spawn_pos: Vector2) -> void:
 ## charge_level is 0.0–1.0 (1.0 = fully charged)
 func charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	_do_charge_fire(spawn_pos, charge_level)
+	AudioManager.play_charge_fire_sfx(charge_level)
 	charge_fired.emit()
 
 ## Override this for primary shot pattern
 func _do_fire(spawn_pos: Vector2) -> void:
 	_spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed, bullet_color, damage, 1.0)
 
+## Returns damage multiplier based on charge color tier: Red (80%), Yellow (90%), Green (95%), Flashing Max (100%)
+func get_charge_tier_multiplier(charge_level: float) -> float:
+	if charge_level >= 1.0:
+		return 1.00 # 100% full damage when fully charged & flashing
+	elif charge_level >= 0.66:
+		return 0.95 # 95% green tier
+	elif charge_level >= 0.33:
+		return 0.90 # 90% yellow tier
+	else:
+		return 0.80 # 80% red tier
+
 ## Override this for charged shot pattern
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
+	var tier_mult := get_charge_tier_multiplier(charge_level)
 	var size_mult := lerpf(1.5, 3.0, charge_level)
+	var raw_dmg: float = damage * 3 * charge_level + 1
+	var final_dmg: int = max(1, int(raw_dmg * tier_mult))
 	_spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed * 0.85,
-			bullet_color.lightened(0.3), int(damage * 3 * charge_level + 1), size_mult)
+			bullet_color.lightened(0.3 if charge_level < 1.0 else 0.6), final_dmg, size_mult)
 
 # ── Helpers ──────────────────────────────────────────────────
 
 ## Spawns a single bullet with given parameters
 func _spawn_bullet(pos: Vector2, velocity: Vector2,
 		col: Color, dmg: int, size_mult: float = 1.0, sprite_type: String = "") -> Bullet:
+	if bullet_container == null or not is_instance_valid(bullet_container):
+		var tree := get_tree()
+		if tree and tree.current_scene:
+			var container := tree.current_scene.get_node_or_null("Entities/PlayerBullets")
+			if container:
+				bullet_container = container
+			else:
+				bullet_container = tree.current_scene
 	if bullet_container == null:
 		push_warning("WeaponBase: bullet_container not set on %s" % weapon_name)
 		return null
 	var b: Bullet = BulletScene.instantiate()
-	bullet_container.add_child(b)
+	bullet_container.call_deferred("add_child", b)
 	b.global_position = pos
 	b.setup(velocity, col, dmg, size_mult, false, sprite_type)
 	return b

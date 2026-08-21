@@ -8,10 +8,12 @@ func _do_fire(spawn_pos: Vector2) -> void:
 		_chain_electric(b, 1)
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
+	var raw_dmg: float = damage * 1.6
+	var zap_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level)))
 	for i in 3:
 		var angle: float = -20.0 + i * 20.0
 		var vel: Vector2 = Vector2.RIGHT.rotated(deg_to_rad(angle)) * bullet_speed * 1.25
-		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.4), int(damage * 1.6), 1.2)
+		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.4 if charge_level < 1.0 else 0.75), zap_dmg, 1.2)
 		if b:
 			_chain_electric(b, 2)
 

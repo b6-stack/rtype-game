@@ -1,4 +1,4 @@
-# R-Type Mobile (Godot 4.5)
+# Starlight Vanguard (Godot 4.5)
 
 A dynamic, side-scrolling sci-fi shoot-'em-up game built in **Godot 4.5+ (GDScript)** tailored for mobile (Samsung Galaxy S24+ / 1920×1080 landscape) and desktop pair-programming with Google DeepMind's **Antigravity** AI assistant.
 

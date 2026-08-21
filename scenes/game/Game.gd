@@ -68,8 +68,9 @@ func _ready() -> void:
 	if _boss_bar_panel:
 		_boss_bar_panel.visible = false
 
-	# Start level
+	# Start level & level music
 	_level_gen.initialize(GameState.level, _scroll_speed)
+	AudioManager.play_level_music(GameState.level)
 
 func _process(delta: float) -> void:
 	# Drive background scroll
