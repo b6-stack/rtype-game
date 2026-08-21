@@ -23,6 +23,9 @@ var score: int = 0
 var lives: int = STARTING_LIVES
 var level: int = 1
 var current_weapon_index: int = 0
+var god_mode_enabled: bool = false
+var always_max_charge_enabled: bool = false
+var cheats_used: bool = false
 var high_score: int = 0
 var is_game_over: bool = false
 var next_life_score_goal: int = SCORE_GOAL_INTERVAL
@@ -37,6 +40,9 @@ func reset() -> void:
 	lives = STARTING_LIVES
 	level = 1
 	current_weapon_index = 0
+	god_mode_enabled = false
+	always_max_charge_enabled = false
+	cheats_used = false
 	is_game_over = false
 	next_life_score_goal = SCORE_GOAL_INTERVAL
 	score_changed.emit(score)
@@ -45,7 +51,17 @@ func reset() -> void:
 	level_changed.emit(level)
 	score_goal_updated.emit(score, next_life_score_goal)
 
+func mark_cheats_used() -> void:
+	cheats_used = true
+	score = 0
+	score_changed.emit(0)
+
 func add_score(points: int) -> void:
+	if cheats_used:
+		score = 0
+		score_changed.emit(0)
+		return
+
 	score += points
 	if score > high_score:
 		high_score = score

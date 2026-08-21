@@ -40,8 +40,8 @@ func _input(event: InputEvent) -> void:
 # ── Touch handlers ───────────────────────────────────────────
 
 func _is_in_ui_dead_zone(pos: Vector2) -> bool:
-	# Top HUD region (Y < 95.0) containing Pause button, Score, and Goal bar
-	if pos.y < 95.0:
+	# Top HUD region (Y < 105.0) containing enlarged 2x Pause button, Score, and Goal bar
+	if pos.y < 105.0:
 		return true
 	# Bottom HUD Charge bar region (Y > 1000.0)
 	if pos.y > 1000.0:

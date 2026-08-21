@@ -108,7 +108,12 @@ func _physics_process(delta: float) -> void:
 		_current_weapon.fire(_muzzle.global_position, rate_mult)
 
 	# Weapon charge accumulation
-	if _is_charging:
+	if GameState.always_max_charge_enabled:
+		_charge_level = 1.0
+		if hud:
+			hud.set_charge(1.0)
+			hud.show_charge_bar(true)
+	elif _is_charging:
 		var weapon_charge_time := CHARGE_TIME
 		if _current_weapon:
 			var data_path: String = WEAPON_DATA_PATHS[GameState.current_weapon_index] \
@@ -121,20 +126,30 @@ func _physics_process(delta: float) -> void:
 			hud.set_charge(_charge_level)
 			hud.show_charge_bar(true)
 
-	# Invincibility period handling
-	if _is_invincible:
+	# God Mode & Invincibility handling
+	if GameState.god_mode_enabled:
+		_sprite.modulate = Color(1.0, 0.95, 0.5, 1.0)
+		if _shield_ring:
+			_shield_ring.visible = true
+			_shield_ring.rotation += delta * 6.0
+			_shield_ring.modulate = Color(1.0, 0.85, 0.2, 0.8)
+	elif _is_invincible:
 		_invincibility_timer -= delta
 		# Visual flashing shield & ship transparency
-		_sprite.modulate.a = 0.35 + 0.65 * abs(sin(_invincibility_timer * 18.0))
+		_sprite.modulate = Color(1.0, 1.0, 1.0, 0.35 + 0.65 * abs(sin(_invincibility_timer * 18.0)))
 		if _shield_ring:
 			_shield_ring.visible = true
 			_shield_ring.rotation += delta * 4.0
-			_shield_ring.modulate.a = 0.4 + 0.6 * abs(sin(_invincibility_timer * 12.0))
+			_shield_ring.modulate = Color(0.2, 0.9, 1.0, 0.4 + 0.6 * abs(sin(_invincibility_timer * 12.0)))
 		if _invincibility_timer <= 0.0:
 			_is_invincible = false
-			_sprite.modulate.a = 1.0
+			_sprite.modulate = Color.WHITE
 			if _shield_ring:
 				_shield_ring.visible = false
+	else:
+		_sprite.modulate = Color.WHITE
+		if _shield_ring and _shield_ring.visible:
+			_shield_ring.visible = false
 
 	# Keyboard fallback position
 	_apply_keyboard_fallback(delta)
@@ -149,11 +164,14 @@ func _apply_keyboard_fallback(delta: float) -> void:
 		_target_pos.x = clamp(_target_pos.x, 60.0, 1840.0)
 		_target_pos.y = clamp(_target_pos.y, corridor_top + SHIP_MARGIN, corridor_bottom - SHIP_MARGIN)
 
+const FINGER_OFFSET := Vector2(60.0, 0.0)
+
 # ── Input handlers ────────────────────────────────────────────
 
 func _on_move_input(viewport_pos: Vector2) -> void:
-	_target_pos.x = clamp(viewport_pos.x, 60.0, 1840.0)
-	_target_pos.y = clamp(viewport_pos.y, corridor_top + SHIP_MARGIN, corridor_bottom - SHIP_MARGIN)
+	var target := viewport_pos + FINGER_OFFSET
+	_target_pos.x = clamp(target.x, 60.0, 1840.0)
+	_target_pos.y = clamp(target.y, corridor_top + SHIP_MARGIN, corridor_bottom - SHIP_MARGIN)
 
 func _on_charge_start() -> void:
 	if _is_dead:
@@ -191,7 +209,7 @@ func _on_hurtbox_body_entered(body: Node) -> void:
 		_take_hit("enemy")
 
 func _take_hit(source: String = "") -> void:
-	if _is_invincible or _is_dead:
+	if _is_invincible or _is_dead or GameState.god_mode_enabled:
 		return
 
 	GameState.lose_life()
