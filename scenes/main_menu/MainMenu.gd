@@ -34,9 +34,10 @@ func _on_quit_pressed() -> void:
 
 func _generate_stars() -> void:
 	_stars.clear()
+	var screen_size: Vector2 = get_viewport_rect().size
 	for i in STAR_COUNT:
 		_stars.append({
-			"pos": Vector2(randf() * 1920.0, randf() * 1080.0),
+			"pos": Vector2(randf() * screen_size.x, randf() * screen_size.y),
 			"speed": randf_range(30.0, 150.0),
 			"size": randf_range(1.0, 3.5),
 			"brightness": randf_range(0.5, 1.0),
@@ -44,9 +45,10 @@ func _generate_stars() -> void:
 	_star_container.queue_redraw()
 
 func _scroll_stars(delta: float) -> void:
+	var screen_size: Vector2 = get_viewport_rect().size
 	for s in _stars:
 		s["pos"].x -= s["speed"] * delta
 		if s["pos"].x < -5.0:
-			s["pos"].x = 1925.0
-			s["pos"].y = randf() * 1080.0
+			s["pos"].x = screen_size.x + 5.0
+			s["pos"].y = randf() * screen_size.y
 	_star_container.queue_redraw()

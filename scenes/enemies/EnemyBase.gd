@@ -71,7 +71,7 @@ func _shoot() -> void:
 # ── Public API ────────────────────────────────────────────────
 
 func take_damage(amount: int) -> void:
-	if _is_dead or global_position.x > 1920.0:
+	if _is_dead or global_position.x > get_viewport_rect().size.x:
 		return
 	current_health -= amount
 	damaged.emit(amount)

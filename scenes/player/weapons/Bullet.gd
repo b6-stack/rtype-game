@@ -87,7 +87,8 @@ func setup(vel: Vector2, col: Color, dmg: int,
 func _physics_process(delta: float) -> void:
 	global_position += velocity * delta
 	_lifetime += delta
-	if _lifetime >= MAX_LIFETIME or global_position.x > 1920.0 or global_position.x < -100.0:
+	var screen_width: float = get_viewport_rect().size.x
+	if _lifetime >= MAX_LIFETIME or global_position.x > screen_width + 100.0 or global_position.x < -100.0:
 		queue_free()
 
 func _on_area_entered(area: Area2D) -> void:
