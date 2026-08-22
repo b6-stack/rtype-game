@@ -27,6 +27,7 @@ var _sfx_boss: AudioStreamWAV
 # Level music tracks & Boss music track
 var _level_tracks: Dictionary = {}
 var _boss_music_track: AudioStreamWAV = null
+var _victory_music_track: AudioStreamWAV = null
 var _current_level_music: int = -1
 var _is_boss_music: bool = false
 
@@ -63,6 +64,18 @@ func play_boss_music() -> void:
 		return
 	_is_boss_music = true
 	var stream: AudioStreamWAV = _get_or_create_boss_track()
+	if stream:
+		_music_player.stream = stream
+		_music_player.volume_db = _vol_db(music_volume, music_muted)
+		_music_player.play()
+
+## Triumphant looping fanfare for the win screen.
+func play_victory_music() -> void:
+	_current_level_music = -1
+	_is_boss_music = false
+	if music_muted:
+		return
+	var stream: AudioStreamWAV = _get_or_create_victory_track()
 	if stream:
 		_music_player.stream = stream
 		_music_player.volume_db = _vol_db(music_volume, music_muted)
@@ -241,6 +254,32 @@ func _get_or_create_boss_track() -> AudioStreamWAV:
 		return clampf(bass + lead + noise_tick, -0.9, 0.9)
 	)
 	return _boss_music_track
+
+func _get_or_create_victory_track() -> AudioStreamWAV:
+	if _victory_music_track != null:
+		return _victory_music_track
+
+	const RATE: int = 22050
+	const DURATION: float = 4.0
+	var sample_count: int = int(RATE * DURATION)
+
+	# Ascending major arpeggio (C5-E5-G5-C6-E6) with a soft sub-octave and
+	# a bright octave-up sparkle layered on the lead note.
+	var melody: Array[float] = [523.25, 659.25, 783.99, 1046.50, 1318.51]
+	const NOTE_DUR: float = 0.42
+
+	_victory_music_track = _create_wav(sample_count, RATE, true, func(_i: int, t: float, _total: float) -> float:
+		var note_idx: int = int(t / NOTE_DUR) % melody.size()
+		var freq: float = melody[note_idx]
+		var local_t: float = fmod(t, NOTE_DUR)
+		var env: float = 1.0 - pow(local_t / NOTE_DUR, 2.0) * 0.55
+
+		var lead: float = sin(TAU * freq * t) * 0.45
+		var sub: float = sin(TAU * freq * 0.5 * t) * 0.18
+		var sparkle: float = sin(TAU * freq * 2.0 * t) * 0.10
+		return clampf((lead + sub + sparkle) * env, -0.9, 0.9)
+	)
+	return _victory_music_track
 
 func _get_or_create_level_track(lvl: int) -> AudioStreamWAV:
 	if _level_tracks.has(lvl):

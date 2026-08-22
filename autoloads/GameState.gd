@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "1.3.1"
+const APP_VERSION := "1.4.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -42,6 +42,10 @@ var always_max_charge_enabled: bool = false
 var cheats_used: bool = false
 var high_score: int = 0
 var is_game_over: bool = false
+## Boss Rush: back-to-back fights against all 10 bosses, no regular waves
+## between them. Read by LevelGenerator (short lead-in, no filler spawns)
+## and persists across the per-level scene reloads inside advance_level().
+var boss_rush_mode: bool = false
 var next_life_score_goal: int = SCORE_GOAL_INTERVAL
 
 func _ready() -> void:
@@ -54,6 +58,7 @@ func reset() -> void:
 	lives = STARTING_LIVES
 	level = 1
 	current_weapon_index = 0
+	boss_rush_mode = false
 	god_mode_enabled = false
 	always_max_charge_enabled = false
 	cheats_used = false
@@ -127,6 +132,12 @@ func advance_level() -> void:
 
 func start_game() -> void:
 	reset()
+	get_tree().paused = false
+	get_tree().change_scene_to_file(GAME_SCENE)
+
+func start_boss_rush() -> void:
+	reset()
+	boss_rush_mode = true
 	get_tree().paused = false
 	get_tree().change_scene_to_file(GAME_SCENE)
 

@@ -56,11 +56,16 @@ const LEVEL_COLORS: Array[Color] = [
 func _ready() -> void:
 	_rng = RandomNumberGenerator.new()
 
+## Boss Rush: trigger the boss almost immediately (still leaves the base
+## 3-chunk spawn grace period so it doesn't feel like an ambush) instead of
+## the usual ~20-chunk regular-wave build-up between bosses.
+const BOSS_RUSH_CHUNKS_UNTIL_BOSS: int = 4
+
 func initialize(level: int, speed: float) -> void:
 	scroll_speed = speed
 	_base_scroll_speed = speed
 	_chunk_index = 0
-	_chunks_until_boss = _boss_chunk_interval
+	_chunks_until_boss = BOSS_RUSH_CHUNKS_UNTIL_BOSS if GameState.boss_rush_mode else _boss_chunk_interval
 	_rng.seed = level * 12345 + 1
 	_corridor_top = 180.0
 	_corridor_bottom = 900.0
@@ -149,8 +154,9 @@ func _spawn_next_chunk_at(spawn_x: float) -> void:
 
 func _generate_spawn_data(chunk_world_x: float) -> Array:
 	var spawns: Array = []
-	# Grace intro period: no enemies for the first 3 chunks (gives player ~10-12s of clear flying)
-	if _chunk_index < 3 or is_boss_active:
+	# Grace intro period: no enemies for the first 3 chunks (gives player ~10-12s of clear flying).
+	# Boss Rush skips regular waves entirely — it's boss fights back-to-back, nothing else.
+	if _chunk_index < 3 or is_boss_active or GameState.boss_rush_mode:
 		return spawns
 
 	var level: int = GameState.level

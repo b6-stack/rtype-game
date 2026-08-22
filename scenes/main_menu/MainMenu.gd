@@ -2,6 +2,7 @@ extends Control
 ## MainMenu — title screen with Start Game and Quit buttons.
 
 @onready var _start_btn: Button = $Center/VBox/StartButton
+@onready var _boss_rush_btn: Button = $Center/VBox/BossRushButton
 @onready var _quit_btn: Button = $Center/VBox/QuitButton
 @onready var _hi_score_label: Label = $Center/VBox/HiScoreLabel
 @onready var _star_container: Node2D = $StarContainer
@@ -17,6 +18,7 @@ var _stars: Array[Dictionary] = []
 
 func _ready() -> void:
 	_start_btn.pressed.connect(_on_start_pressed)
+	_boss_rush_btn.pressed.connect(_on_boss_rush_pressed)
 	_quit_btn.pressed.connect(_on_quit_pressed)
 	_hi_score_label.text = "HIGH SCORE: %d" % GameState.high_score
 	_version_label.text = "v%s" % GameState.APP_VERSION
@@ -34,6 +36,9 @@ func _process(delta: float) -> void:
 
 func _on_start_pressed() -> void:
 	GameState.start_game()
+
+func _on_boss_rush_pressed() -> void:
+	GameState.start_boss_rush()
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()

@@ -99,6 +99,13 @@ text = "START GAME"
 custom_minimum_size = Vector2(360, 80)
 theme_override_font_sizes/font_size = 36
 
+[node name="BossRushButton" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "⚔ BOSS RUSH"
+custom_minimum_size = Vector2(360, 60)
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1.0, 0.55, 0.3, 1)
+
 [node name="QuitButton" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "QUIT"
