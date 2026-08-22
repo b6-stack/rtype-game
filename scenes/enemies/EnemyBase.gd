@@ -113,13 +113,17 @@ func _die() -> void:
 	queue_free()
 
 func _spawn_death_flash() -> void:
-	var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
-	fx.process_mode = Node.PROCESS_MODE_ALWAYS
-	var parent_node: Node = get_parent() if get_parent() else get_tree().current_scene
+	_do_spawn_explosion.call_deferred(global_position, enemy_color, max(0.9, size_scale))
+
+func _do_spawn_explosion(pos: Vector2, col: Color, scale_s: float) -> void:
+	var tree := get_tree()
+	var parent_node: Node = get_parent() if get_parent() else (tree.current_scene if tree else null)
 	if parent_node:
-		parent_node.call_deferred("add_child", fx)
+		var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
+		parent_node.add_child(fx)
+		fx.global_position = pos
 		if fx.has_method("setup"):
-			fx.setup(global_position, enemy_color, max(0.8, size_scale))
+			fx.setup(pos, col, scale_s)
 
 func _fire_at_player() -> void:
 	if bullet_container == null:

@@ -66,12 +66,17 @@ func get_charge_tier_multiplier(charge_level: float) -> float:
 
 ## Override this for charged shot pattern
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
-	var tier_mult := get_charge_tier_multiplier(charge_level)
-	var size_mult := lerpf(1.5, 3.0, charge_level)
-	var raw_dmg: float = damage * 3 * charge_level + 1
-	var final_dmg: int = max(1, int(raw_dmg * tier_mult))
-	_spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed * 0.85,
-			bullet_color.lightened(0.3 if charge_level < 1.0 else 0.6), final_dmg, size_mult)
+	if charge_level < 1.0:
+		# Partial charge: smooth above-average normal shot
+		var dmg: int = max(1, int(damage * lerpf(1.25, 1.65, charge_level)))
+		var size_m: float = lerpf(1.15, 1.40, charge_level)
+		_spawn_bullet(spawn_pos, Vector2.RIGHT * (bullet_speed * 1.05),
+				bullet_color.lightened(0.25), dmg, size_m)
+	else:
+		# Full Super Charge
+		var final_dmg: int = max(1, int(damage * 3.2))
+		_spawn_bullet(spawn_pos, Vector2.RIGHT * (bullet_speed * 1.15),
+				bullet_color.lightened(0.65), final_dmg, 2.6)
 
 # ── Helpers ──────────────────────────────────────────────────
 
