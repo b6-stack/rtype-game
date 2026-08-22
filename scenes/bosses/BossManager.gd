@@ -60,7 +60,7 @@ func _spawn_boss(index: int) -> void:
 
 	_fight_active = true
 	AudioManager.play_boss_sfx()
-	AudioManager.play_boss_music()
+	AudioManager.play_boss_music(index)
 
 	# Tell level generator boss is active so it creates open arena chunks
 	if level_generator:

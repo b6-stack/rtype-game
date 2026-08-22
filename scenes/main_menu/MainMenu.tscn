@@ -108,14 +108,20 @@ text = "QUIT"
 custom_minimum_size = Vector2(360, 44)
 theme_override_font_sizes/font_size = 22
 
-[node name="CheatsHeader" type="Label" parent="Center/VBox"]
+[node name="CheatsToggleBtn" type="Button" parent="Center/VBox"]
 layout_mode = 2
-text = "─── ARCADE CHEATS ───"
-horizontal_alignment = 1
+text = "▸ ARCADE CHEATS"
+custom_minimum_size = Vector2(360, 32)
 theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(1.0, 0.85, 0.2, 1)
+flat = true
 
-[node name="CheatsCaveatLabel" type="Label" parent="Center/VBox"]
+[node name="CheatsPanel" type="VBoxContainer" parent="Center/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+visible = false
+
+[node name="CheatsCaveatLabel" type="Label" parent="Center/VBox/CheatsPanel"]
 layout_mode = 2
 custom_minimum_size = Vector2(380, 0)
 text = "⚠ Cheats disable score & high score for that run"
@@ -124,13 +130,13 @@ autowrap_mode = 2
 theme_override_font_sizes/font_size = 12
 theme_override_colors/font_color = Color(1.0, 0.55, 0.3, 1)
 
-[node name="CheatGodModeBtn" type="Button" parent="Center/VBox"]
+[node name="CheatGodModeBtn" type="Button" parent="Center/VBox/CheatsPanel"]
 layout_mode = 2
 text = "🛡️ GOD MODE: OFF"
 custom_minimum_size = Vector2(360, 40)
 theme_override_font_sizes/font_size = 17
 
-[node name="CheatMaxChargeBtn" type="Button" parent="Center/VBox"]
+[node name="CheatMaxChargeBtn" type="Button" parent="Center/VBox/CheatsPanel"]
 layout_mode = 2
 text = "🚀 ALWAYS MAX CHARGE: OFF"
 custom_minimum_size = Vector2(360, 40)
