@@ -36,6 +36,13 @@ var _phase_time: float = 0.0
 var _sprite: Sprite2D
 var _entry_start_x: float = 2100.0
 var _base_sprite_scale: Vector2 = Vector2.ONE
+## Most boss_color values have channels near/at 0 (accent-style colors,
+## not meant to stand alone), so using them as a full sprite modulate
+## multiplied the painted boss artwork down to a noticeably dark/muddy
+## look — making the hit-flash-to-white read as brightening rather than
+## damage feedback. Lightened once here and reused for both the resting
+## sprite tint and what the hit-flash tweens back to.
+var _resting_modulate: Color = Color.WHITE
 
 ## Sprite scale/alpha while flying in — a small, dim, ghostly wisp rather
 ## than a smooth continuous fade (which read as barely-there/too-subtle-to-
@@ -47,6 +54,7 @@ func _ready() -> void:
 	current_health = max_health
 	_sprite = $Visual/Sprite2D
 	_base_sprite_scale = Vector2(0.165, 0.165) * size_scale
+	_resting_modulate = boss_color.lightened(0.45)
 	# Start fully offscreen to the right, whatever the actual screen width is.
 	_entry_start_x = get_viewport_rect().size.x + 250.0
 	global_position.x = _entry_start_x
@@ -107,7 +115,7 @@ func take_damage(amount: int) -> void:
 	if current_health > 0 and _sprite and is_inside_tree():
 		var tw := create_tween()
 		tw.tween_property(_sprite, "modulate", Color.WHITE, 0.06)
-		tw.tween_property(_sprite, "modulate", boss_color, 0.06)
+		tw.tween_property(_sprite, "modulate", _resting_modulate, 0.06)
 	_check_phase_transition()
 	if current_health <= 0:
 		_die()
@@ -152,7 +160,7 @@ func _do_entry(delta: float) -> void:
 		_is_entering = false
 		_phase_time = 0.0
 		if _sprite:
-			_sprite.modulate = boss_color
+			_sprite.modulate = _resting_modulate
 			_sprite.scale = _base_sprite_scale
 			_sprite.rotation = 0.0
 		collision_layer = 32
