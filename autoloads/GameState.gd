@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "1.3.0"
+const APP_VERSION := "1.3.1"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -132,6 +132,7 @@ func start_game() -> void:
 
 func go_to_menu() -> void:
 	get_tree().paused = false
+	AudioManager.stop_music()
 	get_tree().change_scene_to_file(MENU_SCENE)
 
 func go_to_game_over() -> void:

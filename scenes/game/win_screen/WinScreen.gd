@@ -1,5 +1,5 @@
 extends Control
-## WinScreen — displayed after defeating all 8 bosses.
+## WinScreen — displayed after defeating all 10 bosses.
 
 @onready var _score_label: Label = $Center/VBox/FinalScoreLabel
 @onready var _hi_label: Label = $Center/VBox/HiScoreLabel
