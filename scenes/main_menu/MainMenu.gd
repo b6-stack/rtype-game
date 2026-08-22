@@ -14,10 +14,11 @@ extends Control
 	$Center/VBox/DifficultyRow/NormalButton,
 	$Center/VBox/DifficultyRow/HardButton,
 ]
-@onready var _cheats_toggle_btn: Button = $Center/VBox/CheatsToggleBtn
-@onready var _cheats_panel: VBoxContainer = $Center/VBox/CheatsPanel
-@onready var _god_mode_btn: Button = $Center/VBox/CheatsPanel/CheatGodModeBtn
-@onready var _max_charge_btn: Button = $Center/VBox/CheatsPanel/CheatMaxChargeBtn
+@onready var _cheats_open_btn: Button = $Center/VBox/CheatsOpenBtn
+@onready var _cheats_overlay: Control = $CheatsOverlay
+@onready var _cheats_close_btn: Button = $CheatsOverlay/Panel/VBox/CloseBtn
+@onready var _god_mode_btn: Button = $CheatsOverlay/Panel/VBox/CheatGodModeBtn
+@onready var _max_charge_btn: Button = $CheatsOverlay/Panel/VBox/CheatMaxChargeBtn
 
 const STAR_COUNT: int = 120
 var _stars: Array[Dictionary] = []
@@ -159,16 +160,19 @@ func _on_title_label_input(event: InputEvent) -> void:
 # active run) ──────────────────────────────────────────────────
 
 func _setup_cheat_buttons() -> void:
-	_cheats_toggle_btn.pressed.connect(_on_cheats_toggle_pressed)
+	_cheats_open_btn.pressed.connect(_on_cheats_open_pressed)
+	_cheats_close_btn.pressed.connect(_on_cheats_close_pressed)
 	_god_mode_btn.pressed.connect(_on_cheat_god_mode)
 	_max_charge_btn.pressed.connect(_on_cheat_max_charge)
 	_update_cheat_btn_texts()
 
-## Deliberately collapsed by default — cheats should be an explicit
-## opt-in the player has to go open, not something visible at a glance.
-func _on_cheats_toggle_pressed() -> void:
-	_cheats_panel.visible = not _cheats_panel.visible
-	_cheats_toggle_btn.text = ("▾" if _cheats_panel.visible else "▸") + " ARCADE CHEATS"
+## Deliberately a popup the player has to go open, not something visible
+## at a glance — matches the pause menu's cheats treatment.
+func _on_cheats_open_pressed() -> void:
+	_cheats_overlay.visible = true
+
+func _on_cheats_close_pressed() -> void:
+	_cheats_overlay.visible = false
 
 func _on_cheat_god_mode() -> void:
 	GameState.mark_cheats_used()
