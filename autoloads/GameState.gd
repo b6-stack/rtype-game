@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "2.2.1"
+const APP_VERSION := "2.2.2"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -233,13 +233,20 @@ func start_game() -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file(GAME_SCENE)
 
+## No free continues on Hard — if you die there, that's it.
+func can_continue() -> bool:
+	return difficulty != Difficulty.HARD
+
 ## Arcade-style continue: resumes at the CURRENT level (unlike start_game/
 ## start_boss_rush, which restart from level 1) with a fresh set of lives
 ## and the weapon reset to Vulcan, at the cost of a one-time score reset.
 ## Deliberately NOT treated as a cheat — scoring keeps working normally
 ## afterward, and legitimately finishing the game/Boss Rush from here
-## still earns the real unlocks.
+## still earns the real unlocks. Gated off entirely on Hard — see
+## can_continue().
 func continue_game() -> void:
+	if not can_continue():
+		return
 	score = 0
 	score_changed.emit(0)
 	next_life_score_goal = get_life_goal_interval()

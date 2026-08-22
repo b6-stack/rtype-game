@@ -13,6 +13,11 @@ func _ready() -> void:
 	_continue_btn.pressed.connect(GameState.continue_game)
 	_retry_btn.pressed.connect(GameState.start_boss_rush if GameState.boss_rush_mode else GameState.start_game)
 	_menu_btn.pressed.connect(GameState.go_to_menu)
+
+	if not GameState.can_continue():
+		_continue_btn.text = "CONTINUE (LOCKED ON HARD)"
+		_continue_btn.disabled = true
+		_continue_btn.modulate = Color(1, 1, 1, 0.5)
 	AudioManager.stop_music()
 	modulate.a = 0.0
 	create_tween().tween_property(self, "modulate:a", 1.0, 1.0)
