@@ -135,10 +135,15 @@ func _fire_direction(dir: Vector2) -> void:
 func _spawn_enemy_bullet(vel: Vector2) -> void:
 	if bullet_container == null:
 		return
+	_do_spawn_enemy_bullet.call_deferred(global_position, vel, bullet_color, bullet_damage)
+
+func _do_spawn_enemy_bullet(spawn_pos: Vector2, vel: Vector2, col: Color, dmg: int) -> void:
+	if bullet_container == null:
+		return
 	var b: Bullet = EnemyBulletScene.instantiate()
-	bullet_container.call_deferred("add_child", b)
-	b.global_position = global_position
-	b.setup(vel, bullet_color, bullet_damage, 1.0, true)
+	bullet_container.add_child(b)
+	b.global_position = spawn_pos
+	b.setup(vel, col, dmg, 1.0, true)
 
 func _scale_visual() -> void:
 	if _sprite:
