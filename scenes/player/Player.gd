@@ -52,6 +52,16 @@ const SHIP_MARGIN: float = 32.0
 const INVINCIBILITY_TIME: float = 3.5
 const CHARGE_TIME: float = 3.0
 
+## If the player's finger/mouse is already resting on the right side of the
+## screen the instant a level starts, free-flight movement would otherwise
+## snap the ship straight there on frame one — often straight into an enemy
+## or the level boundary before the player even realizes they have control.
+## For a couple of seconds after spawn, clamp X so the ship can only ease
+## out from the left edge, giving them a moment to get their bearings.
+const SPAWN_GRACE_TIME: float = 2.0
+const SPAWN_GRACE_MAX_X: float = 380.0
+var _spawn_grace_timer: float = SPAWN_GRACE_TIME
+
 # ── State ──────────────────────────────────────────────────────
 var _current_weapon: WeaponBase = null
 var _target_pos: Vector2 = Vector2(280.0, 540.0)
@@ -95,6 +105,12 @@ func _physics_process(delta: float) -> void:
 
 	# Free flight range across screen
 	global_position.x = clamp(global_position.x, 60.0, 1840.0)
+
+	# Spawn grace: keep the ship near the left edge for a couple seconds so
+	# an already-resting finger on the right side can't yank it there instantly.
+	if _spawn_grace_timer > 0.0:
+		_spawn_grace_timer -= delta
+		global_position.x = min(global_position.x, SPAWN_GRACE_MAX_X)
 
 	# Landscape boundary collision check
 	if not _is_invincible:

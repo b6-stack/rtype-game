@@ -39,6 +39,14 @@ var _chunks_until_boss: int = 20
 var _boss_chunk_interval: int = 20
 var _next_chunk_x: float = 1920.0
 
+## The initial look-ahead chunk batch spawns all at once in initialize(),
+## which would otherwise satisfy a small _chunks_until_boss count (like
+## Boss Rush's) instantly — the boss warning/arrival could fire before the
+## player has seen a single frame of gameplay. This enforces a minimum
+## real-time buffer regardless of how fast the chunk countdown reaches zero.
+const MIN_TIME_BEFORE_BOSS: float = 7.0
+var _level_elapsed_time: float = 0.0
+
 ## Level color themes [top wall color, bottom wall color]
 const LEVEL_COLORS: Array[Color] = [
 	Color(0.12, 0.22, 0.38),  # Level 1 - Blue cave
@@ -66,6 +74,7 @@ func initialize(level: int, speed: float) -> void:
 	_base_scroll_speed = speed
 	_chunk_index = 0
 	_chunks_until_boss = BOSS_RUSH_CHUNKS_UNTIL_BOSS if GameState.boss_rush_mode else _boss_chunk_interval
+	_level_elapsed_time = 0.0
 	_rng.seed = level * 12345 + 1
 	_corridor_top = 180.0
 	_corridor_bottom = 900.0
@@ -74,7 +83,8 @@ func initialize(level: int, speed: float) -> void:
 		_spawn_next_chunk_at(spawn_x)
 		spawn_x += CHUNK_WIDTH
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_level_elapsed_time += delta
 	if chunk_parent == null:
 		return
 
@@ -145,11 +155,15 @@ func _spawn_next_chunk_at(spawn_x: float) -> void:
 	_corridor_bottom = new_bot
 	_chunk_index += 1
 
-	# Boss trigger
+	# Boss trigger — gated on real elapsed time as well as chunk count, since
+	# the initial look-ahead batch spawns several chunks in one frame and
+	# would otherwise let a small countdown (like Boss Rush's) hit zero
+	# before the player has even seen the level start.
 	if not is_boss_active:
-		_chunks_until_boss -= 1
-		if _chunks_until_boss <= 0:
-			_chunks_until_boss = _boss_chunk_interval
+		if _chunks_until_boss > 0:
+			_chunks_until_boss -= 1
+		if _chunks_until_boss <= 0 and _level_elapsed_time >= MIN_TIME_BEFORE_BOSS:
+			_chunks_until_boss = BOSS_RUSH_CHUNKS_UNTIL_BOSS if GameState.boss_rush_mode else _boss_chunk_interval
 			boss_trigger_reached.emit(GameState.level)
 
 func _generate_spawn_data(chunk_world_x: float) -> Array:

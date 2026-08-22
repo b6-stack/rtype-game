@@ -20,7 +20,7 @@ var _stars: Array[Dictionary] = []
 
 ## Hidden trick: hold the version label for this long to unlock Boss Rush
 ## early, without having to beat the game first.
-const VERSION_HOLD_UNLOCK_TIME: float = 10.0
+const VERSION_HOLD_UNLOCK_TIME: float = 5.0
 var _version_holding: bool = false
 var _version_hold_elapsed: float = 0.0
 
@@ -50,11 +50,8 @@ func _process(delta: float) -> void:
 		if _version_hold_elapsed >= VERSION_HOLD_UNLOCK_TIME:
 			_version_holding = false
 			GameState.unlock_boss_rush()
+			_setup_boss_rush_button()
 			AudioManager.play_full_charge_ready_sfx()
-			# Jump straight into it — unambiguous confirmation that the
-			# trick worked, rather than a silent unlock the player has to
-			# notice and then separately go tap Boss Rush to see happen.
-			GameState.start_boss_rush()
 
 func _on_start_pressed() -> void:
 	GameState.start_game()
