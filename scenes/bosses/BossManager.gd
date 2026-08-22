@@ -113,7 +113,7 @@ func _on_boss_health_changed(current: int, maximum: int) -> void:
 
 func _on_boss_died() -> void:
 	_fight_active = false
-	var boss_pos: Vector2 = Vector2(1400.0, 540.0)
+	var boss_pos: Vector2 = Vector2(1200.0, 540.0)
 	if _current_boss and is_instance_valid(_current_boss):
 		boss_pos = _current_boss.global_position
 	_current_boss = null
@@ -121,9 +121,10 @@ func _on_boss_died() -> void:
 	if hud and hud.has_method("hide_boss_bar"):
 		hud.hide_boss_bar()
 
-	# Drop power-up on boss defeat
+	# Drop guaranteed weapon power-up on boss defeat
 	if powerup_spawner:
-		powerup_spawner.spawn_powerup_at(boss_pos)
+		var next_weapon_idx: int = (GameState.current_weapon_index + 1) % 10
+		powerup_spawner.spawn_powerup_at(boss_pos, next_weapon_idx, "weapon")
 
 	boss_fight_ended.emit()
 
@@ -131,8 +132,8 @@ func _on_boss_died() -> void:
 	if level_generator:
 		level_generator.is_boss_active = false
 
-	# Brief pause then level advance
-	await get_tree().create_timer(2.0).timeout
+	# 4.5 seconds pause so player can collect the weapon drop before next level
+	await get_tree().create_timer(4.5).timeout
 	GameState.advance_level()
 
 func is_fight_active() -> bool:

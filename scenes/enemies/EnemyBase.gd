@@ -71,12 +71,10 @@ func _shoot() -> void:
 # ── Public API ────────────────────────────────────────────────
 
 func take_damage(amount: int) -> void:
-	if _is_dead or global_position.x > 1920.0:
+	if _is_dead:
 		return
-	current_health -= amount
-	damaged.emit(amount)
-	# Brief flash
-	if _sprite:
+	current_health = max(0, current_health - amount)
+	if current_health > 0 and _sprite and is_inside_tree():
 		var tween := create_tween()
 		tween.tween_property(_sprite, "modulate", Color.WHITE, 0.05)
 		tween.tween_property(_sprite, "modulate", enemy_color, 0.05)

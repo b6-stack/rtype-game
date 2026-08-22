@@ -124,9 +124,9 @@ func _on_enemy_died(pos: Vector2, score_val: int) -> void:
 	GameState.add_score(score_val)
 	if powerup_spawner:
 		var roll: float = randf()
-		if roll < 0.010:      # 1.0% chance for Life Core (+1 HP)
+		if roll < 0.015:      # 1.5% chance for Life Core (+1 HP)
 			powerup_spawner.spawn_powerup_at(pos, -1, "life")
-		elif roll < 0.018:    # 0.8% chance for Super Shield (6s Invincibility)
+		elif roll < 0.030:    # 1.5% chance for Super Shield (6s Invincibility)
 			powerup_spawner.spawn_powerup_at(pos, -1, "shield")
-		elif roll < 0.098:    # 8.0% chance for Weapon Upgrade Capsule
+		elif roll < 0.180:    # 15.0% chance for Weapon Upgrade Capsule
 			powerup_spawner.spawn_powerup_at(pos, -1, "weapon")

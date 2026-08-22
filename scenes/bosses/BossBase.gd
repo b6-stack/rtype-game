@@ -80,7 +80,7 @@ func take_damage(amount: int) -> void:
 		return
 	current_health = max(0, current_health - amount)
 	health_changed.emit(current_health, max_health)
-	if _sprite:
+	if current_health > 0 and _sprite and is_inside_tree():
 		var tw := create_tween()
 		tw.tween_property(_sprite, "modulate", Color.WHITE, 0.06)
 		tw.tween_property(_sprite, "modulate", boss_color, 0.06)
