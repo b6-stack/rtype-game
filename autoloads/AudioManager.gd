@@ -302,8 +302,16 @@ func _get_or_create_menu_theme_track() -> AudioStreamWAV:
 		return _menu_music_track
 
 	const RATE: int = 22050
-	const CHORD_DUR: float = 2.0
-	const DURATION: float = CHORD_DUR * 4.0  # full i-VI-III-VII progression, 8s
+	# Kept at/under the largest track size already proven stable through
+	# extensive real-device testing (~4s / ~88K samples) — an earlier 8s
+	# version (2s/chord) was the prime suspect in a native audio-thread
+	# crash reported after a sustained ~10s hold on the title label, which
+	# would have crossed that longer loop's wrap point. Headless testing
+	# can't catch native audio-thread issues at all (no real audio device
+	# under --headless), so this is a size-based precaution, not a
+	# confirmed-and-verified fix.
+	const CHORD_DUR: float = 1.0
+	const DURATION: float = CHORD_DUR * 4.0  # full i-VI-III-VII progression, 4s
 	var sample_count: int = int(RATE * DURATION)
 
 	# Am - F - C - G (i - VI - III - VII): a driving, heroic progression —
@@ -315,7 +323,7 @@ func _get_or_create_menu_theme_track() -> AudioStreamWAV:
 	# recognizable melodic line layered over the arpeggio wash rather than
 	# just cycling through chord tones uniformly.
 	var hook_pattern: Array[float] = [1.5, 1.2, 1.0, 1.2]
-	const HOOK_NOTE_DUR: float = 0.5
+	const HOOK_NOTE_DUR: float = 0.25
 
 	_menu_music_track = _create_wav(sample_count, RATE, true, func(_i: int, t: float, _total: float) -> float:
 		var chord_idx: int = int(t / CHORD_DUR) % 4
