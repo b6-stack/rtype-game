@@ -1,7 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://rtype_enemybase"]
+[gd_scene load_steps=7 format=3 uid="uid://rtype_enemybase"]
 
 [ext_resource type="Script" path="res://scenes/enemies/EnemyBase.gd" id="1_ebase"]
 [ext_resource type="Texture2D" path="res://assets/sprites/enemy_ship.png" id="2_sprite"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_glow"]
+blend_mode = 1
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
 radius = 16.0
@@ -17,6 +20,12 @@ collision_mask = 7
 script = ExtResource("1_ebase")
 
 [node name="Visual" type="Node2D" parent="."]
+
+[node name="GlowHalo" type="Sprite2D" parent="Visual"]
+material = SubResource("CanvasItemMaterial_glow")
+scale = Vector2(0.085, 0.085)
+texture = ExtResource("2_sprite")
+modulate = Color(1, 1, 1, 0.55)
 
 [node name="Sprite2D" type="Sprite2D" parent="Visual"]
 scale = Vector2(0.065, 0.065)

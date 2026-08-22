@@ -123,6 +123,7 @@ func _on_enemy_spawn_requested(pos: Vector2, enemy_type_id: int) -> void:
 			_:
 				sprite_node.texture = SPRITE_BASIC
 				sprite_node.scale = Vector2(0.065, 0.065) * enemy.size_scale
+		enemy.sync_glow_halo()
 
 	# Wire up died signal for scoring
 	enemy.died.connect(_on_enemy_died)

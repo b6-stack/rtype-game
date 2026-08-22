@@ -32,13 +32,18 @@ var _is_dead: bool = false
 var _time: float = 0.0          # elapsed time for pattern math
 var _spawn_position: Vector2 = Vector2.ZERO
 var _sprite: Sprite2D
+var _glow_halo: Sprite2D
 
 func _ready() -> void:
 	current_health = max_health
 	_sprite = $Visual/Sprite2D
+	_glow_halo = $Visual/GlowHalo
 	if _sprite:
-		_sprite.modulate = enemy_color
+		# Lightened modulate + an additive glow halo behind the sprite so
+		# enemies read clearly against the dark starfield/terrain backdrop.
+		_sprite.modulate = enemy_color.lightened(0.2)
 		_scale_visual()
+	sync_glow_halo()
 	_shoot_timer = randf_range(0.0, shoot_cooldown)
 	_spawn_position = global_position
 
@@ -152,6 +157,17 @@ func _do_spawn_enemy_bullet(spawn_pos: Vector2, vel: Vector2, col: Color, dmg: i
 func _scale_visual() -> void:
 	if _sprite:
 		_sprite.scale = Vector2(0.065, 0.065) * size_scale
+
+## Re-syncs the glow halo's texture/transform to match the visible sprite.
+## Call after changing _sprite's texture (e.g. EnemySpawner assigning an
+## archetype-specific texture) so the halo doesn't lag behind stale art.
+func sync_glow_halo() -> void:
+	if _glow_halo == null or _sprite == null:
+		return
+	_glow_halo.texture = _sprite.texture
+	_glow_halo.flip_h = _sprite.flip_h
+	_glow_halo.scale = _sprite.scale * 1.3
+	_glow_halo.modulate = Color(enemy_color.r, enemy_color.g, enemy_color.b, 0.5).lightened(0.4)
 
 func get_player_direction() -> Vector2:
 	if player_ref and is_instance_valid(player_ref):
