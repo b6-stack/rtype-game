@@ -56,8 +56,8 @@ const SHAPES: Dictionary = {
 		[Vector2(8, 0), Vector2(2, -3), Vector2(0, 0), Vector2(-4, -3.5), Vector2(-1, 0), Vector2(-7, 3.5), Vector2(0, 1.5), Vector2(1.5, 3)]
 	],
 	"generic": [
-		[Vector2(6, 0), Vector2(2, -2), Vector2(-3, -1.5), Vector2(-4, 0), Vector2(-3, 1.5), Vector2(2, 2)],
-		[Vector2(3, 0), Vector2(0, -1), Vector2(-2, 0), Vector2(0, 1)]
+		[Vector2(11, 0), Vector2(4, -3.5), Vector2(-6, -2.5), Vector2(-9, 0), Vector2(-6, 2.5), Vector2(4, 3.5)],
+		[Vector2(5.5, 0), Vector2(1.5, -1.8), Vector2(-3, 0), Vector2(1.5, 1.8)]
 	]
 }
 

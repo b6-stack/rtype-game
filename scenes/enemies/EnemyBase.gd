@@ -162,7 +162,9 @@ func _do_spawn_enemy_bullet(spawn_pos: Vector2, vel: Vector2, col: Color, dmg: i
 	var b: Bullet = EnemyBulletScene.instantiate()
 	bullet_container.add_child(b)
 	b.global_position = spawn_pos
-	b.setup(vel, col, dmg, 1.0, true)
+	# Brighter + larger than the base bullet size so enemy fire reads
+	# clearly as an incoming threat against the dark backdrop.
+	b.setup(vel, col.lightened(0.2), dmg, 1.5, true)
 
 func _scale_visual() -> void:
 	if _sprite:
