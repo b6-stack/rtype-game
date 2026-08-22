@@ -266,39 +266,17 @@ func _build_circle_poly(radius: float, steps: int) -> PackedVector2Array:
 func _spawn_grunt() -> void:
 	if bullet_container == null:
 		return
-	_grunt_count += 1
-	var grunt: CharacterBody2D = CharacterBody2D.new()
-	grunt.collision_layer = 16
-	grunt.collision_mask = 4
 
-	var col: CollisionShape2D = CollisionShape2D.new()
-	var shape: CircleShape2D = CircleShape2D.new()
-	shape.radius = 11.0
-	col.shape = shape
-	grunt.add_child(col)
+	var grunt_scene: PackedScene = preload("res://scenes/enemies/EnemyBase.tscn")
+	var grunt: EnemyBase = grunt_scene.instantiate()
+	grunt.set_script(load("res://scenes/enemies/EnemyGrunt.gd"))
+	grunt.bullet_container = bullet_container
+	grunt.player_ref = player_ref
+	grunt.add_to_group("enemies")
 
-	var poly: Polygon2D = Polygon2D.new()
-	poly.polygon = PackedVector2Array([
-		Vector2(0, -11), Vector2(11, 0), Vector2(0, 11), Vector2(-11, 0)
-	])
-	poly.color = Color(0.9, 0.2, 0.2, 1.0)
-	grunt.add_child(poly)
-
-	grunt.set_meta("hp", 20)
+	var parent_node: Node = get_parent() if get_parent() else bullet_container
+	parent_node.add_child(grunt)
 	grunt.global_position = global_position + Vector2(-40.0, randf_range(-80.0, 80.0))
-
-	var script: GDScript = GDScript.new()
-	script.source_code = """
-extends CharacterBody2D
-var speed: float = -260.0
-func _physics_process(delta):
-	velocity.x = speed
-	move_and_slide()
-	if global_position.x < -100.0:
-		queue_free()
-"""
-	grunt.set_script(script)
-	bullet_container.add_child(grunt)
 
 
 func _on_phase_change(new_phase: int) -> void:

@@ -59,9 +59,9 @@ func _physics_process(delta: float) -> void:
 	_phase_attack(delta)
 	move_and_slide()
 
-	# Clamp boss to right half of screen
-	global_position.x = clamp(global_position.x, 900.0, 1750.0)
-	global_position.y = clamp(global_position.y, 80.0, 1000.0)
+	# Clamp boss to arena bounds
+	global_position.x = clamp(global_position.x, 150.0, 1850.0)
+	global_position.y = clamp(global_position.y, 60.0, 1020.0)
 
 # ── Override in subclasses ────────────────────────────────────
 
