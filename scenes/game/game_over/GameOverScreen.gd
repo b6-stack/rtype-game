@@ -3,12 +3,14 @@ extends Control
 
 @onready var _score_label: Label = $Center/VBox/ScoreLabel
 @onready var _hi_label: Label = $Center/VBox/HiScoreLabel
+@onready var _continue_btn: Button = $Center/VBox/ContinueButton
 @onready var _retry_btn: Button = $Center/VBox/RetryButton
 @onready var _menu_btn: Button = $Center/VBox/MenuButton
 
 func _ready() -> void:
 	_score_label.text = "SCORE: %d" % GameState.score
 	_hi_label.text = "BEST: %d" % GameState.high_score
+	_continue_btn.pressed.connect(GameState.continue_game)
 	_retry_btn.pressed.connect(GameState.start_boss_rush if GameState.boss_rush_mode else GameState.start_game)
 	_menu_btn.pressed.connect(GameState.go_to_menu)
 	AudioManager.stop_music()

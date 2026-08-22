@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "2.1.4"
+const APP_VERSION := "2.2.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -230,6 +230,21 @@ func advance_level() -> void:
 
 func start_game() -> void:
 	reset()
+	get_tree().paused = false
+	get_tree().change_scene_to_file(GAME_SCENE)
+
+## Arcade-style continue: resumes at the CURRENT level (unlike start_game/
+## start_boss_rush, which restart from level 1) with a fresh set of lives
+## and the weapon reset to Vulcan, at the cost of the score — marked as a
+## cheat (score -> 0, scoring disabled for the rest of the run, blocks
+## Boss Rush/Ultra Mode unlocks) same as any other free continuation.
+func continue_game() -> void:
+	mark_cheats_used()
+	lives = STARTING_LIVES
+	current_weapon_index = 0
+	is_game_over = false
+	lives_changed.emit(lives)
+	weapon_changed.emit(current_weapon_index)
 	get_tree().paused = false
 	get_tree().change_scene_to_file(GAME_SCENE)
 
