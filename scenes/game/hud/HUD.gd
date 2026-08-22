@@ -171,3 +171,89 @@ func _on_weapon_changed(_index: int) -> void:
 
 func _on_level_changed(_lvl: int) -> void:
 	_refresh_level()
+
+# ── Boss Warning Arrival System ───────────────────────────────
+
+var _warning_container: Control = null
+var _warning_flash_rect: ColorRect = null
+var _warning_title: Label = null
+var _warning_sub: Label = null
+
+func show_boss_warning(boss_name: String) -> void:
+	if _warning_container == null:
+		_build_warning_banner()
+
+	_warning_title.text = "⚠️ WARNING! ⚠️"
+	_warning_sub.text = "MASSIVE BATTLESHIP APPROACHING RAPIDLY:\n[ %s ]" % boss_name.to_upper()
+	_warning_container.visible = true
+	_warning_container.modulate.a = 1.0
+	_warning_flash_rect.visible = true
+	_warning_flash_rect.modulate.a = 0.0
+
+	# Siren alert sound
+	AudioManager.play_boss_sfx()
+
+	# Red screen alarm flash
+	var tw_flash := create_tween()
+	for i in 6:
+		tw_flash.tween_property(_warning_flash_rect, "modulate:a", 0.30, 0.16)
+		tw_flash.tween_property(_warning_flash_rect, "modulate:a", 0.0, 0.16)
+
+	# Warning banner pulse
+	_warning_container.scale = Vector2(0.8, 0.8)
+	var tw_banner := create_tween()
+	tw_banner.tween_property(_warning_container, "scale", Vector2(1.05, 1.05), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw_banner.tween_property(_warning_container, "scale", Vector2.ONE, 0.15)
+	tw_banner.tween_interval(1.8)
+	tw_banner.tween_property(_warning_container, "modulate:a", 0.0, 0.4)
+	tw_banner.tween_callback(func():
+		if _warning_container: _warning_container.visible = false
+		if _warning_flash_rect: _warning_flash_rect.visible = false
+	)
+
+func _build_warning_banner() -> void:
+	var ctrl: Control = $Control
+	if ctrl == null:
+		return
+
+	# Red alarm backdrop flash
+	_warning_flash_rect = ColorRect.new()
+	_warning_flash_rect.name = "WarningFlashRect"
+	_warning_flash_rect.color = Color(1.0, 0.1, 0.1, 1.0)
+	_warning_flash_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_warning_flash_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_warning_flash_rect.visible = false
+	ctrl.add_child(_warning_flash_rect)
+
+	# Centered Warning Box
+	_warning_container = PanelContainer.new()
+	_warning_container.name = "BossWarningContainer"
+	_warning_container.set_anchors_preset(Control.PRESET_CENTER)
+	_warning_container.pivot_offset = Vector2(300.0, 60.0)
+	_warning_container.custom_minimum_size = Vector2(600.0, 120.0)
+	_warning_container.position = Vector2(660.0, 480.0)
+	_warning_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_warning_container.visible = false
+	ctrl.add_child(_warning_container)
+
+	var vbox := VBoxContainer.new()
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	_warning_container.add_child(vbox)
+
+	_warning_title = Label.new()
+	_warning_title.text = "⚠️ WARNING! ⚠️"
+	_warning_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_warning_title.add_theme_font_size_override("font_size", 34)
+	_warning_title.add_theme_color_override("font_color", Color(1.0, 0.25, 0.25))
+	_warning_title.add_theme_color_override("font_outline_color", Color.BLACK)
+	_warning_title.add_theme_constant_override("outline_size", 6)
+	vbox.add_child(_warning_title)
+
+	_warning_sub = Label.new()
+	_warning_sub.text = "MASSIVE BATTLESHIP APPROACHING"
+	_warning_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_warning_sub.add_theme_font_size_override("font_size", 20)
+	_warning_sub.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
+	_warning_sub.add_theme_color_override("font_outline_color", Color.BLACK)
+	_warning_sub.add_theme_constant_override("outline_size", 4)
+	vbox.add_child(_warning_sub)

@@ -82,6 +82,7 @@ func _spawn_boss(index: int) -> void:
 	boss.add_to_group("bosses")
 
 	boss_parent.add_child(boss)
+	boss.global_position = Vector2(2100.0, 540.0)
 	_current_boss = boss
 
 	# Assign distinct boss sprite texture

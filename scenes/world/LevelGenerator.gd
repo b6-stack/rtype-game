@@ -115,8 +115,7 @@ func _spawn_next_chunk_at(spawn_x: float) -> void:
 
 	var level_col_idx: int = clampi(GameState.level - 1, 0, LEVEL_COLORS.size() - 1)
 	var wall_col: Color = LEVEL_COLORS[level_col_idx]
-
-	chunk.build(_corridor_top, _corridor_bottom, new_top, new_bot, wall_col, scroll_speed, _rng)
+	chunk.build(_corridor_top, _corridor_bottom, new_top, new_bot, wall_col, scroll_speed, _rng, GameState.level)
 
 	# Generate spawn data for this chunk (if not fighting boss)
 	if not is_boss_active:

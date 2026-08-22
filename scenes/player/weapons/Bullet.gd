@@ -117,11 +117,11 @@ func setup(vel: Vector2, col: Color, dmg: int,
 
 	if enemy:
 		collision_layer = 8    # layer 4 (bit 3) = enemy bullet
-		collision_mask  = 2    # layer 2 (bit 1) = player
+		collision_mask  = 2 | 1 # layer 2 (player) + layer 1 (landscape terrain)
 		add_to_group("enemy_bullet")
 	else:
 		collision_layer = 4    # layer 3 (bit 2) = player bullet
-		collision_mask  = 16 | 32 # layer 5 (enemies) + layer 6 (bosses)
+		collision_mask  = 16 | 32 | 1 # layer 5 (enemies) + layer 6 (bosses) + layer 1 (landscape terrain)
 		add_to_group("player_bullet")
 
 func _physics_process(delta: float) -> void:
@@ -143,7 +143,31 @@ func _on_area_entered(area: Area2D) -> void:
 	_handle_collision(area)
 
 func _on_body_entered(body: Node2D) -> void:
+	if body is StaticBody2D or body.name == "StaticBody2D" or (body.collision_layer & 1) != 0:
+		_handle_landscape_collision(body)
+		return
 	_handle_collision(body)
+
+func _handle_landscape_collision(_landscape: Node) -> void:
+	if bullet_type == "bouncer":
+		velocity.y = -velocity.y
+		rotation = velocity.angle()
+		return
+	elif bullet_type == "drill" and pierce_count > 0:
+		pierce_count -= 1
+		return
+
+	hit_target.emit(global_position)
+	_spawn_impact_spark(global_position)
+	queue_free()
+
+func _spawn_impact_spark(pos: Vector2) -> void:
+	var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
+	var parent_node: Node = get_parent() if get_parent() else get_tree().current_scene
+	if parent_node:
+		parent_node.call_deferred("add_child", fx)
+		if fx.has_method("setup"):
+			fx.setup(pos, Color(1.0, 0.8, 0.3), 0.35)
 
 func _handle_collision(target: Node) -> void:
 	if not is_instance_valid(target):
