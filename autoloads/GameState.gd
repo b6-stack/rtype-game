@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "1.4.1"
+const APP_VERSION := "1.5.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -62,8 +62,10 @@ func reset() -> void:
 	level = 1
 	current_weapon_index = 0
 	boss_rush_mode = false
-	god_mode_enabled = false
-	always_max_charge_enabled = false
+	# god_mode_enabled / always_max_charge_enabled are intentionally NOT reset
+	# here — they're now toggleable from the main menu before a run even
+	# starts, so clearing them on start_game() would silently undo the
+	# player's choice. is_scoring_disabled() covers the score-zeroing side.
 	cheats_used = false
 	is_game_over = false
 	next_life_score_goal = SCORE_GOAL_INTERVAL
@@ -78,8 +80,13 @@ func mark_cheats_used() -> void:
 	score = 0
 	score_changed.emit(0)
 
+## True whenever any cheat (one-shot or a persistent toggle) is active for
+## this run — used to zero out score/high-score while cheats are in play.
+func is_scoring_disabled() -> bool:
+	return cheats_used or god_mode_enabled or always_max_charge_enabled
+
 func add_score(points: int) -> void:
-	if cheats_used:
+	if is_scoring_disabled():
 		score = 0
 		score_changed.emit(0)
 		return

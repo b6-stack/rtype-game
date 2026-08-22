@@ -12,9 +12,17 @@ extends Control
 	$Center/VBox/DifficultyRow/NormalButton,
 	$Center/VBox/DifficultyRow/HardButton,
 ]
+@onready var _god_mode_btn: Button = $Center/VBox/CheatGodModeBtn
+@onready var _max_charge_btn: Button = $Center/VBox/CheatMaxChargeBtn
 
 const STAR_COUNT: int = 120
 var _stars: Array[Dictionary] = []
+
+## Hidden trick: hold the version label for this long to unlock Boss Rush
+## early, without having to beat the game first.
+const VERSION_HOLD_UNLOCK_TIME: float = 10.0
+var _version_holding: bool = false
+var _version_hold_elapsed: float = 0.0
 
 func _ready() -> void:
 	_start_btn.pressed.connect(_on_start_pressed)
@@ -22,8 +30,11 @@ func _ready() -> void:
 	_quit_btn.pressed.connect(_on_quit_pressed)
 	_hi_score_label.text = "HIGH SCORE: %d" % GameState.high_score
 	_version_label.text = "v%s" % GameState.APP_VERSION
+	_version_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	_version_label.gui_input.connect(_on_version_label_input)
 	_setup_boss_rush_button()
 	_setup_difficulty_buttons()
+	_setup_cheat_buttons()
 	_generate_stars()
 	# Animate title in
 	$Center/VBox/TitleLabel.modulate.a = 0.0
@@ -34,6 +45,13 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_scroll_stars(delta)
+	if _version_holding and not GameState.boss_rush_unlocked:
+		_version_hold_elapsed += delta
+		if _version_hold_elapsed >= VERSION_HOLD_UNLOCK_TIME:
+			_version_holding = false
+			GameState.unlock_boss_rush()
+			_setup_boss_rush_button()
+			AudioManager.play_full_charge_ready_sfx()
 
 func _on_start_pressed() -> void:
 	GameState.start_game()
@@ -57,6 +75,57 @@ func _setup_boss_rush_button() -> void:
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
+
+# ── Hidden version-hold unlock ────────────────────────────────
+
+func _on_version_label_input(event: InputEvent) -> void:
+	if GameState.boss_rush_unlocked:
+		return
+	var pressed: bool
+	if event is InputEventScreenTouch:
+		pressed = event.pressed
+	elif event is InputEventMouseButton:
+		pressed = event.pressed
+	else:
+		return
+	_version_holding = pressed
+	_version_hold_elapsed = 0.0
+
+# ── Arcade cheats (persistent toggles only — dynamic one-shot cheats
+# like Nuke/Cycle Weapon/+Lives stay pause-menu-only since they need an
+# active run) ──────────────────────────────────────────────────
+
+func _setup_cheat_buttons() -> void:
+	_god_mode_btn.pressed.connect(_on_cheat_god_mode)
+	_max_charge_btn.pressed.connect(_on_cheat_max_charge)
+	_update_cheat_btn_texts()
+
+func _on_cheat_god_mode() -> void:
+	GameState.mark_cheats_used()
+	GameState.god_mode_enabled = !GameState.god_mode_enabled
+	_update_cheat_btn_texts()
+
+func _on_cheat_max_charge() -> void:
+	GameState.mark_cheats_used()
+	GameState.always_max_charge_enabled = !GameState.always_max_charge_enabled
+	_update_cheat_btn_texts()
+	if GameState.always_max_charge_enabled:
+		AudioManager.play_full_charge_ready_sfx()
+
+func _update_cheat_btn_texts() -> void:
+	if GameState.god_mode_enabled:
+		_god_mode_btn.text = "🛡️ GOD MODE: ON"
+		_god_mode_btn.modulate = Color(0.3, 1.0, 0.4)
+	else:
+		_god_mode_btn.text = "🛡️ GOD MODE: OFF"
+		_god_mode_btn.modulate = Color.WHITE
+
+	if GameState.always_max_charge_enabled:
+		_max_charge_btn.text = "🚀 ALWAYS MAX CHARGE: ON"
+		_max_charge_btn.modulate = Color(0.3, 1.0, 0.4)
+	else:
+		_max_charge_btn.text = "🚀 ALWAYS MAX CHARGE: OFF"
+		_max_charge_btn.modulate = Color.WHITE
 
 # ── Difficulty selector ──────────────────────────────────────
 

@@ -190,6 +190,8 @@ var _warning_flash_rect: ColorRect = null
 var _warning_title: Label = null
 var _warning_boss_name: Label = null
 var _warning_hint: Label = null
+var _warning_banner_tween: Tween = null
+var _warning_flash_tween: Tween = null
 
 func show_boss_warning(boss_name: String) -> void:
 	if _warning_container == null:
@@ -202,6 +204,10 @@ func show_boss_warning(boss_name: String) -> void:
 
 	_warning_container.visible = true
 	_warning_container.modulate.a = 1.0
+	# STOP (rather than IGNORE) so a tap within the banner's bounds can
+	# dismiss it early instead of blocking the player's view of incoming
+	# threats for the full ~4s duration with no way to skip it.
+	_warning_container.mouse_filter = Control.MOUSE_FILTER_STOP
 	_warning_flash_rect.visible = true
 	_warning_flash_rect.modulate.a = 0.0
 
@@ -209,22 +215,41 @@ func show_boss_warning(boss_name: String) -> void:
 	AudioManager.play_boss_sfx()
 
 	# Red screen alarm flash (8 pulses over 3.2s)
-	var tw_flash := create_tween()
+	_warning_flash_tween = create_tween()
 	for i in 8:
-		tw_flash.tween_property(_warning_flash_rect, "modulate:a", 0.28, 0.20)
-		tw_flash.tween_property(_warning_flash_rect, "modulate:a", 0.0, 0.20)
+		_warning_flash_tween.tween_property(_warning_flash_rect, "modulate:a", 0.28, 0.20)
+		_warning_flash_tween.tween_property(_warning_flash_rect, "modulate:a", 0.0, 0.20)
 
 	# Warning banner entrance, display, and fade
 	_warning_container.scale = Vector2(0.85, 0.85)
-	var tw_banner := create_tween()
-	tw_banner.tween_property(_warning_container, "scale", Vector2(1.05, 1.05), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw_banner.tween_property(_warning_container, "scale", Vector2.ONE, 0.15)
-	tw_banner.tween_interval(3.2) # Ample time to read tactical hint
-	tw_banner.tween_property(_warning_container, "modulate:a", 0.0, 0.45)
-	tw_banner.tween_callback(func():
-		if _warning_container: _warning_container.visible = false
-		if _warning_flash_rect: _warning_flash_rect.visible = false
-	)
+	_warning_banner_tween = create_tween()
+	_warning_banner_tween.tween_property(_warning_container, "scale", Vector2(1.05, 1.05), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_warning_banner_tween.tween_property(_warning_container, "scale", Vector2.ONE, 0.15)
+	_warning_banner_tween.tween_interval(3.2) # Ample time to read tactical hint
+	_warning_banner_tween.tween_property(_warning_container, "modulate:a", 0.0, 0.45)
+	_warning_banner_tween.tween_callback(_hide_boss_warning)
+
+func _hide_boss_warning() -> void:
+	if _warning_container:
+		_warning_container.visible = false
+		_warning_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if _warning_flash_rect:
+		_warning_flash_rect.visible = false
+
+## Lets the player tap anywhere within the warning banner to dismiss it
+## immediately, rather than being stuck looking at it for a fixed ~4s.
+func _on_warning_banner_input(event: InputEvent) -> void:
+	var pressed: bool = (event is InputEventScreenTouch and event.pressed) \
+			or (event is InputEventMouseButton and event.pressed)
+	if not pressed:
+		return
+	if _warning_banner_tween and _warning_banner_tween.is_valid():
+		_warning_banner_tween.kill()
+	if _warning_flash_tween and _warning_flash_tween.is_valid():
+		_warning_flash_tween.kill()
+	var tw := create_tween()
+	tw.tween_property(_warning_container, "modulate:a", 0.0, 0.15)
+	tw.tween_callback(_hide_boss_warning)
 
 func _build_warning_banner() -> void:
 	var ctrl: Control = $Control
@@ -257,6 +282,7 @@ func _build_warning_banner() -> void:
 	_warning_container.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_warning_container.pivot_offset = Vector2(440.0, 95.0)
 	_warning_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_warning_container.gui_input.connect(_on_warning_banner_input)
 	_warning_container.visible = false
 
 	# Styled dark semi-translucent red hazard panel with bright borders
