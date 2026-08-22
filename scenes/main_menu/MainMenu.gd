@@ -8,6 +8,7 @@ extends Control
 @onready var _hi_score_label: Label = $Center/VBox/HiScoreLabel
 @onready var _star_container: Node2D = $StarContainer
 @onready var _version_label: Label = $Center/VBox/VersionLabel
+@onready var _title_label: Label = $Center/VBox/TitleLabel
 @onready var _difficulty_buttons: Array[Button] = [
 	$Center/VBox/DifficultyRow/EasyButton,
 	$Center/VBox/DifficultyRow/NormalButton,
@@ -27,6 +28,12 @@ const VERSION_HOLD_UNLOCK_TIME: float = 5.0
 var _version_holding: bool = false
 var _version_hold_elapsed: float = 0.0
 
+## Hidden trick: hold the game title for this long to unlock Ultra Mode
+## early, without having to clear Boss Rush first.
+const TITLE_HOLD_UNLOCK_TIME: float = 10.0
+var _title_holding: bool = false
+var _title_hold_elapsed: float = 0.0
+
 func _ready() -> void:
 	AudioManager.play_menu_music()
 	_start_btn.pressed.connect(_on_start_pressed)
@@ -36,6 +43,8 @@ func _ready() -> void:
 	_version_label.text = "v%s" % GameState.APP_VERSION
 	_version_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	_version_label.gui_input.connect(_on_version_label_input)
+	_title_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	_title_label.gui_input.connect(_on_title_label_input)
 	_setup_boss_rush_button()
 	_setup_ultra_mode_button()
 	_setup_difficulty_buttons()
@@ -56,6 +65,13 @@ func _process(delta: float) -> void:
 			_version_holding = false
 			GameState.unlock_boss_rush()
 			_setup_boss_rush_button()
+			AudioManager.play_full_charge_ready_sfx()
+	if _title_holding and not GameState.ultra_mode_unlocked:
+		_title_hold_elapsed += delta
+		if _title_hold_elapsed >= TITLE_HOLD_UNLOCK_TIME:
+			_title_holding = false
+			GameState.unlock_ultra_mode()
+			_setup_ultra_mode_button()
 			AudioManager.play_full_charge_ready_sfx()
 
 func _on_start_pressed() -> void:
@@ -119,6 +135,19 @@ func _on_version_label_input(event: InputEvent) -> void:
 		return
 	_version_holding = pressed
 	_version_hold_elapsed = 0.0
+
+func _on_title_label_input(event: InputEvent) -> void:
+	if GameState.ultra_mode_unlocked:
+		return
+	var pressed: bool
+	if event is InputEventScreenTouch:
+		pressed = event.pressed
+	elif event is InputEventMouseButton:
+		pressed = event.pressed
+	else:
+		return
+	_title_holding = pressed
+	_title_hold_elapsed = 0.0
 
 # ── Arcade cheats (persistent toggles only — dynamic one-shot cheats
 # like Nuke/Cycle Weapon/+Lives stay pause-menu-only since they need an

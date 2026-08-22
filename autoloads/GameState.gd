@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "2.0.0"
+const APP_VERSION := "2.0.1"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -41,11 +41,14 @@ const LIFE_GOAL_MULTIPLIERS: Array[float] = [1.0, 1.3, 1.6]
 const SHIELD_BASE_DURATION: float = 10.0
 ## Score multiplier by difficulty — Hard rewards the extra challenge,
 ## Easy scores a bit less, Normal is the baseline.
-const SCORE_MULTIPLIERS: Array[float] = [0.8, 1.0, 1.5]
+const SCORE_MULTIPLIERS: Array[float] = [0.8, 1.0, 1.1]
 ## Extra score multiplier while Ultra Mode is enabled — it's an earned
 ## reward (unlocked by clearing Boss Rush legitimately), not a cheat, so
 ## unlike god_mode/always_max_charge it does NOT disable scoring.
-const ULTRA_MODE_SCORE_MULT: float = 1.5
+const ULTRA_MODE_SCORE_MULT: float = 1.15
+## Hard cap on the combined (difficulty x Ultra Mode) score multiplier —
+## Hard (1.1x) stacked with Ultra (1.15x) would otherwise reach 1.265x.
+const MAX_SCORE_MULTIPLIER: float = 1.25
 ## Ultra Mode combat bonuses.
 const ULTRA_MODE_BOSS_DAMAGE_MULT: float = 3.0
 
@@ -122,6 +125,7 @@ func add_score(points: int) -> void:
 	var mult: float = get_score_multiplier()
 	if ultra_mode_enabled:
 		mult *= ULTRA_MODE_SCORE_MULT
+	mult = minf(mult, MAX_SCORE_MULTIPLIER)
 	score += int(points * mult)
 	if score > high_score:
 		high_score = score
