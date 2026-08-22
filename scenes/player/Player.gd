@@ -47,7 +47,9 @@ var corridor_bottom: float = 960.0
 # ── Config ────────────────────────────────────────────────────
 const MOVE_SMOOTH: float = 35.0
 const SHIP_MARGIN: float = 32.0
-const INVINCIBILITY_TIME: float = 3.0
+## Base respawn invincibility, before the difficulty grace multiplier
+## (GameState.get_respawn_grace_multiplier) is applied — see _respawn_safe().
+const INVINCIBILITY_TIME: float = 3.5
 const CHARGE_TIME: float = 3.0
 
 # ── State ──────────────────────────────────────────────────────
@@ -231,7 +233,7 @@ func _take_hit(source: String = "") -> void:
 
 func _respawn_safe() -> void:
 	_is_invincible = true
-	_invincibility_timer = INVINCIBILITY_TIME
+	_invincibility_timer = INVINCIBILITY_TIME * GameState.get_respawn_grace_multiplier()
 	_is_charging = false
 	_charge_level = 0.0
 	if hud:

@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "1.1.1"
+const APP_VERSION := "1.2.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -28,6 +28,9 @@ enum Difficulty { EASY, NORMAL, HARD }
 const DIFFICULTY_NAMES: Array[String] = ["EASY", "NORMAL", "HARD"]
 ## Overall aggression scale applied to enemy speed, fire rate, and spawn density.
 const DIFFICULTY_MULTIPLIERS: Array[float] = [0.75, 1.0, 1.3]
+## Respawn invincibility duration scale — lower difficulties get more grace
+## to recover and reposition before enemies can threaten them again.
+const RESPAWN_GRACE_MULTIPLIERS: Array[float] = [1.6, 1.2, 1.0]
 
 var score: int = 0
 var lives: int = STARTING_LIVES
@@ -109,6 +112,9 @@ func set_difficulty(new_difficulty: int) -> void:
 
 func get_difficulty_multiplier() -> float:
 	return DIFFICULTY_MULTIPLIERS[difficulty]
+
+func get_respawn_grace_multiplier() -> float:
+	return RESPAWN_GRACE_MULTIPLIERS[difficulty]
 
 func advance_level() -> void:
 	level += 1

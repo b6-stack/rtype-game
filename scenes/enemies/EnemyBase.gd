@@ -26,6 +26,14 @@ var player_ref: Node = null
 
 const EnemyBulletScene: PackedScene = preload("res://scenes/player/weapons/Bullet.tscn")
 
+## Player weapons only fire rightward, so an enemy this close to (or past)
+## the left edge is one the player can no longer retaliate against —
+## stop it from shooting so it can't get a free, undodgeable hit in.
+const NO_ATTACK_MARGIN_X: float = 60.0
+## Fully despawn shortly after crossing the left edge — no need to let it
+## linger off-screen (it's already forbidden from attacking by then).
+const DESPAWN_MARGIN_X: float = -80.0
+
 # ── Internal ─────────────────────────────────────────────────
 var _shoot_timer: float = 0.0
 var _is_dead: bool = false
@@ -59,8 +67,8 @@ func _physics_process(delta: float) -> void:
 		_shoot_timer = shoot_cooldown
 		_shoot()
 
-	# Auto-destroy when scrolled off screen (left edge)
-	if global_position.x < -200.0:
+	# Auto-destroy shortly after scrolling off the left edge
+	if global_position.x < DESPAWN_MARGIN_X:
 		queue_free()
 
 # ── Override these ────────────────────────────────────────────
@@ -143,6 +151,8 @@ func _fire_direction(dir: Vector2) -> void:
 
 func _spawn_enemy_bullet(vel: Vector2) -> void:
 	if bullet_container == null:
+		return
+	if global_position.x < NO_ATTACK_MARGIN_X:
 		return
 	_do_spawn_enemy_bullet.call_deferred(global_position, vel, bullet_color, bullet_damage)
 
