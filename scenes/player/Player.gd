@@ -45,7 +45,10 @@ var corridor_top: float = 120.0
 var corridor_bottom: float = 960.0
 
 # ── Config ────────────────────────────────────────────────────
-const MOVE_SMOOTH: float = 35.0
+## Lerp responsiveness toward the touch/mouse target. At 35 the ship reached
+## the target in ~2-3 frames, reading as a snap/teleport rather than a
+## glide. Halved so movement actually eases through space.
+const MOVE_SMOOTH: float = 17.5
 const SHIP_MARGIN: float = 32.0
 ## Base respawn invincibility, before the difficulty grace multiplier
 ## (GameState.get_respawn_grace_multiplier) is applied — see _respawn_safe().
