@@ -98,30 +98,29 @@ theme_override_font_sizes/font_size = 30
 [node name="BossRushButton" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "⚔ BOSS RUSH"
-custom_minimum_size = Vector2(360, 48)
-theme_override_font_sizes/font_size = 22
+custom_minimum_size = Vector2(360, 56)
+theme_override_font_sizes/font_size = 24
 theme_override_colors/font_color = Color(1.0, 0.55, 0.3, 1)
 
 [node name="UltraModeButton" type="Button" parent="Center/VBox"]
 layout_mode = 2
 visible = false
 text = "🌈 ULTRA MODE: OFF"
-custom_minimum_size = Vector2(360, 44)
-theme_override_font_sizes/font_size = 20
+custom_minimum_size = Vector2(360, 56)
+theme_override_font_sizes/font_size = 24
 
 [node name="QuitButton" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "QUIT"
-custom_minimum_size = Vector2(360, 44)
-theme_override_font_sizes/font_size = 22
+custom_minimum_size = Vector2(360, 56)
+theme_override_font_sizes/font_size = 24
 
 [node name="CheatsOpenBtn" type="Button" parent="Center/VBox"]
 layout_mode = 2
-text = "─── ARCADE CHEATS ───"
-custom_minimum_size = Vector2(360, 32)
-theme_override_font_sizes/font_size = 16
+text = "CHEATS"
+custom_minimum_size = Vector2(360, 56)
+theme_override_font_sizes/font_size = 24
 theme_override_colors/font_color = Color(1.0, 0.85, 0.2, 1)
-flat = true
 
 [node name="HiScoreLabel" type="Label" parent="Center/VBox"]
 layout_mode = 2
