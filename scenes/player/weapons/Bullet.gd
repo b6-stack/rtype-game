@@ -76,7 +76,12 @@ func setup(vel: Vector2, col: Color, dmg: int,
 	if _glow_core == null: _glow_core = $GlowCore
 	if _sprite == null: _sprite = $Sprite2D
 
-	if sprite_type == "plasma" or size_mult >= 2.2:
+	# The size-based plasma fallback is only for weapons that don't specify
+	# their own archetype shape (sprite_type == ""). An explicit archetype
+	# like "laser" must keep its own look even at large charged sizes —
+	# WeaponLaser's full-charge beams reach size_mult 2.2 and were being
+	# silently swapped to the plasma-orb sprite instead of rendering as beams.
+	if sprite_type == "plasma" or (sprite_type == "" and size_mult >= 2.2):
 		if _sprite and SPRITE_PLASMA:
 			_sprite.texture = SPRITE_PLASMA
 			_sprite.scale = Vector2(0.028, 0.028) * size_mult

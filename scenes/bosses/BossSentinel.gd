@@ -2,23 +2,30 @@ class_name BossSentinel
 extends BossBase
 
 ## Sentinel Boss — Level 4
-## Protected by 6 rotating force-field shield segments.
-## Bullets hitting active shield segments are deflected with energy sparks.
-## The boss is ONLY vulnerable when the rotating shield gap allows shots to hit the core!
+## Protected by a full rotating force-field shield ring.
+## Bullets hitting the shield while active are deflected with energy sparks.
+## The shield periodically fades out (fully, ring-wide) to open a clear,
+## guaranteed window to hit the core — rather than relying on the player
+## threading shots through a narrow rotating gap, which could leave the
+## boss effectively unhittable depending on timing/rotation speed.
 
 const SHIELD_COUNT: int = 6
 const SHIELD_RADIUS: float = 135.0
-const GAP_ANGLE_DEG: float = 55.0  # open gap width in degrees
 
 var _shields: Array[Area2D] = []
 var _shield_polys: Array[Polygon2D] = []
 var _shield_rotation: float = 0.0
 var _fire_timer: float = 0.0
 var _cross_timer: float = 0.0
-var _gap_open: bool = true
-var _gap_timer: float = 0.0
 
-const GAP_FLICKER_RATE: float = 0.45
+## Whether the shield is currently solid enough to block/deflect shots.
+var _shield_active: bool = true
+var _shield_fade_timer: float = 0.0
+## Full up-down-up fade cycle length, seconds — shortens each phase so
+## vulnerability windows come more often (and briefer) as the fight escalates.
+const SHIELD_FADE_PERIOD: Array[float] = [4.0, 3.2, 2.4]
+## Below this alpha the shield is considered "down" — collision disabled.
+const SHIELD_COLLISION_ALPHA_THRESHOLD: float = 0.35
 
 var _patrol_dir: int = 1
 const PATROL_SPEED: float = 85.0
@@ -37,8 +44,9 @@ func _ready() -> void:
 	_create_shields()
 
 func _create_shields() -> void:
-	# 4 shield segments leaving 2 prominent rotating firing gaps for the player to aim through
-	var segment_span: float = (360.0 / SHIELD_COUNT) - (GAP_ANGLE_DEG / SHIELD_COUNT)
+	# Segments form a complete, gapless ring — vulnerability comes from the
+	# whole ring periodically fading out, not from finding a physical gap.
+	var segment_span: float = 360.0 / SHIELD_COUNT
 	var arc_poly: PackedVector2Array = _build_arc_segment(SHIELD_RADIUS, segment_span)
 
 	for i: int in range(SHIELD_COUNT):
@@ -80,7 +88,7 @@ func _build_arc_segment(radius: float, span_deg: float) -> PackedVector2Array:
 	return pts
 
 func _on_shield_hit(area: Area2D, shield_idx: int) -> void:
-	if not _gap_open:
+	if not _shield_active:
 		return
 	if area is Bullet and not area.is_enemy_bullet:
 		_deflect_bullet(area, shield_idx)
@@ -112,7 +120,7 @@ func _spawn_deflect_sparks(pos: Vector2) -> void:
 func _phase_attack(delta: float) -> void:
 	_patrol(delta)
 	_rotate_shields(delta)
-	_handle_gap_flicker(delta)
+	_update_shield_fade(delta)
 
 	if current_phase >= 1:
 		_fire_timer += delta
@@ -151,19 +159,24 @@ func _rotate_shields(delta: float) -> void:
 	for i: int in range(_shields.size()):
 		var base_angle: float = (360.0 / SHIELD_COUNT) * i
 		_shields[i].rotation_degrees = base_angle + _shield_rotation
-		_shields[i].visible = _gap_open
+
+## Smoothly fades the whole shield ring in and out (rather than an instant
+## on/off), so the player gets a clear, telegraphed window to hit the core.
+## Active in every phase — the cycle just runs faster in later phases.
+func _update_shield_fade(delta: float) -> void:
+	var period: float = SHIELD_FADE_PERIOD[clampi(current_phase, 0, SHIELD_FADE_PERIOD.size() - 1)]
+	_shield_fade_timer += delta
+	if _shield_fade_timer >= period:
+		_shield_fade_timer -= period
+
+	var alpha: float = 0.5 + 0.5 * cos(TAU * _shield_fade_timer / period)
+	_shield_active = alpha >= SHIELD_COLLISION_ALPHA_THRESHOLD
+
+	for i: int in range(_shields.size()):
+		_shields[i].modulate.a = alpha
 		var col_shape = _shields[i].get_node_or_null("CollisionPolygon2D")
 		if col_shape:
-			col_shape.disabled = !_gap_open
-
-func _handle_gap_flicker(delta: float) -> void:
-	if current_phase < 2:
-		_gap_open = true
-		return
-	_gap_timer += delta
-	if _gap_timer >= GAP_FLICKER_RATE:
-		_gap_timer = 0.0
-		_gap_open = !_gap_open
+			col_shape.disabled = !_shield_active
 
 func _fire_cross() -> void:
 	var directions: Array = [
