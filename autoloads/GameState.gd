@@ -6,12 +6,17 @@ const MENU_SCENE := "res://scenes/main_menu/MainMenu.tscn"
 const GAME_OVER_SCENE := "res://scenes/game/game_over/GameOverScreen.tscn"
 const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
+## Bump this alongside export_presets.cfg's version/name on every release
+## so the main menu version label reflects what's actually installed.
+const APP_VERSION := "1.1.0"
+
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
 signal weapon_changed(weapon_index: int)
 signal level_changed(new_level: int)
 signal score_goal_updated(current_score: int, goal_score: int)
 signal life_awarded(new_lives: int)
+signal difficulty_changed(new_difficulty: int)
 signal game_over
 
 const MAX_LIVES: int = 5
@@ -19,10 +24,16 @@ const STARTING_LIVES: int = 3
 const TOTAL_LEVELS: int = 10
 const SCORE_GOAL_INTERVAL: int = 5000
 
+enum Difficulty { EASY, NORMAL, HARD }
+const DIFFICULTY_NAMES: Array[String] = ["EASY", "NORMAL", "HARD"]
+## Overall aggression scale applied to enemy speed, fire rate, and spawn density.
+const DIFFICULTY_MULTIPLIERS: Array[float] = [0.75, 1.0, 1.3]
+
 var score: int = 0
 var lives: int = STARTING_LIVES
 var level: int = 1
 var current_weapon_index: int = 0
+var difficulty: int = Difficulty.NORMAL
 var god_mode_enabled: bool = false
 var always_max_charge_enabled: bool = false
 var cheats_used: bool = false
@@ -91,6 +102,14 @@ func set_weapon(index: int) -> void:
 	current_weapon_index = index
 	weapon_changed.emit(index)
 
+func set_difficulty(new_difficulty: int) -> void:
+	difficulty = clampi(new_difficulty, Difficulty.EASY, Difficulty.HARD)
+	_save()
+	difficulty_changed.emit(difficulty)
+
+func get_difficulty_multiplier() -> float:
+	return DIFFICULTY_MULTIPLIERS[difficulty]
+
 func advance_level() -> void:
 	level += 1
 	level_changed.emit(level)
@@ -116,9 +135,11 @@ func go_to_game_over() -> void:
 func _save() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("data", "high_score", high_score)
+	cfg.set_value("data", "difficulty", difficulty)
 	cfg.save("user://save.cfg")
 
 func _load_save() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load("user://save.cfg") == OK:
 		high_score = cfg.get_value("data", "high_score", 0)
+		difficulty = clampi(cfg.get_value("data", "difficulty", Difficulty.NORMAL), Difficulty.EASY, Difficulty.HARD)

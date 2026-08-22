@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://rtype_mainmenu"]
+[gd_scene load_steps=4 format=3 uid="uid://rtype_mainmenu"]
 
 [ext_resource type="Script" path="res://scenes/main_menu/MainMenu.gd" id="1_mm"]
 [ext_resource type="Script" path="res://scenes/main_menu/StarContainer.gd" id="2_sc"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_dg"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -50,6 +52,47 @@ theme_override_colors/font_color = Color(0.6, 0.8, 1.0, 1)
 layout_mode = 2
 custom_minimum_size = Vector2(0, 40)
 
+[node name="DifficultyLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "DIFFICULTY"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.6, 0.8, 1.0, 1)
+
+[node name="DifficultyRow" type="HBoxContainer" parent="Center/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="EasyButton" type="Button" parent="Center/VBox/DifficultyRow"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_dg")
+text = "EASY"
+custom_minimum_size = Vector2(110, 56)
+theme_override_font_sizes/font_size = 22
+
+[node name="NormalButton" type="Button" parent="Center/VBox/DifficultyRow"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_dg")
+text = "NORMAL"
+custom_minimum_size = Vector2(110, 56)
+theme_override_font_sizes/font_size = 22
+
+[node name="HardButton" type="Button" parent="Center/VBox/DifficultyRow"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_dg")
+text = "HARD"
+custom_minimum_size = Vector2(110, 56)
+theme_override_font_sizes/font_size = 22
+
+[node name="Spacer3" type="Control" parent="Center/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 10)
+
 [node name="StartButton" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "START GAME"
@@ -72,3 +115,19 @@ text = "HIGH SCORE: 0"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 24
 theme_override_colors/font_color = Color(1.0, 0.9, 0.3, 1)
+
+[node name="VersionLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -36.0
+offset_right = -12.0
+offset_bottom = -8.0
+text = "v0.0.0"
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.5, 0.55, 0.65, 0.8)

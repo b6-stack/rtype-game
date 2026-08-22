@@ -172,10 +172,12 @@ func _generate_spawn_data(chunk_world_x: float) -> Array:
 		enemy_count = _rng.randi_range(2, 3 + int(level / 3))
 		spawn_chance = 0.80
 
-	# Difficulty scaling: higher levels pack in more enemies, more often.
-	var density_bonus: int = int(float(level - 1) * DENSITY_BONUS_PER_LEVEL)
+	# Difficulty scaling: higher levels pack in more enemies, more often;
+	# the player's difficulty selection scales this growth up or down.
+	var diff_mult: float = GameState.get_difficulty_multiplier()
+	var density_bonus: int = int(float(level - 1) * DENSITY_BONUS_PER_LEVEL * diff_mult)
 	enemy_count += density_bonus
-	spawn_chance = minf(MAX_SPAWN_CHANCE, spawn_chance + float(level - 1) * SPAWN_CHANCE_PER_LEVEL)
+	spawn_chance = minf(MAX_SPAWN_CHANCE, spawn_chance * diff_mult + float(level - 1) * SPAWN_CHANCE_PER_LEVEL * diff_mult)
 
 	# Overall density multiplier (doubles how many enemies pack into each chunk).
 	enemy_count = mini(enemy_count * DENSITY_MULTIPLIER, MAX_ENEMIES_PER_CHUNK)

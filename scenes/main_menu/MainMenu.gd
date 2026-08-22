@@ -5,6 +5,12 @@ extends Control
 @onready var _quit_btn: Button = $Center/VBox/QuitButton
 @onready var _hi_score_label: Label = $Center/VBox/HiScoreLabel
 @onready var _star_container: Node2D = $StarContainer
+@onready var _version_label: Label = $VersionLabel
+@onready var _difficulty_buttons: Array[Button] = [
+	$Center/VBox/DifficultyRow/EasyButton,
+	$Center/VBox/DifficultyRow/NormalButton,
+	$Center/VBox/DifficultyRow/HardButton,
+]
 
 const STAR_COUNT: int = 120
 var _stars: Array[Dictionary] = []
@@ -13,6 +19,8 @@ func _ready() -> void:
 	_start_btn.pressed.connect(_on_start_pressed)
 	_quit_btn.pressed.connect(_on_quit_pressed)
 	_hi_score_label.text = "HIGH SCORE: %d" % GameState.high_score
+	_version_label.text = "v%s" % GameState.APP_VERSION
+	_setup_difficulty_buttons()
 	_generate_stars()
 	# Animate title in
 	$Center/VBox/TitleLabel.modulate.a = 0.0
@@ -29,6 +37,17 @@ func _on_start_pressed() -> void:
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
+
+# ── Difficulty selector ──────────────────────────────────────
+
+func _setup_difficulty_buttons() -> void:
+	for i in _difficulty_buttons.size():
+		var btn: Button = _difficulty_buttons[i]
+		btn.button_pressed = (i == GameState.difficulty)
+		btn.pressed.connect(_on_difficulty_pressed.bind(i))
+
+func _on_difficulty_pressed(index: int) -> void:
+	GameState.set_difficulty(index)
 
 # ── Starfield ─────────────────────────────────────────────────
 

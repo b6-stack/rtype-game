@@ -130,8 +130,9 @@ func _on_enemy_spawn_requested(pos: Vector2, enemy_type_id: int) -> void:
 ## Makes enemies more aggressive and shoot more often as the level increases.
 func _apply_difficulty_scaling(enemy: EnemyBase) -> void:
 	var level_above_base: float = float(GameState.level - 1)
-	var speed_mult: float = 1.0 + level_above_base * DIFFICULTY_SPEED_PER_LEVEL
-	var fire_rate_mult: float = 1.0 + level_above_base * DIFFICULTY_FIRE_RATE_PER_LEVEL
+	var diff_mult: float = GameState.get_difficulty_multiplier()
+	var speed_mult: float = (1.0 + level_above_base * DIFFICULTY_SPEED_PER_LEVEL) * diff_mult
+	var fire_rate_mult: float = (1.0 + level_above_base * DIFFICULTY_FIRE_RATE_PER_LEVEL) * diff_mult
 
 	enemy.move_speed *= speed_mult
 	if enemy.shoot_cooldown > 0.0:
