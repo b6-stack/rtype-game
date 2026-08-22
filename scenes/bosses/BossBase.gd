@@ -81,7 +81,13 @@ func _on_phase_change(new_phase: int) -> void:
 # ── Public API ────────────────────────────────────────────────
 
 func take_damage(amount: int) -> void:
-	if _is_dead:
+	# Invulnerable while flying in: without this, continuous player fire
+	# was landing hits the instant the boss came into range mid-entry —
+	# chewing through health (and even triggering phase transitions)
+	# before the boss had "arrived", and the resulting hit-flash tween
+	# fought the entry fade for _sprite.modulate every frame, making the
+	# materialize effect look glitchy instead of a clean fade-in.
+	if _is_dead or _is_entering:
 		return
 	current_health = max(0, current_health - amount)
 	health_changed.emit(current_health, max_health)
