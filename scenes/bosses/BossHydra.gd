@@ -51,6 +51,11 @@ func _create_heads() -> void:
 		area.position = HEAD_OFFSETS[i]
 		area.collision_layer = 0
 		area.collision_mask = 4  # player bullets
+		# Hidden and non-interactive until the boss actually arrives —
+		# otherwise heads were fully visible/hittable during the whole
+		# entry glide despite the rest of the boss being intangible.
+		area.visible = false
+		area.monitoring = false
 
 		var col: CollisionShape2D = CollisionShape2D.new()
 		var shape: CircleShape2D = CircleShape2D.new()
@@ -71,6 +76,13 @@ func _create_heads() -> void:
 		add_child(area)
 		head_data.node = area
 		_heads.append(head_data)
+
+
+func _on_entrance_ready() -> void:
+	for head: HydraHead in _heads:
+		if head.alive:
+			head.node.visible = true
+			head.node.monitoring = true
 
 
 func _build_hexagon(radius: float) -> PackedVector2Array:

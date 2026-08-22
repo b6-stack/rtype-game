@@ -55,6 +55,13 @@ func _create_shields() -> void:
 		shield_area.collision_layer = 32  # boss collision layer
 		shield_area.collision_mask = 4   # player bullets
 		shield_area.add_to_group("boss_shield")
+		# Hidden and non-interactive until the boss actually arrives —
+		# otherwise the ring was fully solid/blocking the whole entry
+		# glide despite the rest of the boss being intangible. Revealed
+		# in _on_entrance_ready(); _update_shield_fade() takes over the
+		# open/closed cycling from there once _phase_attack starts running.
+		shield_area.visible = false
+		shield_area.monitoring = false
 
 		var poly := Polygon2D.new()
 		poly.polygon = arc_poly
@@ -86,6 +93,11 @@ func _build_arc_segment(radius: float, span_deg: float) -> PackedVector2Array:
 		var a: float = deg_to_rad(half - (span_deg / steps) * i)
 		pts.append(Vector2(cos(a) * inner_r, sin(a) * inner_r))
 	return pts
+
+func _on_entrance_ready() -> void:
+	for s: Area2D in _shields:
+		s.visible = true
+		s.monitoring = true
 
 func _on_shield_hit(area: Area2D, shield_idx: int) -> void:
 	if not _shield_active:

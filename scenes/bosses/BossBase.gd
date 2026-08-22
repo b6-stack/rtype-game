@@ -158,8 +158,17 @@ func _do_entry(delta: float) -> void:
 		collision_layer = 32
 		$HurtBox.collision_layer = 32
 		$HurtBox.monitoring = true
+		_on_entrance_ready()
 		_spawn_arrival_burst()
 		entrance_complete.emit()
+
+## Override to reveal/enable any boss-specific extra visuals or hitboxes
+## that were hidden and non-interactive during the entry glide — e.g.
+## Hydra's heads or Sentinel's shield ring. These are separate Area2D
+## children with their own collision/visibility, so the base sprite/
+## HurtBox intangibility above doesn't cover them automatically.
+func _on_entrance_ready() -> void:
+	pass
 
 func _spawn_arrival_burst() -> void:
 	var parent_node: Node = get_parent() if get_parent() else get_tree().current_scene
