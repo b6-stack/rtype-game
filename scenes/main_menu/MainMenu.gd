@@ -5,7 +5,7 @@ extends Control
 @onready var _quit_btn: Button = $Center/VBox/QuitButton
 @onready var _hi_score_label: Label = $Center/VBox/HiScoreLabel
 @onready var _star_container: Node2D = $StarContainer
-@onready var _version_label: Label = $VersionLabel
+@onready var _version_label: Label = $Center/VBox/VersionLabel
 @onready var _difficulty_buttons: Array[Button] = [
 	$Center/VBox/DifficultyRow/EasyButton,
 	$Center/VBox/DifficultyRow/NormalButton,
