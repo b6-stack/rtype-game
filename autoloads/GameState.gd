@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "1.4.0"
+const APP_VERSION := "1.4.1"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -46,6 +46,9 @@ var is_game_over: bool = false
 ## between them. Read by LevelGenerator (short lead-in, no filler spawns)
 ## and persists across the per-level scene reloads inside advance_level().
 var boss_rush_mode: bool = false
+## Unlocked permanently the first time the player reaches the win screen —
+## a reward for finishing the campaign rather than day-one-available.
+var boss_rush_unlocked: bool = false
 var next_life_score_goal: int = SCORE_GOAL_INTERVAL
 
 func _ready() -> void:
@@ -115,6 +118,12 @@ func set_difficulty(new_difficulty: int) -> void:
 	_save()
 	difficulty_changed.emit(difficulty)
 
+func unlock_boss_rush() -> void:
+	if boss_rush_unlocked:
+		return
+	boss_rush_unlocked = true
+	_save()
+
 func get_difficulty_multiplier() -> float:
 	return DIFFICULTY_MULTIPLIERS[difficulty]
 
@@ -156,6 +165,7 @@ func _save() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("data", "high_score", high_score)
 	cfg.set_value("data", "difficulty", difficulty)
+	cfg.set_value("data", "boss_rush_unlocked", boss_rush_unlocked)
 	cfg.save("user://save.cfg")
 
 func _load_save() -> void:
@@ -163,3 +173,4 @@ func _load_save() -> void:
 	if cfg.load("user://save.cfg") == OK:
 		high_score = cfg.get_value("data", "high_score", 0)
 		difficulty = clampi(cfg.get_value("data", "difficulty", Difficulty.NORMAL), Difficulty.EASY, Difficulty.HARD)
+		boss_rush_unlocked = cfg.get_value("data", "boss_rush_unlocked", false)

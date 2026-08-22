@@ -12,6 +12,8 @@ func _ready() -> void:
 	_hi_label.text = "HIGH SCORE: %d" % GameState.high_score
 	_menu_btn.pressed.connect(GameState.go_to_menu)
 
+	GameState.unlock_boss_rush()
+
 	if GameState.boss_rush_mode:
 		_title_label.text = "BOSS RUSH CLEAR!"
 		_play_again_btn.pressed.connect(GameState.start_boss_rush)

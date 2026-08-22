@@ -22,6 +22,7 @@ func _ready() -> void:
 	_quit_btn.pressed.connect(_on_quit_pressed)
 	_hi_score_label.text = "HIGH SCORE: %d" % GameState.high_score
 	_version_label.text = "v%s" % GameState.APP_VERSION
+	_setup_boss_rush_button()
 	_setup_difficulty_buttons()
 	_generate_stars()
 	# Animate title in
@@ -38,7 +39,21 @@ func _on_start_pressed() -> void:
 	GameState.start_game()
 
 func _on_boss_rush_pressed() -> void:
+	if not GameState.boss_rush_unlocked:
+		return
 	GameState.start_boss_rush()
+
+## Boss Rush is unlocked by beating the game once — reward the first
+## clear rather than making boss-only content available day one.
+func _setup_boss_rush_button() -> void:
+	if GameState.boss_rush_unlocked:
+		_boss_rush_btn.text = "⚔ BOSS RUSH"
+		_boss_rush_btn.disabled = false
+		_boss_rush_btn.modulate = Color.WHITE
+	else:
+		_boss_rush_btn.text = "🔒 BOSS RUSH (BEAT THE GAME)"
+		_boss_rush_btn.disabled = true
+		_boss_rush_btn.modulate = Color(1, 1, 1, 0.55)
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
