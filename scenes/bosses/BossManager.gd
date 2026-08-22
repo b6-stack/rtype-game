@@ -132,8 +132,11 @@ func _on_boss_died() -> void:
 	if level_generator:
 		level_generator.is_boss_active = false
 
-	# 4.5 seconds pause so player can collect the weapon drop before next level
-	await get_tree().create_timer(4.5).timeout
+	# 4.5 seconds pause so player can collect the weapon drop before next level.
+	# process_always=false so this respects the pause menu instead of firing
+	# a scene transition while the tree is still paused (which would leave
+	# the next scene frozen with no pause menu to unpause it).
+	await get_tree().create_timer(4.5, false).timeout
 	GameState.advance_level()
 
 func is_fight_active() -> bool:

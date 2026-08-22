@@ -273,8 +273,9 @@ func _die() -> void:
 		parent_node.call_deferred("add_child", fx)
 		if fx.has_method("setup"):
 			fx.setup(global_position, Color.CYAN, 1.5)
-	# Delay then game over scene transition
-	await get_tree().create_timer(1.5).timeout
+	# Delay then game over scene transition.
+	# process_always=false: don't advance to the game-over scene while paused.
+	await get_tree().create_timer(1.5, false).timeout
 	GameState.go_to_game_over()
 
 # ── Weapon management ─────────────────────────────────────────

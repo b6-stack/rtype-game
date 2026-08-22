@@ -126,5 +126,6 @@ func _on_quit() -> void:
 	GameState.go_to_menu()
 
 func _on_game_over() -> void:
-	await get_tree().create_timer(2.0).timeout
+	# process_always=false: don't advance to the game-over scene while paused.
+	await get_tree().create_timer(2.0, false).timeout
 	GameState.go_to_game_over()

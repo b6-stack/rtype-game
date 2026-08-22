@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "1.2.0"
+const APP_VERSION := "1.2.1"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -119,6 +119,7 @@ func get_respawn_grace_multiplier() -> float:
 func advance_level() -> void:
 	level += 1
 	level_changed.emit(level)
+	get_tree().paused = false
 	if level > TOTAL_LEVELS:
 		get_tree().change_scene_to_file(WIN_SCENE)
 	else:
@@ -126,6 +127,7 @@ func advance_level() -> void:
 
 func start_game() -> void:
 	reset()
+	get_tree().paused = false
 	get_tree().change_scene_to_file(GAME_SCENE)
 
 func go_to_menu() -> void:
