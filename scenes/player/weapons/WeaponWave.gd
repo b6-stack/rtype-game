@@ -17,9 +17,9 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var wave_col: Color = bullet_color.lightened(0.3 if charge_level < 1.0 else 0.75)
 	var pierces: int = 1 if charge_level < 1.0 else 4
 
-	var amplitudes: Array[float] = [180.0, 320.0, -180.0, -320.0]
+	var amplitudes: Array = [180.0, 320.0, -180.0, -320.0]
 	for i in wave_count:
-		var amp: float = amplitudes[i % amplitudes.size()]
+		var amp: float = float(amplitudes[i % amplitudes.size()])
 		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * (bullet_speed * 1.05), wave_col, wave_dmg, wave_size, "wave", pierces)
 		if b: _attach_wave(b, 1.0 if amp > 0 else -1.0, absf(amp))
 

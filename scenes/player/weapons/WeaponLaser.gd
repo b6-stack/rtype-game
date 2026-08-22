@@ -22,9 +22,9 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var beam_col: Color = bullet_color.lightened(0.35 if charge_level < 1.0 else 0.8)
 	var pierces: int = 2 if charge_level < 1.0 else 8
 
-	var offsets: Array[float] = [-10.0, 10.0] if beam_count == 2 else ([-18.0, 0.0, 18.0] if beam_count == 3 else [-32.0, -16.0, 0.0, 16.0, 32.0])
-	for offset: float in offsets:
-		var offset_pos := spawn_pos + Vector2(0.0, offset)
+	var offsets: Array = [-10.0, 10.0] if beam_count == 2 else ([-18.0, 0.0, 18.0] if beam_count == 3 else [-32.0, -16.0, 0.0, 16.0, 32.0])
+	for offset in offsets:
+		var offset_pos := spawn_pos + Vector2(0.0, float(offset))
 		_spawn_bullet(
 			offset_pos,
 			Vector2.RIGHT * bullet_speed * 1.4,

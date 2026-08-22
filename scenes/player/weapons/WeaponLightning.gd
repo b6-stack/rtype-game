@@ -15,9 +15,9 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var zap_size: float = lerpf(1.2, 2.0, charge_level)
 	var chains: int = 3 if charge_level < 1.0 else 8
 
-	var angles: Array[float] = [-30.0, -15.0, 0.0, 15.0, 30.0]
+	var angles: Array = [-30.0, -15.0, 0.0, 15.0, 30.0]
 	for i in bolt_count:
-		var angle: float = angles[i % angles.size()]
+		var angle: float = float(angles[i % angles.size()])
 		var vel: Vector2 = Vector2.RIGHT.rotated(deg_to_rad(angle)) * (bullet_speed * 1.3)
 		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.4 if charge_level < 1.0 else 0.85), zap_dmg, zap_size, "lightning", 1)
 		if b:
@@ -25,9 +25,12 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 
 func _chain_electric(b: Bullet, chains: int) -> void:
 	b.hit_target.connect(func(hit_pos: Vector2):
-		var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
-		var bosses: Array[Node] = get_tree().get_nodes_in_group("bosses")
-		var targets: Array[Node] = enemies + bosses
+		var tree := get_tree()
+		if tree == null:
+			return
+		var targets: Array = []
+		targets.append_array(tree.get_nodes_in_group("enemies"))
+		targets.append_array(tree.get_nodes_in_group("bosses"))
 		var chained: int = 0
 		for t in targets:
 			if is_instance_valid(t) and t is Node2D and not t.is_queued_for_deletion() and chained < chains:

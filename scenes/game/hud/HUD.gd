@@ -225,15 +225,36 @@ func _build_warning_banner() -> void:
 	_warning_flash_rect.visible = false
 	ctrl.add_child(_warning_flash_rect)
 
-	# Centered Warning Box
+	# Perfectly centered Warning Box
 	_warning_container = PanelContainer.new()
 	_warning_container.name = "BossWarningContainer"
-	_warning_container.set_anchors_preset(Control.PRESET_CENTER)
-	_warning_container.pivot_offset = Vector2(300.0, 60.0)
-	_warning_container.custom_minimum_size = Vector2(600.0, 120.0)
-	_warning_container.position = Vector2(660.0, 480.0)
+	_warning_container.layout_mode = 1
+	_warning_container.anchors_preset = Control.PRESET_CENTER
+	_warning_container.anchor_left = 0.5
+	_warning_container.anchor_right = 0.5
+	_warning_container.anchor_top = 0.5
+	_warning_container.anchor_bottom = 0.5
+	_warning_container.offset_left = -380.0
+	_warning_container.offset_right = 380.0
+	_warning_container.offset_top = -75.0
+	_warning_container.offset_bottom = 75.0
+	_warning_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_warning_container.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_warning_container.pivot_offset = Vector2(380.0, 75.0)
 	_warning_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_warning_container.visible = false
+
+	# Styled dark semi-translucent red hazard panel
+	var style_box := StyleBoxFlat.new()
+	style_box.bg_color = Color(0.12, 0.02, 0.02, 0.90)
+	style_box.border_color = Color(1.0, 0.3, 0.1, 1.0)
+	style_box.set_border_width_all(3)
+	style_box.set_corner_radius_all(8)
+	style_box.content_margin_left = 20.0
+	style_box.content_margin_right = 20.0
+	style_box.content_margin_top = 12.0
+	style_box.content_margin_bottom = 12.0
+	_warning_container.add_theme_stylebox_override("panel", style_box)
 	ctrl.add_child(_warning_container)
 
 	var vbox := VBoxContainer.new()
@@ -250,7 +271,7 @@ func _build_warning_banner() -> void:
 	vbox.add_child(_warning_title)
 
 	_warning_sub = Label.new()
-	_warning_sub.text = "MASSIVE BATTLESHIP APPROACHING"
+	_warning_sub.text = "MASSIVE BATTLESHIP APPROACHING RAPIDLY"
 	_warning_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_warning_sub.add_theme_font_size_override("font_size", 20)
 	_warning_sub.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))

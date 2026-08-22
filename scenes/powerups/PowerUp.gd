@@ -101,10 +101,12 @@ func _collect() -> void:
 	if powerup_type == "life":
 		GameState.gain_life()
 	elif powerup_type == "shield":
-		var players: Array[Node] = get_tree().get_nodes_in_group("player")
-		for p in players:
-			if is_instance_valid(p) and p.has_method("grant_invincibility"):
-				p.grant_invincibility(6.0)
+		var tree := get_tree()
+		if tree:
+			var players: Array = tree.get_nodes_in_group("player")
+			for p in players:
+				if is_instance_valid(p) and p.has_method("grant_invincibility"):
+					p.grant_invincibility(6.0)
 	else:
 		GameState.set_weapon(weapon_index)
 

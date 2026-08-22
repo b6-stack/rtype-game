@@ -252,10 +252,12 @@ func grant_invincibility(duration: float = 6.0) -> void:
 	_invincibility_timer = max(_invincibility_timer, duration)
 
 func _clear_enemy_bullets_screen() -> void:
-	var enemy_bullets: Array[Node] = get_tree().get_nodes_in_group("enemy_bullet")
-	for b in enemy_bullets:
-		if is_instance_valid(b):
-			b.queue_free()
+	var tree := get_tree()
+	if tree:
+		var enemy_bullets: Array = tree.get_nodes_in_group("enemy_bullet")
+		for b in enemy_bullets:
+			if is_instance_valid(b):
+				b.queue_free()
 
 func _die() -> void:
 	_is_dead = true

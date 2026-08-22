@@ -3,7 +3,7 @@ extends WeaponBase
 ## WeaponMissile — heavy smart-seeking micro-torpedoes with anti-spam concurrency limiter.
 ## Super Charge: 6-Missile Macross Swarm Salvo.
 
-var _active_missiles: Array[Bullet] = []
+var _active_missiles: Array = []
 const MAX_ACTIVE_PRIMARY_MISSILES: int = 2
 
 func can_fire() -> bool:
@@ -13,7 +13,7 @@ func can_fire() -> bool:
 	return super.can_fire()
 
 func _cleanup_active_missiles() -> void:
-	var valid: Array[Bullet] = []
+	var valid: Array = []
 	for m in _active_missiles:
 		if is_instance_valid(m) and not m.is_queued_for_deletion():
 			valid.append(m)
@@ -35,9 +35,9 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var missile_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level)))
 	var missile_size: float = lerpf(1.2, 1.8, charge_level)
 
-	var angles: Array[float] = [-35.0, -15.0, 15.0, 35.0, -50.0, 50.0]
+	var angles: Array = [-35.0, -15.0, 15.0, 35.0, -50.0, 50.0]
 	for i in count:
-		var angle: float = angles[i % angles.size()]
+		var angle: float = float(angles[i % angles.size()])
 		var vel: Vector2 = Vector2.RIGHT.rotated(deg_to_rad(angle)) * (bullet_speed * 1.1)
 		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.25 if charge_level < 1.0 else 0.6), missile_dmg, missile_size, "missile")
 		if b:
@@ -51,13 +51,16 @@ func _attach_homing(b: Bullet, turn_rate: float = 0.25) -> void:
 	steer_timer.timeout.connect(func():
 		if not is_instance_valid(b) or b.is_queued_for_deletion():
 			return
-		var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
-		var bosses: Array[Node] = get_tree().get_nodes_in_group("bosses")
-		var targets: Array[Node] = enemies + bosses
+		var tree := get_tree()
+		if tree == null:
+			return
+		var targets: Array = []
+		targets.append_array(tree.get_nodes_in_group("enemies"))
+		targets.append_array(tree.get_nodes_in_group("bosses"))
 		var closest: Node2D = null
 		var min_dist: float = 99999.0
 		for t in targets:
-			if is_instance_valid(t) and t is Node2D:
+			if is_instance_valid(t) and t is Node2D and not t.is_queued_for_deletion():
 				var t_node: Node2D = t as Node2D
 				if t_node.global_position.x > b.global_position.x - 60.0:
 					var d: float = b.global_position.distance_to(t_node.global_position)

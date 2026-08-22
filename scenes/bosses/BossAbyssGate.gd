@@ -70,11 +70,11 @@ func _do_attack() -> void:
 
 
 func _fire_cross() -> void:
-	var dirs: Array[Vector2] = [
+	var dirs: Array = [
 		Vector2(1, 0), Vector2(-1, 0),
 		Vector2(0, 1), Vector2(0, -1)
 	]
-	for d: Vector2 in dirs:
+	for d in dirs:
 		_spawn_boss_bullet(d * 500.0, Color(0.5, 0.0, 0.9, 1.0), 14)
 
 

@@ -17,9 +17,9 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var cluster_size: float = lerpf(1.2, 1.9, charge_level)
 	var shard_count: int = 3 if charge_level < 1.0 else 4
 
-	var angles: Array[float] = [-24.0, 24.0, -8.0, 8.0]
+	var angles: Array = [-24.0, 24.0, -8.0, 8.0]
 	for i in bomb_count:
-		var angle: float = angles[i % angles.size()]
+		var angle: float = float(angles[i % angles.size()])
 		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT.rotated(deg_to_rad(angle)) * bullet_speed, bullet_color.lightened(0.3 if charge_level < 1.0 else 0.7), cluster_dmg, cluster_size, "ricochet")
 		if b:
 			b.hit_target.connect(func(pos: Vector2):

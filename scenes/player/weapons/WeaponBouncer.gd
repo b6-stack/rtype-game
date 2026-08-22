@@ -17,9 +17,9 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var bouncer_size: float = lerpf(1.1, 1.9, charge_level)
 	var bouncer_col: Color = bullet_color.lightened(0.25 if charge_level < 1.0 else 0.7)
 
-	var angles: Array[float] = [-45.0, -30.0, -15.0, 0.0, 15.0, 30.0, 45.0]
+	var angles: Array = [-45.0, -30.0, -15.0, 0.0, 15.0, 30.0, 45.0]
 	for i in count:
-		var a: float = angles[i % angles.size()]
+		var a: float = float(angles[i % angles.size()])
 		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT.rotated(deg_to_rad(a)) * bullet_speed, bouncer_col, bouncer_dmg, bouncer_size, "bouncer")
 		if b: _attach_bounce(b)
 

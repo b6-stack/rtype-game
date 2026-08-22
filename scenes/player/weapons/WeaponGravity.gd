@@ -28,7 +28,10 @@ func _attach_vortex(b: Bullet, radius: float, pull_strength: float) -> void:
 	timer.timeout.connect(func():
 		if not is_instance_valid(b) or b.is_queued_for_deletion():
 			return
-		var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+		var tree := get_tree()
+		if tree == null:
+			return
+		var enemies: Array = tree.get_nodes_in_group("enemies")
 		for e in enemies:
 			if is_instance_valid(e) and e is Node2D and not e.is_queued_for_deletion():
 				var enemy_node: Node2D = e as Node2D

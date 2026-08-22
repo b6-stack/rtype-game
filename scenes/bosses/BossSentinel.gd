@@ -166,10 +166,10 @@ func _handle_gap_flicker(delta: float) -> void:
 		_gap_open = !_gap_open
 
 func _fire_cross() -> void:
-	var directions: Array[Vector2] = [
+	var directions: Array = [
 		Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)
 	]
-	for dir: Vector2 in directions:
+	for dir in directions:
 		_spawn_boss_bullet(dir * 500.0, Color(0.5, 0.8, 1.0, 1.0), 16)
 
 func _on_phase_change(new_phase: int) -> void:
