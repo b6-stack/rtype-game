@@ -134,12 +134,14 @@ func _phase_attack(delta: float) -> void:
 	_rotate_shields(delta)
 	_update_shield_fade(delta)
 
-	if current_phase >= 1:
-		_fire_timer += delta
-		var rate: float = 1.2 if current_phase == 1 else 0.8
-		if _fire_timer >= rate:
-			_fire_timer = 0.0
-			_fire_at_player(480.0, 14, Color(0.4, 0.7, 1.0, 1.0))
+	# Fires from the moment it arrives — phase only escalates the rate,
+	# it doesn't gate whether it fires at all (previously required losing
+	# over a third of its health before ever taking a shot).
+	_fire_timer += delta
+	var rate: float = 1.6 if current_phase == 0 else (1.2 if current_phase == 1 else 0.8)
+	if _fire_timer >= rate:
+		_fire_timer = 0.0
+		_fire_at_player(480.0, 14, Color(0.4, 0.7, 1.0, 1.0))
 
 	if current_phase == 2:
 		_cross_timer += delta
