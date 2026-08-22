@@ -35,17 +35,23 @@ var _is_boss_music: bool = false
 
 ## Per-level theme parameters (index 0 = level 1), matching each level's
 ## biome name/mood in LevelGenerator.LEVEL_COLORS.
+## NOTE: "duration" must be an exact multiple of the arp cycle length
+## (arp.size() * step) — otherwise the melody is cut off mid-phrase when
+## the WAV loops back to the start, producing an audible jump/"glitch"
+## on every repeat. (Level 1 originally didn't follow this and was the
+## one instance that got noticed — its sparse arrangement had nothing
+## else to mask the discontinuity. Values below are all aligned.)
 const LEVEL_THEMES: Array[Dictionary] = [
-	{ "root": 130.81, "arp": [1.0, 1.2, 1.333, 1.5, 1.778], "step": 0.35, "bass_style": "drone", "brightness": 0.0, "percussion": 0.06, "tremolo": 0.0, "voices": 1, "duration": 3.2 },   # 1 Blue Cave — mysterious, sparse
-	{ "root": 146.83, "arp": [1.0, 1.125, 1.2, 1.333, 1.5], "step": 0.20, "bass_style": "pulse", "brightness": 0.25, "percussion": 0.18, "tremolo": 0.0, "voices": 1, "duration": 2.6 },  # 2 Red Cavern — aggressive, driving
-	{ "root": 164.81, "arp": [1.0, 1.2, 1.0, 1.333, 1.5, 1.2], "step": 0.24, "bass_style": "wobble", "brightness": 0.15, "percussion": 0.14, "tremolo": 0.15, "voices": 1, "duration": 2.9 }, # 3 Green Base — organic, syncopated
-	{ "root": 174.61, "arp": [1.0, 1.0, 1.25, 1.5], "step": 0.22, "bass_style": "march", "brightness": 0.35, "percussion": 0.22, "tremolo": 0.0, "voices": 1, "duration": 2.6 },        # 4 Brown Fortress — militaristic
-	{ "root": 196.00, "arp": [1.0, 1.122, 1.26, 1.414, 1.587], "step": 0.30, "bass_style": "drone", "brightness": 0.1, "percussion": 0.05, "tremolo": 0.35, "voices": 1, "duration": 3.4 }, # 5 Purple Alien — eerie, dissonant
-	{ "root": 220.00, "arp": [1.0, 1.125, 1.25, 1.333, 1.5, 1.667, 1.875, 2.0], "step": 0.11, "bass_style": "pulse", "brightness": 0.4, "percussion": 0.28, "tremolo": 0.0, "voices": 1, "duration": 2.4 }, # 6 Teal Station — techy, fast
-	{ "root": 246.94, "arp": [1.0, 1.2, 1.333, 1.5], "step": 0.15, "bass_style": "stab", "brightness": 0.35, "percussion": 0.24, "tremolo": 0.0, "voices": 1, "duration": 2.4 },        # 7 Crimson Core — intense
-	{ "root": 261.63, "arp": [1.0, 1.125, 1.25, 1.333, 1.5, 1.667, 1.875], "step": 0.20, "bass_style": "march", "brightness": 0.45, "percussion": 0.16, "tremolo": 0.0, "voices": 1, "duration": 2.8 }, # 8 Gold Final — triumphant
-	{ "root": 146.83, "arp": [1.0, 1.122, 1.0, 0.944], "step": 0.5, "bass_style": "drone", "brightness": 0.0, "percussion": 0.03, "tremolo": 0.2, "voices": 1, "duration": 4.0 },       # 9 Cosmic Void — ambient, spacious
-	{ "root": 329.63, "arp": [1.0, 1.25, 1.5, 1.875, 2.0, 1.5], "step": 0.14, "bass_style": "pulse", "brightness": 0.5, "percussion": 0.3, "tremolo": 0.0, "voices": 1, "duration": 2.2 }, # 10 Solar Core — blazing
+	{ "root": 130.81, "arp": [1.0, 1.2, 1.333, 1.5, 1.778], "step": 0.35, "bass_style": "drone", "brightness": 0.0, "percussion": 0.0, "tremolo": 0.0, "voices": 1, "duration": 3.5 },   # 1 Blue Cave — mysterious, sparse (5 * 0.35 * 2)
+	{ "root": 146.83, "arp": [1.0, 1.125, 1.2, 1.333, 1.5], "step": 0.20, "bass_style": "pulse", "brightness": 0.25, "percussion": 0.18, "tremolo": 0.0, "voices": 1, "duration": 3.0 },  # 2 Red Cavern — aggressive, driving (5 * 0.20 * 3)
+	{ "root": 164.81, "arp": [1.0, 1.2, 1.0, 1.333, 1.5, 1.2], "step": 0.24, "bass_style": "wobble", "brightness": 0.15, "percussion": 0.14, "tremolo": 0.15, "voices": 1, "duration": 2.88 }, # 3 Green Base — organic, syncopated (6 * 0.24 * 2)
+	{ "root": 174.61, "arp": [1.0, 1.0, 1.25, 1.5], "step": 0.22, "bass_style": "march", "brightness": 0.35, "percussion": 0.22, "tremolo": 0.0, "voices": 1, "duration": 2.64 },        # 4 Brown Fortress — militaristic (4 * 0.22 * 3)
+	{ "root": 196.00, "arp": [1.0, 1.122, 1.26, 1.414, 1.587], "step": 0.30, "bass_style": "drone", "brightness": 0.1, "percussion": 0.05, "tremolo": 0.35, "voices": 1, "duration": 3.0 }, # 5 Purple Alien — eerie, dissonant (5 * 0.30 * 2)
+	{ "root": 220.00, "arp": [1.0, 1.125, 1.25, 1.333, 1.5, 1.667, 1.875, 2.0], "step": 0.11, "bass_style": "pulse", "brightness": 0.4, "percussion": 0.28, "tremolo": 0.0, "voices": 1, "duration": 2.64 }, # 6 Teal Station — techy, fast (8 * 0.11 * 3)
+	{ "root": 246.94, "arp": [1.0, 1.2, 1.333, 1.5], "step": 0.15, "bass_style": "stab", "brightness": 0.35, "percussion": 0.24, "tremolo": 0.0, "voices": 1, "duration": 2.4 },        # 7 Crimson Core — intense (4 * 0.15 * 4, already aligned)
+	{ "root": 261.63, "arp": [1.0, 1.125, 1.25, 1.333, 1.5, 1.667, 1.875], "step": 0.20, "bass_style": "march", "brightness": 0.45, "percussion": 0.16, "tremolo": 0.0, "voices": 1, "duration": 2.8 }, # 8 Gold Final — triumphant (7 * 0.20 * 2, already aligned)
+	{ "root": 146.83, "arp": [1.0, 1.122, 1.0, 0.944], "step": 0.5, "bass_style": "drone", "brightness": 0.0, "percussion": 0.03, "tremolo": 0.2, "voices": 1, "duration": 4.0 },       # 9 Cosmic Void — ambient, spacious (4 * 0.5 * 2, already aligned)
+	{ "root": 329.63, "arp": [1.0, 1.25, 1.5, 1.875, 2.0, 1.5], "step": 0.14, "bass_style": "pulse", "brightness": 0.5, "percussion": 0.3, "tremolo": 0.0, "voices": 1, "duration": 2.52 }, # 10 Solar Core — blazing (6 * 0.14 * 3)
 ]
 
 ## Per-boss theme parameters (index matches BossManager.BOSS_SCRIPTS order).

@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "2.0.2"
+const APP_VERSION := "2.1.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -66,18 +66,29 @@ var is_game_over: bool = false
 ## between them. Read by LevelGenerator (short lead-in, no filler spawns)
 ## and persists across the per-level scene reloads inside advance_level().
 var boss_rush_mode: bool = false
-## Unlocked permanently the first time the player reaches the win screen —
-## a reward for finishing the campaign rather than day-one-available.
-## Not granted if cheats were used this run (see WinScreen._ready()).
+## Unlocked PERMANENTLY (persisted) the first time the player reaches the
+## win screen — a reward for finishing the campaign rather than
+## day-one-available. Not granted if cheats were used this run (see
+## WinScreen._ready()). This is the real, earned record — see
+## is_boss_rush_available() for what actually gates the menu button.
 var boss_rush_unlocked: bool = false
-## Unlocked permanently by clearing Boss Rush (also blocked by cheats).
-## A hidden main-menu toggle appears only once this is true.
+## Unlocked PERMANENTLY (persisted) by clearing Boss Rush (also blocked
+## by cheats). The real, earned record — see is_ultra_mode_available().
 var ultra_mode_unlocked: bool = false
 ## Session-only toggle (not persisted, like god_mode_enabled) — rainbow
 ## aftereffect, instant-kill on basic enemies, 3x boss damage, and a
 ## score bonus. Deliberately NOT part of is_scoring_disabled(): it's an
 ## earned reward, not a cheat, so score still counts while it's on.
 var ultra_mode_enabled: bool = false
+
+## The hidden press-and-hold main-menu tricks set THESE instead of the
+## real unlocked flags above — they open the menu buttons for testing,
+## for this app instance only (never saved, cleared on restart), and are
+## deliberately kept separate so nothing mistakes a testing shortcut for
+## an actually-earned unlock (e.g. WinScreen's "already unlocked" skip).
+var _boss_rush_test_unlocked: bool = false
+var _ultra_mode_test_unlocked: bool = false
+
 var next_life_score_goal: int = SCORE_GOAL_INTERVAL
 
 func _ready() -> void:
@@ -171,6 +182,24 @@ func unlock_ultra_mode() -> void:
 		return
 	ultra_mode_unlocked = true
 	_save()
+
+## Hidden main-menu hold-trick versions — open the button for THIS APP
+## INSTANCE only, never persisted. Deliberately not the same flag as a
+## real unlock so code that cares whether it was actually earned (e.g.
+## WinScreen) isn't fooled by a testing shortcut.
+func test_unlock_boss_rush() -> void:
+	_boss_rush_test_unlocked = true
+
+func test_unlock_ultra_mode() -> void:
+	_ultra_mode_test_unlocked = true
+
+## What actually gates the main-menu buttons — either a real, earned,
+## persisted unlock, or this instance's testing shortcut.
+func is_boss_rush_available() -> bool:
+	return boss_rush_unlocked or _boss_rush_test_unlocked
+
+func is_ultra_mode_available() -> bool:
+	return ultra_mode_unlocked or _ultra_mode_test_unlocked
 
 func get_difficulty_multiplier() -> float:
 	return DIFFICULTY_MULTIPLIERS[difficulty]

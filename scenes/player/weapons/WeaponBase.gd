@@ -86,6 +86,8 @@ func _spawn_bullet(pos: Vector2, velocity: Vector2,
 	if container == null:
 		push_warning("WeaponBase: bullet_container not set on %s" % weapon_name)
 		return null
+	if GameState.ultra_mode_enabled:
+		col = Color.from_hsv(fmod(Time.get_ticks_msec() * 0.001, 1.0), 1.0, 1.0)
 	var b: Bullet = BulletScene.instantiate()
 	b.setup(velocity, col, dmg, size_mult, false, sprite_type, pierces)
 	b.global_position = pos

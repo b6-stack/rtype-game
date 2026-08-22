@@ -59,18 +59,18 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_scroll_stars(delta)
-	if _version_holding and not GameState.boss_rush_unlocked:
+	if _version_holding and not GameState.is_boss_rush_available():
 		_version_hold_elapsed += delta
 		if _version_hold_elapsed >= VERSION_HOLD_UNLOCK_TIME:
 			_version_holding = false
-			GameState.unlock_boss_rush()
+			GameState.test_unlock_boss_rush()
 			_setup_boss_rush_button()
 			AudioManager.play_full_charge_ready_sfx()
-	if _title_holding and not GameState.ultra_mode_unlocked:
+	if _title_holding and not GameState.is_ultra_mode_available():
 		_title_hold_elapsed += delta
 		if _title_hold_elapsed >= TITLE_HOLD_UNLOCK_TIME:
 			_title_holding = false
-			GameState.unlock_ultra_mode()
+			GameState.test_unlock_ultra_mode()
 			_setup_ultra_mode_button()
 			AudioManager.play_full_charge_ready_sfx()
 
@@ -78,14 +78,17 @@ func _on_start_pressed() -> void:
 	GameState.start_game()
 
 func _on_boss_rush_pressed() -> void:
-	if not GameState.boss_rush_unlocked:
+	if not GameState.is_boss_rush_available():
 		return
 	GameState.start_boss_rush()
 
 ## Boss Rush is unlocked by beating the game once — reward the first
-## clear rather than making boss-only content available day one.
+## clear rather than making boss-only content available day one. (The
+## hidden hold-trick only opens this for the current app instance —
+## see GameState.test_unlock_boss_rush — so it doesn't count as really
+## earning it.)
 func _setup_boss_rush_button() -> void:
-	if GameState.boss_rush_unlocked:
+	if GameState.is_boss_rush_available():
 		_boss_rush_btn.text = "⚔ BOSS RUSH"
 		_boss_rush_btn.disabled = false
 		_boss_rush_btn.modulate = Color.WHITE
@@ -96,12 +99,14 @@ func _setup_boss_rush_button() -> void:
 
 ## Ultra Mode is unlocked by clearing Boss Rush — a hidden toggle that
 ## doesn't even appear on the menu until earned, unlike Boss Rush's
-## visible-but-locked treatment.
+## visible-but-locked treatment. (Same test-vs-real distinction as
+## Boss Rush above.)
 func _setup_ultra_mode_button() -> void:
-	_ultra_mode_btn.visible = GameState.ultra_mode_unlocked
-	if not GameState.ultra_mode_unlocked:
+	_ultra_mode_btn.visible = GameState.is_ultra_mode_available()
+	if not GameState.is_ultra_mode_available():
 		return
-	_ultra_mode_btn.pressed.connect(_on_ultra_mode_pressed)
+	if not _ultra_mode_btn.pressed.is_connected(_on_ultra_mode_pressed):
+		_ultra_mode_btn.pressed.connect(_on_ultra_mode_pressed)
 	_update_ultra_mode_btn_text()
 
 func _on_ultra_mode_pressed() -> void:
@@ -124,7 +129,7 @@ func _on_quit_pressed() -> void:
 # ── Hidden version-hold unlock ────────────────────────────────
 
 func _on_version_label_input(event: InputEvent) -> void:
-	if GameState.boss_rush_unlocked:
+	if GameState.is_boss_rush_available():
 		return
 	var pressed: bool
 	if event is InputEventScreenTouch:
@@ -137,7 +142,7 @@ func _on_version_label_input(event: InputEvent) -> void:
 	_version_hold_elapsed = 0.0
 
 func _on_title_label_input(event: InputEvent) -> void:
-	if GameState.ultra_mode_unlocked:
+	if GameState.is_ultra_mode_available():
 		return
 	var pressed: bool
 	if event is InputEventScreenTouch:
