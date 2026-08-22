@@ -98,10 +98,10 @@ func show_boss_bar(boss_name: String, max_hp: int) -> void:
 	_boss_bar_panel.modulate.a = 0.0
 	_boss_bar_panel.visible = true
 
-	# Fade in the boss health bar after warning banner pulse
+	# Fade in the boss health bar after tactical warning briefing
 	var tw := create_tween()
-	tw.tween_interval(1.2)
-	tw.tween_property(_boss_bar_panel, "modulate:a", 1.0, 0.4)
+	tw.tween_interval(2.6)
+	tw.tween_property(_boss_bar_panel, "modulate:a", 1.0, 0.45)
 
 func update_boss_bar(current: int, maximum: int) -> void:
 	if _boss_bar == null:
