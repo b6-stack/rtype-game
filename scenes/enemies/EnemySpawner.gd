@@ -128,5 +128,5 @@ func _on_enemy_died(pos: Vector2, score_val: int) -> void:
 			powerup_spawner.spawn_powerup_at(pos, -1, "life")
 		elif roll < 0.018:    # 0.8% chance for Super Shield (6s Invincibility)
 			powerup_spawner.spawn_powerup_at(pos, -1, "shield")
-		elif roll < 0.048:    # 3.0% chance for Weapon Upgrade
+		elif roll < 0.098:    # 8.0% chance for Weapon Upgrade Capsule
 			powerup_spawner.spawn_powerup_at(pos, -1, "weapon")
