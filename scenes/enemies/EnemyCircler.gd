@@ -1,4 +1,4 @@
-﻿class_name EnemyCircler
+class_name EnemyCircler
 extends EnemyBase
 
 ## Circler enemy — orbits a fixed point offset from spawn. Fires 3-way shot.
@@ -40,7 +40,7 @@ func _move(delta: float) -> void:
 
 func _shoot() -> void:
 	# 3-way: left, up-left (45 deg), down-left (45 deg)
-	var dirs: Array[Vector2] = [
+	var dirs: Array = [
 		Vector2.LEFT,
 		Vector2(-0.707, -0.707),
 		Vector2(-0.707, 0.707)

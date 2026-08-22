@@ -7,7 +7,7 @@ script = ExtResource("1_chunk")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 collision_layer = 1
-collision_mask = 2
+collision_mask = 14
 
 [node name="TopCol" type="CollisionPolygon2D" parent="StaticBody2D"]
 

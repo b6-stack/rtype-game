@@ -171,3 +171,139 @@ func _on_weapon_changed(_index: int) -> void:
 
 func _on_level_changed(_lvl: int) -> void:
 	_refresh_level()
+
+# ── Boss Warning Arrival System ───────────────────────────────
+
+const BOSS_HINTS: Dictionary = {
+	"Iron Claw": "Focus fire on the central core when its rotating pincers open between strikes!",
+	"Hydra": "Destroy the 3 outer heads first to expose and breach the main core!",
+	"Behemoth": "Heavy ramming charger! Maneuver vertically to evade its high-speed rushes.",
+	"Sentinel": "Force-field barrier! Time your shots to shoot between the rotating shield gaps.",
+	"Swarm Queen": "Bio-hive matriarch! Clear the spawned swarm drones, then charge your shots.",
+	"Photon Core": "Sweeping particle laser! Slip behind the beam arc as it rotates across the arena.",
+	"Abyss Gate": "Dimensional warper! Evade gravity wells and predict its warp positions.",
+	"Omega": "Ultimate flagship! Adapt across all phases and unleash maximum Super Charges!"
+}
+
+var _warning_container: Control = null
+var _warning_flash_rect: ColorRect = null
+var _warning_title: Label = null
+var _warning_boss_name: Label = null
+var _warning_hint: Label = null
+
+func show_boss_warning(boss_name: String) -> void:
+	if _warning_container == null:
+		_build_warning_banner()
+
+	_warning_title.text = "⚠️ PREPARE FOR BATTLE! ⚠️"
+	_warning_boss_name.text = "TARGET: [ %s ]" % boss_name.to_upper()
+	var hint_text: String = BOSS_HINTS.get(boss_name, "Engage with concentrated fire and evade hostile volleys!")
+	_warning_hint.text = "💡 TACTICAL HINT: %s" % hint_text
+
+	_warning_container.visible = true
+	_warning_container.modulate.a = 1.0
+	_warning_flash_rect.visible = true
+	_warning_flash_rect.modulate.a = 0.0
+
+	# Siren alert sound
+	AudioManager.play_boss_sfx()
+
+	# Red screen alarm flash (8 pulses over 3.2s)
+	var tw_flash := create_tween()
+	for i in 8:
+		tw_flash.tween_property(_warning_flash_rect, "modulate:a", 0.28, 0.20)
+		tw_flash.tween_property(_warning_flash_rect, "modulate:a", 0.0, 0.20)
+
+	# Warning banner entrance, display, and fade
+	_warning_container.scale = Vector2(0.85, 0.85)
+	var tw_banner := create_tween()
+	tw_banner.tween_property(_warning_container, "scale", Vector2(1.05, 1.05), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw_banner.tween_property(_warning_container, "scale", Vector2.ONE, 0.15)
+	tw_banner.tween_interval(3.2) # Ample time to read tactical hint
+	tw_banner.tween_property(_warning_container, "modulate:a", 0.0, 0.45)
+	tw_banner.tween_callback(func():
+		if _warning_container: _warning_container.visible = false
+		if _warning_flash_rect: _warning_flash_rect.visible = false
+	)
+
+func _build_warning_banner() -> void:
+	var ctrl: Control = $Control
+	if ctrl == null:
+		return
+
+	# Red alarm backdrop flash
+	_warning_flash_rect = ColorRect.new()
+	_warning_flash_rect.name = "WarningFlashRect"
+	_warning_flash_rect.color = Color(1.0, 0.1, 0.1, 1.0)
+	_warning_flash_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_warning_flash_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_warning_flash_rect.visible = false
+	ctrl.add_child(_warning_flash_rect)
+
+	# Perfectly centered Tactical Briefing Warning Box
+	_warning_container = PanelContainer.new()
+	_warning_container.name = "BossWarningContainer"
+	_warning_container.layout_mode = 1
+	_warning_container.anchors_preset = Control.PRESET_CENTER
+	_warning_container.anchor_left = 0.5
+	_warning_container.anchor_right = 0.5
+	_warning_container.anchor_top = 0.5
+	_warning_container.anchor_bottom = 0.5
+	_warning_container.offset_left = -440.0
+	_warning_container.offset_right = 440.0
+	_warning_container.offset_top = -95.0
+	_warning_container.offset_bottom = 95.0
+	_warning_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_warning_container.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_warning_container.pivot_offset = Vector2(440.0, 95.0)
+	_warning_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_warning_container.visible = false
+
+	# Styled dark semi-translucent red hazard panel with bright borders
+	var style_box := StyleBoxFlat.new()
+	style_box.bg_color = Color(0.10, 0.02, 0.02, 0.92)
+	style_box.border_color = Color(1.0, 0.35, 0.1, 1.0)
+	style_box.set_border_width_all(3)
+	style_box.set_corner_radius_all(10)
+	style_box.content_margin_left = 24.0
+	style_box.content_margin_right = 24.0
+	style_box.content_margin_top = 16.0
+	style_box.content_margin_bottom = 16.0
+	_warning_container.add_theme_stylebox_override("panel", style_box)
+	ctrl.add_child(_warning_container)
+
+	var vbox := VBoxContainer.new()
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 6)
+	_warning_container.add_child(vbox)
+
+	# 1. Main Title
+	_warning_title = Label.new()
+	_warning_title.text = "⚠️ PREPARE FOR BATTLE! ⚠️"
+	_warning_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_warning_title.add_theme_font_size_override("font_size", 32)
+	_warning_title.add_theme_color_override("font_color", Color(1.0, 0.25, 0.25))
+	_warning_title.add_theme_color_override("font_outline_color", Color.BLACK)
+	_warning_title.add_theme_constant_override("outline_size", 6)
+	vbox.add_child(_warning_title)
+
+	# 2. Target Boss Name
+	_warning_boss_name = Label.new()
+	_warning_boss_name.text = "TARGET: [ BOSS ]"
+	_warning_boss_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_warning_boss_name.add_theme_font_size_override("font_size", 22)
+	_warning_boss_name.add_theme_color_override("font_color", Color(0.2, 1.0, 0.9))
+	_warning_boss_name.add_theme_color_override("font_outline_color", Color.BLACK)
+	_warning_boss_name.add_theme_constant_override("outline_size", 4)
+	vbox.add_child(_warning_boss_name)
+
+	# 3. Tactical Combat Hint
+	_warning_hint = Label.new()
+	_warning_hint.text = "💡 TACTICAL HINT: Focus fire on the core!"
+	_warning_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_warning_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_warning_hint.add_theme_font_size_override("font_size", 17)
+	_warning_hint.add_theme_color_override("font_color", Color(1.0, 0.92, 0.4))
+	_warning_hint.add_theme_color_override("font_outline_color", Color.BLACK)
+	_warning_hint.add_theme_constant_override("outline_size", 4)
+	vbox.add_child(_warning_hint)

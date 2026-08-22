@@ -32,7 +32,7 @@ const DURATION: float = 0.9
 
 var _label: Label
 
-func _ready() -> void:
+func _init() -> void:
 	_label = Label.new()
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -44,6 +44,11 @@ func _ready() -> void:
 	_label.size = Vector2(200, 40)
 	_label.pivot_offset = Vector2(100, 20)
 	add_child(_label)
+
+func _ready() -> void:
+	if _label:
+		_label.text = "⚡ " + _weapon_name
+		_label.add_theme_color_override("font_color", _color.lightened(0.5))
 
 func setup(pos: Vector2, weapon_index: int) -> void:
 	global_position = pos
@@ -62,7 +67,7 @@ func setup_custom(pos: Vector2, text_msg: String, custom_col: Color) -> void:
 	_weapon_name = text_msg
 
 	if _label:
-		_label.text = "✨ " + text_msg
+		_label.text = "⚡ " + text_msg
 		_label.add_theme_color_override("font_color", _color.lightened(0.6))
 
 	_create_sparks_and_rays()

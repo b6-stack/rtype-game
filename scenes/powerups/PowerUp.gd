@@ -51,24 +51,17 @@ func _physics_process(delta: float) -> void:
 	global_position.y += sin(Time.get_ticks_msec() * 0.004) * 0.9
 	if _sprite:
 		_sprite.rotation += delta * 1.5
-		# Subtle pulsing energy glow
-		var pulse: float = 0.88 + 0.12 * sin(Time.get_ticks_msec() * 0.008)
-		_sprite.scale = Vector2(0.045, 0.045) * pulse
+		# Pulsing energy glow
+		var pulse: float = 0.90 + 0.15 * sin(Time.get_ticks_msec() * 0.008)
+		if powerup_type == "weapon":
+			_sprite.scale = Vector2(0.065, 0.065) * pulse
+		elif powerup_type == "life":
+			_sprite.scale = Vector2(0.060, 0.060) * pulse
+		else:
+			_sprite.scale = Vector2(0.055, 0.055) * pulse
+
 	if global_position.x < -100.0:
 		queue_free()
-
-const WEAPON_ICON_PATHS: Array[String] = [
-	"res://assets/sprites/weapons/icon_vulcan.png",
-	"res://assets/sprites/weapons/icon_laser.png",
-	"res://assets/sprites/weapons/icon_plasma.png",
-	"res://assets/sprites/weapons/icon_missile.png",
-	"res://assets/sprites/weapons/icon_wave.png",
-	"res://assets/sprites/weapons/icon_bouncer.png",
-	"res://assets/sprites/weapons/icon_drill.png",
-	"res://assets/sprites/weapons/icon_ricochet.png",
-	"res://assets/sprites/weapons/icon_gravity.png",
-	"res://assets/sprites/weapons/icon_lightning.png",
-]
 
 func _apply_style() -> void:
 	if _sprite == null or _label == null:
@@ -88,18 +81,12 @@ func _apply_style() -> void:
 		_label.modulate = Color(0.2, 0.9, 1.0)
 	else:
 		powerup_type = "weapon"
-		var icon_path: String = WEAPON_ICON_PATHS[weapon_index] if weapon_index < WEAPON_ICON_PATHS.size() else ""
-		if ResourceLoader.exists(icon_path):
-			_sprite.texture = load(icon_path)
-			_sprite.modulate = Color.WHITE
-			_label.text = ""
-		else:
-			_sprite.texture = SPRITE_WEAPON
-			var col := WEAPON_COLORS[weapon_index] if weapon_index < WEAPON_COLORS.size() else Color.WHITE
-			_sprite.modulate = col
-			if weapon_index < WEAPON_LETTERS.size():
-				_label.text = WEAPON_LETTERS[weapon_index]
-			_label.modulate = Color.WHITE
+		_sprite.texture = SPRITE_WEAPON
+		var col := WEAPON_COLORS[weapon_index] if weapon_index < WEAPON_COLORS.size() else Color.WHITE
+		_sprite.modulate = col
+		if weapon_index < WEAPON_LETTERS.size():
+			_label.text = WEAPON_LETTERS[weapon_index]
+		_label.modulate = Color.WHITE
 
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("player_hurtbox") or area.owner is Player or area.get_parent() is Player:
@@ -114,10 +101,12 @@ func _collect() -> void:
 	if powerup_type == "life":
 		GameState.gain_life()
 	elif powerup_type == "shield":
-		var players: Array[Node] = get_tree().get_nodes_in_group("player")
-		for p in players:
-			if is_instance_valid(p) and p.has_method("grant_invincibility"):
-				p.grant_invincibility(6.0)
+		var tree := get_tree()
+		if tree:
+			var players: Array = tree.get_nodes_in_group("player")
+			for p in players:
+				if is_instance_valid(p) and p.has_method("grant_invincibility"):
+					p.grant_invincibility(6.0)
 	else:
 		GameState.set_weapon(weapon_index)
 

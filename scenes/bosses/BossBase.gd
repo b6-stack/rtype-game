@@ -64,9 +64,9 @@ func _physics_process(delta: float) -> void:
 	_phase_attack(delta)
 	move_and_slide()
 
-	# Clamp boss to right half of screen
-	global_position.x = clamp(global_position.x, 900.0, 1750.0)
-	global_position.y = clamp(global_position.y, 80.0, 1000.0)
+	# Clamp boss to arena bounds
+	global_position.x = clamp(global_position.x, 150.0, 1850.0)
+	global_position.y = clamp(global_position.y, 60.0, 1020.0)
 
 # ── Override in subclasses ────────────────────────────────────
 
@@ -85,7 +85,7 @@ func take_damage(amount: int) -> void:
 		return
 	current_health = max(0, current_health - amount)
 	health_changed.emit(current_health, max_health)
-	if _sprite:
+	if current_health > 0 and _sprite and is_inside_tree():
 		var tw := create_tween()
 		tw.tween_property(_sprite, "modulate", Color.WHITE, 0.06)
 		tw.tween_property(_sprite, "modulate", boss_color, 0.06)
@@ -169,14 +169,19 @@ func _die() -> void:
 	queue_free()
 
 func _spawn_death_explosion() -> void:
-	var parent_node: Node = get_parent() if get_parent() else get_tree().current_scene
+	_do_spawn_boss_explosions.call_deferred(global_position, boss_color, size_scale)
+
+func _do_spawn_boss_explosions(pos: Vector2, col: Color, scale_s: float) -> void:
+	var tree := get_tree()
+	var parent_node: Node = get_parent() if get_parent() else (tree.current_scene if tree else null)
 	if parent_node:
 		for i in 6:
 			var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
-			parent_node.call_deferred("add_child", fx)
-			var offset := Vector2(randf_range(-100, 100), randf_range(-60, 60)) * size_scale
+			parent_node.add_child(fx)
+			var offset := Vector2(randf_range(-90, 90), randf_range(-55, 55)) * scale_s
+			fx.global_position = pos + offset
 			if fx.has_method("setup"):
-				fx.setup(global_position + offset, boss_color, size_scale * 1.6)
+				fx.setup(pos + offset, col, scale_s * 1.6)
 
 ## Fires a bullet toward the player
 func _fire_at_player(speed: float = 500.0, dmg: int = 1, col: Color = Color.ORANGE_RED) -> void:

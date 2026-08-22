@@ -73,10 +73,8 @@ func _shoot() -> void:
 func take_damage(amount: int) -> void:
 	if _is_dead or global_position.x > get_viewport_rect().size.x:
 		return
-	current_health -= amount
-	damaged.emit(amount)
-	# Brief flash
-	if _sprite:
+	current_health = max(0, current_health - amount)
+	if current_health > 0 and _sprite and is_inside_tree():
 		var tween := create_tween()
 		tween.tween_property(_sprite, "modulate", Color.WHITE, 0.05)
 		tween.tween_property(_sprite, "modulate", enemy_color, 0.05)
@@ -115,13 +113,17 @@ func _die() -> void:
 	queue_free()
 
 func _spawn_death_flash() -> void:
-	var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
-	fx.process_mode = Node.PROCESS_MODE_ALWAYS
-	var parent_node: Node = get_parent() if get_parent() else get_tree().current_scene
+	_do_spawn_explosion.call_deferred(global_position, enemy_color, max(0.9, size_scale))
+
+func _do_spawn_explosion(pos: Vector2, col: Color, scale_s: float) -> void:
+	var tree := get_tree()
+	var parent_node: Node = get_parent() if get_parent() else (tree.current_scene if tree else null)
 	if parent_node:
-		parent_node.call_deferred("add_child", fx)
+		var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
+		parent_node.add_child(fx)
+		fx.global_position = pos
 		if fx.has_method("setup"):
-			fx.setup(global_position, enemy_color, max(0.8, size_scale))
+			fx.setup(pos, col, scale_s)
 
 func _fire_at_player() -> void:
 	if bullet_container == null:
@@ -137,10 +139,15 @@ func _fire_direction(dir: Vector2) -> void:
 func _spawn_enemy_bullet(vel: Vector2) -> void:
 	if bullet_container == null:
 		return
+	_do_spawn_enemy_bullet.call_deferred(global_position, vel, bullet_color, bullet_damage)
+
+func _do_spawn_enemy_bullet(spawn_pos: Vector2, vel: Vector2, col: Color, dmg: int) -> void:
+	if bullet_container == null:
+		return
 	var b: Bullet = EnemyBulletScene.instantiate()
-	bullet_container.call_deferred("add_child", b)
-	b.global_position = global_position
-	b.setup(vel, bullet_color, bullet_damage, 1.0, true)
+	bullet_container.add_child(b)
+	b.global_position = spawn_pos
+	b.setup(vel, col, dmg, 1.0, true)
 
 func _scale_visual() -> void:
 	if _sprite:

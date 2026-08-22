@@ -164,9 +164,9 @@ func _apply_keyboard_fallback(delta: float) -> void:
 		_target_pos.x = clamp(_target_pos.x, 60.0, 1840.0)
 		_target_pos.y = clamp(_target_pos.y, corridor_top + SHIP_MARGIN, corridor_bottom - SHIP_MARGIN)
 
-const FINGER_OFFSET := Vector2(100.0, 0.0)
+# ── Input signals ──────────────────────────────────────────────
 
-# ── Input handlers ────────────────────────────────────────────
+const FINGER_OFFSET := Vector2(140.0, 0.0)
 
 func _on_move_input(viewport_pos: Vector2) -> void:
 	var target := viewport_pos + FINGER_OFFSET
@@ -252,10 +252,12 @@ func grant_invincibility(duration: float = 6.0) -> void:
 	_invincibility_timer = max(_invincibility_timer, duration)
 
 func _clear_enemy_bullets_screen() -> void:
-	var enemy_bullets: Array[Node] = get_tree().get_nodes_in_group("enemy_bullet")
-	for b in enemy_bullets:
-		if is_instance_valid(b):
-			b.queue_free()
+	var tree := get_tree()
+	if tree:
+		var enemy_bullets: Array = tree.get_nodes_in_group("enemy_bullet")
+		for b in enemy_bullets:
+			if is_instance_valid(b):
+				b.queue_free()
 
 func _die() -> void:
 	_is_dead = true

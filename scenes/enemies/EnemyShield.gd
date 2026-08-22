@@ -1,4 +1,4 @@
-﻿class_name EnemyShield
+class_name EnemyShield
 extends EnemyBase
 
 ## Shield enemy — slow, frontal shield blocks incoming fire from the right. No shooting.
@@ -39,6 +39,7 @@ func _ready() -> void:
 
 	_shield_area.collision_layer = 8
 	_shield_area.collision_mask = 4  # player_bullets
+	_shield_area.add_to_group("enemy_shield")
 	add_child(_shield_area)
 	_shield_area.area_entered.connect(_on_shield_hit)
 

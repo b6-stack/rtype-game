@@ -63,47 +63,16 @@ func _spawn_grunt() -> void:
 	if bullet_container == null:
 		return
 
-	_grunt_count += 1
-	var grunt: CharacterBody2D = CharacterBody2D.new()
-	grunt.name = "SpawnedGrunt%d" % _grunt_count
+	var grunt_scene: PackedScene = preload("res://scenes/enemies/EnemyBase.tscn")
+	var grunt: EnemyBase = grunt_scene.instantiate()
+	grunt.set_script(load("res://scenes/enemies/EnemyGrunt.gd"))
+	grunt.bullet_container = bullet_container
+	grunt.player_ref = player_ref
+	grunt.add_to_group("enemies")
 
-	# Collision
-	grunt.collision_layer = 16  # enemies
-	grunt.collision_mask = 4    # player_bullets
-
-	var col: CollisionShape2D = CollisionShape2D.new()
-	var shape: CircleShape2D = CircleShape2D.new()
-	shape.radius = GRUNT_RADIUS
-	col.shape = shape
-	grunt.add_child(col)
-
-	# Visual
-	var poly: Polygon2D = Polygon2D.new()
-	poly.polygon = _build_diamond(GRUNT_RADIUS)
-	poly.color = Color(0.8, 0.2, 0.9, 1.0)
-	grunt.add_child(poly)
-
-	# Health tracker via meta
-	grunt.set_meta("hp", GRUNT_HP)
-
-	# Spawn near boss with vertical spread
-	var spawn_offset: float = randf_range(-60.0, 60.0)
-	grunt.global_position = global_position + Vector2(-30.0, spawn_offset)
-
-	# Script inline via movement handled by parent process
-	var script: GDScript = GDScript.new()
-	script.source_code = """
-extends CharacterBody2D
-var speed: float = -240.0
-func _physics_process(delta):
-	velocity.x = speed
-	move_and_slide()
-	if global_position.x < -100.0:
-		queue_free()
-"""
-	grunt.set_script(script)
-
-	bullet_container.add_child(grunt)
+	var parent_node: Node = get_parent() if get_parent() else bullet_container
+	parent_node.add_child(grunt)
+	grunt.global_position = global_position + Vector2(-40.0, randf_range(-70.0, 70.0))
 
 
 func _build_diamond(r: float) -> PackedVector2Array:

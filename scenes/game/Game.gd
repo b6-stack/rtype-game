@@ -73,13 +73,13 @@ func _ready() -> void:
 	AudioManager.play_level_music(GameState.level)
 
 func _process(delta: float) -> void:
-	# Drive background scroll
-	_background.scroll(_scroll_speed, delta)
+	if _background:
+		_background.scroll(_scroll_speed, delta)
 
-	# Update player corridor bounds from generator
-	var bounds := _level_gen.get_corridor_bounds()
-	_player.corridor_top    = bounds.x
-	_player.corridor_bottom = bounds.y
+	if _level_gen and _player:
+		var bounds := _level_gen.get_corridor_bounds()
+		_player.corridor_top    = bounds.x
+		_player.corridor_bottom = bounds.y
 
 	# Pause input
 	if Input.is_action_just_pressed("pause_game"):
@@ -88,12 +88,20 @@ func _process(delta: float) -> void:
 # ── Boss bar helpers (called by BossManager) ──────────────────
 
 func show_boss_bar(boss_name: String, max_hp: int) -> void:
+	if _hud and _hud.has_method("show_boss_warning"):
+		_hud.show_boss_warning(boss_name)
 	if _boss_bar_panel == null:
 		return
-	_boss_bar_panel.visible = true
 	_boss_name_label.text = boss_name.to_upper()
 	_boss_bar.max_value = max_hp
 	_boss_bar.value = max_hp
+	_boss_bar_panel.modulate.a = 0.0
+	_boss_bar_panel.visible = true
+
+	# Fade in the boss health bar after tactical warning briefing
+	var tw := create_tween()
+	tw.tween_interval(2.6)
+	tw.tween_property(_boss_bar_panel, "modulate:a", 1.0, 0.45)
 
 func update_boss_bar(current: int, maximum: int) -> void:
 	if _boss_bar == null:

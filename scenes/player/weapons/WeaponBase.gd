@@ -66,18 +66,39 @@ func get_charge_tier_multiplier(charge_level: float) -> float:
 
 ## Override this for charged shot pattern
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
-	var tier_mult := get_charge_tier_multiplier(charge_level)
-	var size_mult := lerpf(1.5, 3.0, charge_level)
-	var raw_dmg: float = damage * 3 * charge_level + 1
-	var final_dmg: int = max(1, int(raw_dmg * tier_mult))
-	_spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed * 0.85,
-			bullet_color.lightened(0.3 if charge_level < 1.0 else 0.6), final_dmg, size_mult)
+	if charge_level < 1.0:
+		# Partial charge: smooth above-average normal shot
+		var dmg: int = max(1, int(damage * lerpf(1.25, 1.65, charge_level)))
+		var size_m: float = lerpf(1.15, 1.40, charge_level)
+		_spawn_bullet(spawn_pos, Vector2.RIGHT * (bullet_speed * 1.05),
+				bullet_color.lightened(0.25), dmg, size_m)
+	else:
+		# Full Super Charge
+		var final_dmg: int = max(1, int(damage * 3.2))
+		_spawn_bullet(spawn_pos, Vector2.RIGHT * (bullet_speed * 1.15),
+				bullet_color.lightened(0.65), final_dmg, 2.6)
 
 # ── Helpers ──────────────────────────────────────────────────
 
-## Spawns a single bullet with given parameters
 func _spawn_bullet(pos: Vector2, velocity: Vector2,
-		col: Color, dmg: int, size_mult: float = 1.0, sprite_type: String = "") -> Bullet:
+		col: Color, dmg: int, size_mult: float = 1.0, sprite_type: String = "", pierces: int = 0) -> Bullet:
+	var container := _get_bullet_container()
+	if container == null:
+		push_warning("WeaponBase: bullet_container not set on %s" % weapon_name)
+		return null
+	var b: Bullet = BulletScene.instantiate()
+	b.setup(velocity, col, dmg, size_mult, false, sprite_type, pierces)
+	b.global_position = pos
+	_safe_add_bullet.call_deferred(b, pos)
+	return b
+
+func _safe_add_bullet(b: Bullet, pos: Vector2) -> void:
+	var container := _get_bullet_container()
+	if container and is_instance_valid(b):
+		container.add_child(b)
+		b.global_position = pos
+
+func _get_bullet_container() -> Node:
 	if bullet_container == null or not is_instance_valid(bullet_container):
 		var tree := get_tree()
 		if tree and tree.current_scene:
@@ -86,27 +107,20 @@ func _spawn_bullet(pos: Vector2, velocity: Vector2,
 				bullet_container = container
 			else:
 				bullet_container = tree.current_scene
-	if bullet_container == null:
-		push_warning("WeaponBase: bullet_container not set on %s" % weapon_name)
-		return null
-	var b: Bullet = BulletScene.instantiate()
-	bullet_container.call_deferred("add_child", b)
-	b.global_position = pos
-	b.setup(velocity, col, dmg, size_mult, false, sprite_type)
-	return b
+	return bullet_container
 
 ## Spawns multiple bullets in an arc (angle_spread in degrees, count shots)
 func _spawn_spread(pos: Vector2, velocity: Vector2, col: Color,
-		dmg: int, size_mult: float, count: int, angle_spread: float, sprite_type: String = "") -> void:
+		dmg: int, size_mult: float, count: int, angle_spread: float, sprite_type: String = "", pierces: int = 0) -> void:
 	if count <= 1:
-		_spawn_bullet(pos, velocity, col, dmg, size_mult, sprite_type)
+		_spawn_bullet(pos, velocity, col, dmg, size_mult, sprite_type, pierces)
 		return
 	var half := angle_spread * 0.5
 	var step := angle_spread / float(count - 1)
 	for i in count:
 		var angle_deg := -half + step * i
 		var rotated := velocity.rotated(deg_to_rad(angle_deg))
-		_spawn_bullet(pos, rotated, col, dmg, size_mult, sprite_type)
+		_spawn_bullet(pos, rotated, col, dmg, size_mult, sprite_type, pierces)
 
 ## Initialise this weapon from a WeaponData resource
 func init_from_data(data: WeaponData) -> void:
