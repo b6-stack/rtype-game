@@ -80,9 +80,25 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 
 # ── Helpers ──────────────────────────────────────────────────
 
-## Spawns a single bullet with given parameters
 func _spawn_bullet(pos: Vector2, velocity: Vector2,
 		col: Color, dmg: int, size_mult: float = 1.0, sprite_type: String = "", pierces: int = 0) -> Bullet:
+	var container := _get_bullet_container()
+	if container == null:
+		push_warning("WeaponBase: bullet_container not set on %s" % weapon_name)
+		return null
+	var b: Bullet = BulletScene.instantiate()
+	b.setup(velocity, col, dmg, size_mult, false, sprite_type, pierces)
+	b.global_position = pos
+	_safe_add_bullet.call_deferred(b, pos)
+	return b
+
+func _safe_add_bullet(b: Bullet, pos: Vector2) -> void:
+	var container := _get_bullet_container()
+	if container and is_instance_valid(b):
+		container.add_child(b)
+		b.global_position = pos
+
+func _get_bullet_container() -> Node:
 	if bullet_container == null or not is_instance_valid(bullet_container):
 		var tree := get_tree()
 		if tree and tree.current_scene:
@@ -91,14 +107,7 @@ func _spawn_bullet(pos: Vector2, velocity: Vector2,
 				bullet_container = container
 			else:
 				bullet_container = tree.current_scene
-	if bullet_container == null:
-		push_warning("WeaponBase: bullet_container not set on %s" % weapon_name)
-		return null
-	var b: Bullet = BulletScene.instantiate()
-	bullet_container.add_child(b)
-	b.global_position = pos
-	b.setup(velocity, col, dmg, size_mult, false, sprite_type, pierces)
-	return b
+	return bullet_container
 
 ## Spawns multiple bullets in an arc (angle_spread in degrees, count shots)
 func _spawn_spread(pos: Vector2, velocity: Vector2, col: Color,

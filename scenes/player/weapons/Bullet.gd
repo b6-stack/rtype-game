@@ -157,7 +157,11 @@ func _handle_collision(target: Node) -> void:
 			hit_target.emit(global_position)
 			queue_free()
 	else:
-		# Player bullet hitting enemy or boss
+		# If striking an active force-field or shield barrier, let the shield deflect/absorb
+		if target.is_in_group("boss_shield") or target.is_in_group("enemy_shield"):
+			return
+
+		# Player bullet hitting enemy or boss core
 		var hit_target_entity: Node = target
 		if not hit_target_entity.has_method("take_damage") and target.get_parent():
 			hit_target_entity = target.get_parent()
