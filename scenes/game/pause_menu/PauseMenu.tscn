@@ -24,8 +24,8 @@ anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = -320.0
 offset_right = 320.0
-offset_top = -350.0
-offset_bottom = 350.0
+offset_top = -390.0
+offset_bottom = 390.0
 
 [node name="VBox" type="VBoxContainer" parent="Overlay/Panel"]
 process_mode = 3
@@ -93,6 +93,13 @@ theme_override_font_sizes/font_size = 22
 process_mode = 3
 layout_mode = 2
 text = "🚀 ALWAYS MAX CHARGE: OFF"
+custom_minimum_size = Vector2(340, 48)
+theme_override_font_sizes/font_size = 22
+
+[node name="CheatSkipLevelBtn" type="Button" parent="Overlay/Panel/VBox"]
+process_mode = 3
+layout_mode = 2
+text = "⏭ SKIP LEVEL"
 custom_minimum_size = Vector2(340, 48)
 theme_override_font_sizes/font_size = 22
 

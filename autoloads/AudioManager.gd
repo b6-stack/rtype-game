@@ -28,6 +28,7 @@ var _sfx_boss: AudioStreamWAV
 var _level_tracks: Dictionary = {}
 var _boss_music_tracks: Dictionary = {}
 var _victory_music_track: AudioStreamWAV = null
+var _menu_music_track: AudioStreamWAV = null
 var _current_level_music: int = -1
 var _current_boss_music_index: int = -1
 var _is_boss_music: bool = false
@@ -97,6 +98,21 @@ func play_boss_music(boss_index: int = 0) -> void:
 	_is_boss_music = true
 	_current_boss_music_index = boss_index
 	var stream: AudioStreamWAV = _get_or_create_boss_track(boss_index)
+	if stream:
+		_music_player.stream = stream
+		_music_player.volume_db = _vol_db(music_volume, music_muted)
+		_music_player.play()
+
+## Main menu theme — a fuller, multi-layered piece (chord progression +
+## arpeggio + a repeating melodic hook + sub-bass + percussion) rather
+## than reusing the sparser in-game loop engine, since it's the game's
+## first impression.
+func play_menu_music() -> void:
+	_current_level_music = -1
+	_is_boss_music = false
+	if music_muted:
+		return
+	var stream: AudioStreamWAV = _get_or_create_menu_theme_track()
 	if stream:
 		_music_player.stream = stream
 		_music_player.volume_db = _vol_db(music_volume, music_muted)
@@ -280,6 +296,61 @@ func _get_or_create_boss_track(boss_index: int) -> AudioStreamWAV:
 	)
 	_boss_music_tracks[idx] = track
 	return track
+
+func _get_or_create_menu_theme_track() -> AudioStreamWAV:
+	if _menu_music_track != null:
+		return _menu_music_track
+
+	const RATE: int = 22050
+	const CHORD_DUR: float = 2.0
+	const DURATION: float = CHORD_DUR * 4.0  # full i-VI-III-VII progression, 8s
+	var sample_count: int = int(RATE * DURATION)
+
+	# Am - F - C - G (i - VI - III - VII): a driving, heroic progression —
+	# common in synthwave/anthem game themes, fitting "Starlight Vanguard".
+	var chord_roots: Array[float] = [220.00, 174.61, 261.63, 196.00]
+	var chord_thirds: Array[float] = [1.2, 1.25, 1.25, 1.25]  # minor, major, major, major
+
+	# 4-note hook motif per chord (fifth-third-root-third) — a held,
+	# recognizable melodic line layered over the arpeggio wash rather than
+	# just cycling through chord tones uniformly.
+	var hook_pattern: Array[float] = [1.5, 1.2, 1.0, 1.2]
+	const HOOK_NOTE_DUR: float = 0.5
+
+	_menu_music_track = _create_wav(sample_count, RATE, true, func(_i: int, t: float, _total: float) -> float:
+		var chord_idx: int = int(t / CHORD_DUR) % 4
+		var chord_t: float = fmod(t, CHORD_DUR)
+		var root: float = chord_roots[chord_idx]
+		var third: float = chord_thirds[chord_idx]
+
+		# Sub-bass drone + driving 8th-note pulse for low-end weight/drive.
+		var sub: float = sin(TAU * root * 0.25 * t) * 0.20
+		var pulse_step: int = int(t / 0.25)
+		var pulse_freq: float = root * 0.5 * (1.0 if pulse_step % 2 == 0 else 1.5)
+		var pulse: float = (0.15 if sin(TAU * pulse_freq * t) > 0.0 else -0.15)
+
+		# 16th-note arpeggio through the triad, one octave up, with a
+		# bright octave-up sparkle layer.
+		var arp_ratios: Array = [1.0, third, 1.5, third]
+		var arp_step: int = int(t / 0.125)
+		var arp_freq: float = root * 2.0 * float(arp_ratios[arp_step % arp_ratios.size()])
+		var arp: float = sin(TAU * arp_freq * t) * 0.15
+		arp += sin(TAU * arp_freq * 2.0 * t) * 0.05
+
+		# Melodic hook — slower, held notes so it reads as an actual tune.
+		var hook_idx: int = int(chord_t / HOOK_NOTE_DUR) % hook_pattern.size()
+		var hook_freq: float = root * 2.0 * float(hook_pattern[hook_idx])
+		var hook_local_t: float = fmod(chord_t, HOOK_NOTE_DUR)
+		var hook_env: float = 1.0 - pow(hook_local_t / HOOK_NOTE_DUR, 2.0) * 0.4
+		var hook: float = sin(TAU * hook_freq * t) * 0.22 * hook_env
+
+		# Light rhythmic percussion accent on the beat.
+		var perc_step: float = fmod(t, 0.25)
+		var perc: float = (randf_range(-0.10, 0.10) if perc_step < 0.015 else 0.0)
+
+		return clampf(sub + pulse + arp + hook + perc, -0.9, 0.9)
+	)
+	return _menu_music_track
 
 func _get_or_create_victory_track() -> AudioStreamWAV:
 	if _victory_music_track != null:

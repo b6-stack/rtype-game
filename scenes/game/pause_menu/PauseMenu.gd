@@ -9,6 +9,7 @@ extends CanvasLayer
 @onready var _cycle_weapon_btn: Button = $Overlay/Panel/VBox/CheatCycleWeaponBtn
 @onready var _nuke_btn: Button = $Overlay/Panel/VBox/CheatNukeBtn
 @onready var _max_charge_btn: Button = $Overlay/Panel/VBox/CheatMaxChargeBtn
+@onready var _skip_level_btn: Button = $Overlay/Panel/VBox/CheatSkipLevelBtn
 
 signal resume_requested
 signal quit_requested
@@ -24,6 +25,7 @@ func _ready() -> void:
 	_cycle_weapon_btn.pressed.connect(_on_cheat_cycle_weapon)
 	_nuke_btn.pressed.connect(_on_cheat_nuke)
 	_max_charge_btn.pressed.connect(_on_cheat_max_charge)
+	_skip_level_btn.pressed.connect(_on_cheat_skip_level)
 
 	visible = false
 	_update_cheat_btn_texts()
@@ -85,6 +87,11 @@ func _on_cheat_max_charge() -> void:
 	_update_cheat_btn_texts()
 	if GameState.always_max_charge_enabled:
 		AudioManager.play_full_charge_ready_sfx()
+
+func _on_cheat_skip_level() -> void:
+	GameState.mark_cheats_used()
+	hide_menu()
+	GameState.advance_level()
 
 func _update_cheat_btn_texts() -> void:
 	if _god_mode_btn:

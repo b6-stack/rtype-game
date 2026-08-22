@@ -27,6 +27,7 @@ var _version_holding: bool = false
 var _version_hold_elapsed: float = 0.0
 
 func _ready() -> void:
+	AudioManager.play_menu_music()
 	_start_btn.pressed.connect(_on_start_pressed)
 	_boss_rush_btn.pressed.connect(_on_boss_rush_pressed)
 	_quit_btn.pressed.connect(_on_quit_pressed)
