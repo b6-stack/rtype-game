@@ -102,6 +102,13 @@ custom_minimum_size = Vector2(360, 48)
 theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(1.0, 0.55, 0.3, 1)
 
+[node name="UltraModeButton" type="Button" parent="Center/VBox"]
+layout_mode = 2
+visible = false
+text = "🌈 ULTRA MODE: OFF"
+custom_minimum_size = Vector2(360, 44)
+theme_override_font_sizes/font_size = 20
+
 [node name="QuitButton" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "QUIT"

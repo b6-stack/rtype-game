@@ -110,6 +110,8 @@ func take_damage(amount: int) -> void:
 	# materialize effect look glitchy instead of a clean fade-in.
 	if _is_dead or _is_entering:
 		return
+	if GameState.ultra_mode_enabled:
+		amount = int(amount * GameState.ULTRA_MODE_BOSS_DAMAGE_MULT)
 	current_health = max(0, current_health - amount)
 	health_changed.emit(current_health, max_health)
 	if current_health > 0 and _sprite and is_inside_tree():

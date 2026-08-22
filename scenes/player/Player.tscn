@@ -33,6 +33,11 @@ visible = false
 polygon = PackedVector2Array(32, 0, 24, -18, 0, -26, -24, -18, -32, 0, -24, 18, 0, 26, 24, 18)
 color = Color(0.2, 0.8, 1, 0.35)
 
+[node name="UltraAuraRing" type="Polygon2D" parent="Visual"]
+visible = false
+polygon = PackedVector2Array(38, 0, 27, -27, 0, -38, -27, -27, -38, 0, -27, 27, 0, 38, 27, 27)
+color = Color(1, 0, 0, 0.4)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_player")

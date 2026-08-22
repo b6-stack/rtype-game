@@ -80,6 +80,7 @@ var _is_dead: bool = false
 @onready var _sprite: Sprite2D = $Visual/Sprite2D
 @onready var _thruster_poly: Polygon2D = $Visual/ThrusterPoly
 @onready var _shield_ring: Polygon2D = $Visual/ShieldRing
+@onready var _ultra_aura_ring: Polygon2D = $Visual/UltraAuraRing
 @onready var _hurtbox: Area2D = $HurtBox
 
 func _ready() -> void:
@@ -104,6 +105,13 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _is_dead:
 		return
+
+	# Ultra Mode rainbow aftereffect — cycling hue ring + slow spin.
+	_ultra_aura_ring.visible = GameState.ultra_mode_enabled
+	if GameState.ultra_mode_enabled:
+		var hue: float = fmod(Time.get_ticks_msec() * 0.0006, 1.0)
+		_ultra_aura_ring.color = Color.from_hsv(hue, 0.85, 1.0, 0.45)
+		_ultra_aura_ring.rotation += delta * 2.0
 
 	# Smooth movement toward touch/mouse position
 	global_position = global_position.lerp(_target_pos, MOVE_SMOOTH * delta)

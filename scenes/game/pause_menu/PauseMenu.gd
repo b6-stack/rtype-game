@@ -89,6 +89,10 @@ func _on_cheat_max_charge() -> void:
 		AudioManager.play_full_charge_ready_sfx()
 
 func _on_cheat_skip_level() -> void:
+	# No skipping past the final level/boss — that's the actual ending,
+	# not something to cheat through.
+	if GameState.level >= GameState.TOTAL_LEVELS:
+		return
 	GameState.mark_cheats_used()
 	hide_menu()
 	GameState.advance_level()
@@ -109,3 +113,13 @@ func _update_cheat_btn_texts() -> void:
 		else:
 			_max_charge_btn.text = "🚀 ALWAYS MAX CHARGE: OFF"
 			_max_charge_btn.modulate = Color.WHITE
+
+	if _skip_level_btn:
+		if GameState.level >= GameState.TOTAL_LEVELS:
+			_skip_level_btn.text = "⏭ SKIP LEVEL (FINAL LEVEL)"
+			_skip_level_btn.disabled = true
+			_skip_level_btn.modulate = Color(1, 1, 1, 0.5)
+		else:
+			_skip_level_btn.text = "⏭ SKIP LEVEL"
+			_skip_level_btn.disabled = false
+			_skip_level_btn.modulate = Color.WHITE

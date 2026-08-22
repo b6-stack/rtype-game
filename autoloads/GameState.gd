@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "1.9.0"
+const APP_VERSION := "2.0.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -39,6 +39,15 @@ const LIFE_GOAL_MULTIPLIERS: Array[float] = [1.0, 1.3, 1.6]
 ## difficulty grace multiplier (same scale as respawn invincibility) is
 ## applied — see get_shield_duration().
 const SHIELD_BASE_DURATION: float = 10.0
+## Score multiplier by difficulty — Hard rewards the extra challenge,
+## Easy scores a bit less, Normal is the baseline.
+const SCORE_MULTIPLIERS: Array[float] = [0.8, 1.0, 1.5]
+## Extra score multiplier while Ultra Mode is enabled — it's an earned
+## reward (unlocked by clearing Boss Rush legitimately), not a cheat, so
+## unlike god_mode/always_max_charge it does NOT disable scoring.
+const ULTRA_MODE_SCORE_MULT: float = 1.5
+## Ultra Mode combat bonuses.
+const ULTRA_MODE_BOSS_DAMAGE_MULT: float = 3.0
 
 var score: int = 0
 var lives: int = STARTING_LIVES
@@ -56,7 +65,16 @@ var is_game_over: bool = false
 var boss_rush_mode: bool = false
 ## Unlocked permanently the first time the player reaches the win screen —
 ## a reward for finishing the campaign rather than day-one-available.
+## Not granted if cheats were used this run (see WinScreen._ready()).
 var boss_rush_unlocked: bool = false
+## Unlocked permanently by clearing Boss Rush (also blocked by cheats).
+## A hidden main-menu toggle appears only once this is true.
+var ultra_mode_unlocked: bool = false
+## Session-only toggle (not persisted, like god_mode_enabled) — rainbow
+## aftereffect, instant-kill on basic enemies, 3x boss damage, and a
+## score bonus. Deliberately NOT part of is_scoring_disabled(): it's an
+## earned reward, not a cheat, so score still counts while it's on.
+var ultra_mode_enabled: bool = false
 var next_life_score_goal: int = SCORE_GOAL_INTERVAL
 
 func _ready() -> void:
@@ -70,10 +88,12 @@ func reset() -> void:
 	level = 1
 	current_weapon_index = 0
 	boss_rush_mode = false
-	# god_mode_enabled / always_max_charge_enabled are intentionally NOT reset
-	# here — they're now toggleable from the main menu before a run even
-	# starts, so clearing them on start_game() would silently undo the
-	# player's choice. is_scoring_disabled() covers the score-zeroing side.
+	# god_mode_enabled / always_max_charge_enabled / ultra_mode_enabled are
+	# intentionally NOT reset here — they're all toggleable from the main
+	# menu before a run even starts, so clearing them on start_game() would
+	# silently undo the player's choice. is_scoring_disabled() covers the
+	# score-zeroing side for the first two; Ultra Mode deliberately isn't
+	# included there since it's an earned reward, not a cheat.
 	cheats_used = false
 	is_game_over = false
 	next_life_score_goal = get_life_goal_interval()
@@ -99,7 +119,10 @@ func add_score(points: int) -> void:
 		score_changed.emit(0)
 		return
 
-	score += points
+	var mult: float = get_score_multiplier()
+	if ultra_mode_enabled:
+		mult *= ULTRA_MODE_SCORE_MULT
+	score += int(points * mult)
 	if score > high_score:
 		high_score = score
 		_save()
@@ -139,8 +162,17 @@ func unlock_boss_rush() -> void:
 	boss_rush_unlocked = true
 	_save()
 
+func unlock_ultra_mode() -> void:
+	if ultra_mode_unlocked:
+		return
+	ultra_mode_unlocked = true
+	_save()
+
 func get_difficulty_multiplier() -> float:
 	return DIFFICULTY_MULTIPLIERS[difficulty]
+
+func get_score_multiplier() -> float:
+	return SCORE_MULTIPLIERS[difficulty]
 
 func get_respawn_grace_multiplier() -> float:
 	return RESPAWN_GRACE_MULTIPLIERS[difficulty]
@@ -190,6 +222,7 @@ func _save() -> void:
 	cfg.set_value("data", "high_score", high_score)
 	cfg.set_value("data", "difficulty", difficulty)
 	cfg.set_value("data", "boss_rush_unlocked", boss_rush_unlocked)
+	cfg.set_value("data", "ultra_mode_unlocked", ultra_mode_unlocked)
 	cfg.save("user://save.cfg")
 
 func _load_save() -> void:
@@ -198,3 +231,4 @@ func _load_save() -> void:
 		high_score = cfg.get_value("data", "high_score", 0)
 		difficulty = clampi(cfg.get_value("data", "difficulty", Difficulty.NORMAL), Difficulty.EASY, Difficulty.HARD)
 		boss_rush_unlocked = cfg.get_value("data", "boss_rush_unlocked", false)
+		ultra_mode_unlocked = cfg.get_value("data", "ultra_mode_unlocked", false)

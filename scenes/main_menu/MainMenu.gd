@@ -3,6 +3,7 @@ extends Control
 
 @onready var _start_btn: Button = $Center/VBox/StartButton
 @onready var _boss_rush_btn: Button = $Center/VBox/BossRushButton
+@onready var _ultra_mode_btn: Button = $Center/VBox/UltraModeButton
 @onready var _quit_btn: Button = $Center/VBox/QuitButton
 @onready var _hi_score_label: Label = $Center/VBox/HiScoreLabel
 @onready var _star_container: Node2D = $StarContainer
@@ -36,6 +37,7 @@ func _ready() -> void:
 	_version_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	_version_label.gui_input.connect(_on_version_label_input)
 	_setup_boss_rush_button()
+	_setup_ultra_mode_button()
 	_setup_difficulty_buttons()
 	_setup_cheat_buttons()
 	_generate_stars()
@@ -75,6 +77,30 @@ func _setup_boss_rush_button() -> void:
 		_boss_rush_btn.text = "🔒 BOSS RUSH (BEAT THE GAME)"
 		_boss_rush_btn.disabled = true
 		_boss_rush_btn.modulate = Color(1, 1, 1, 0.55)
+
+## Ultra Mode is unlocked by clearing Boss Rush — a hidden toggle that
+## doesn't even appear on the menu until earned, unlike Boss Rush's
+## visible-but-locked treatment.
+func _setup_ultra_mode_button() -> void:
+	_ultra_mode_btn.visible = GameState.ultra_mode_unlocked
+	if not GameState.ultra_mode_unlocked:
+		return
+	_ultra_mode_btn.pressed.connect(_on_ultra_mode_pressed)
+	_update_ultra_mode_btn_text()
+
+func _on_ultra_mode_pressed() -> void:
+	GameState.ultra_mode_enabled = !GameState.ultra_mode_enabled
+	_update_ultra_mode_btn_text()
+	if GameState.ultra_mode_enabled:
+		AudioManager.play_full_charge_ready_sfx()
+
+func _update_ultra_mode_btn_text() -> void:
+	if GameState.ultra_mode_enabled:
+		_ultra_mode_btn.text = "🌈 ULTRA MODE: ON"
+		_ultra_mode_btn.modulate = Color(1.0, 0.9, 0.3)
+	else:
+		_ultra_mode_btn.text = "🌈 ULTRA MODE: OFF"
+		_ultra_mode_btn.modulate = Color.WHITE
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()

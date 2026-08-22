@@ -86,6 +86,8 @@ func _shoot() -> void:
 func take_damage(amount: int) -> void:
 	if _is_dead or global_position.x > get_viewport_rect().size.x:
 		return
+	if GameState.ultra_mode_enabled:
+		amount = max_health
 	current_health = max(0, current_health - amount)
 	if current_health > 0 and _sprite and is_inside_tree():
 		var tween := create_tween()
