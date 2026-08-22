@@ -37,6 +37,12 @@ var _sprite: Sprite2D
 var _entry_start_x: float = 2100.0
 var _base_sprite_scale: Vector2 = Vector2.ONE
 
+## Sprite scale/alpha while flying in — a small, dim, ghostly wisp rather
+## than a smooth continuous fade (which read as barely-there/too-subtle-to-
+## notice). Snaps to full size/opacity/solidity at arrival instead.
+const ENTRY_SCALE_MULT: float = 0.4
+const ENTRY_ALPHA: float = 0.35
+
 func _ready() -> void:
 	current_health = max_health
 	_sprite = $Visual/Sprite2D
@@ -47,9 +53,16 @@ func _ready() -> void:
 	global_position.y = 540.0
 	add_to_group("bosses")
 
+	# Intangible while entering — no landscape/player/bullet collisions at
+	# all, so shots visibly sail straight through instead of being silently
+	# absorbed by a boss that can't take damage yet.
+	collision_layer = 0
+	$HurtBox.collision_layer = 0
+	$HurtBox.monitoring = false
+
 	if _sprite:
-		_sprite.modulate = Color(boss_color.r, boss_color.g, boss_color.b, 0.0)
-		_sprite.scale = _base_sprite_scale * 0.3
+		_sprite.modulate = Color(boss_color.r, boss_color.g, boss_color.b, ENTRY_ALPHA)
+		_sprite.scale = _base_sprite_scale * ENTRY_SCALE_MULT
 
 func _physics_process(delta: float) -> void:
 	if _is_dead:
@@ -124,12 +137,14 @@ func _do_entry(delta: float) -> void:
 	velocity.x = -entry_speed
 	move_and_slide()
 
-	# Materialize while flying in: fade + scale up from a small ghostly wisp.
-	var t: float = clamp((_entry_start_x - global_position.x) / (_entry_start_x - _arena_x), 0.0, 1.0)
+	# Small, dim, ghostly wisp for the whole flight — a gentle pulse so it
+	# doesn't read as static/broken — then snaps to full size/opacity/
+	# solidity at arrival, rather than a continuous fade that was too
+	# subtle to notice.
 	if _sprite:
-		_sprite.modulate = Color(boss_color.r, boss_color.g, boss_color.b, ease(t, 0.5))
-		_sprite.scale = _base_sprite_scale * lerpf(0.3, 1.0, ease(t, 0.4))
-		_sprite.rotation = lerpf(0.6, 0.0, t)
+		var pulse: float = ENTRY_ALPHA + 0.10 * sin(_time * 4.0)
+		_sprite.modulate = Color(boss_color.r, boss_color.g, boss_color.b, pulse)
+		_sprite.scale = _base_sprite_scale * ENTRY_SCALE_MULT
 
 	if global_position.x <= _arena_x:
 		global_position.x = _arena_x
@@ -140,6 +155,9 @@ func _do_entry(delta: float) -> void:
 			_sprite.modulate = boss_color
 			_sprite.scale = _base_sprite_scale
 			_sprite.rotation = 0.0
+		collision_layer = 32
+		$HurtBox.collision_layer = 32
+		$HurtBox.monitoring = true
 		_spawn_arrival_burst()
 		entrance_complete.emit()
 
