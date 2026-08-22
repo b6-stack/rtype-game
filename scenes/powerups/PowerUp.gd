@@ -1,7 +1,8 @@
 class_name PowerUp
 extends Area2D
 ## PowerUp — floating item pickup. Supports weapons (0..9), Life Core (+1 HP),
-## and Super Invincibility Shield (6s force-field).
+## and Super Invincibility Shield (duration scales with difficulty — see
+## GameState.get_shield_duration()).
 
 var powerup_type: String = "weapon" # "weapon", "life", "shield"
 var weapon_index: int = 0
@@ -106,7 +107,7 @@ func _collect() -> void:
 			var players: Array = tree.get_nodes_in_group("player")
 			for p in players:
 				if is_instance_valid(p) and p.has_method("grant_invincibility"):
-					p.grant_invincibility(6.0)
+					p.grant_invincibility(GameState.get_shield_duration())
 	else:
 		GameState.set_weapon(weapon_index)
 
@@ -124,7 +125,7 @@ func _spawn_collect_fx() -> void:
 			if powerup_type == "life":
 				fx.setup_custom(global_position, "1-UP (+1 LIFE)", Color(0.2, 1.0, 0.4))
 			elif powerup_type == "shield":
-				fx.setup_custom(global_position, "INVINCIBLE (6s)", Color(0.2, 0.8, 1.0))
+				fx.setup_custom(global_position, "INVINCIBLE (%ds)" % int(GameState.get_shield_duration()), Color(0.2, 0.8, 1.0))
 			else:
 				fx.setup(global_position, weapon_index)
 		elif fx.has_method("setup"):

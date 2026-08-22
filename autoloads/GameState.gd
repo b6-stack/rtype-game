@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "1.6.4"
+const APP_VERSION := "1.7.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -31,6 +31,14 @@ const DIFFICULTY_MULTIPLIERS: Array[float] = [0.75, 1.0, 1.3]
 ## Respawn invincibility duration scale — lower difficulties get more grace
 ## to recover and reposition before enemies can threaten them again.
 const RESPAWN_GRACE_MULTIPLIERS: Array[float] = [1.6, 1.2, 1.0]
+## Extra-life score threshold scale. Easy stays at the flat base interval;
+## Normal/Hard require proportionally more score per 1-UP, matching the
+## "harder difficulty = tougher rewards too" pattern used elsewhere.
+const LIFE_GOAL_MULTIPLIERS: Array[float] = [1.0, 1.3, 1.6]
+## Base duration for the shield powerup / 1-UP bonus shield, before the
+## difficulty grace multiplier (same scale as respawn invincibility) is
+## applied — see get_shield_duration().
+const SHIELD_BASE_DURATION: float = 10.0
 
 var score: int = 0
 var lives: int = STARTING_LIVES
@@ -68,7 +76,7 @@ func reset() -> void:
 	# player's choice. is_scoring_disabled() covers the score-zeroing side.
 	cheats_used = false
 	is_game_over = false
-	next_life_score_goal = SCORE_GOAL_INTERVAL
+	next_life_score_goal = get_life_goal_interval()
 	score_changed.emit(score)
 	lives_changed.emit(lives)
 	weapon_changed.emit(current_weapon_index)
@@ -100,7 +108,7 @@ func add_score(points: int) -> void:
 	while score >= next_life_score_goal:
 		gain_life()
 		life_awarded.emit(lives)
-		next_life_score_goal += SCORE_GOAL_INTERVAL
+		next_life_score_goal += get_life_goal_interval()
 
 	score_goal_updated.emit(score, next_life_score_goal)
 
@@ -136,6 +144,15 @@ func get_difficulty_multiplier() -> float:
 
 func get_respawn_grace_multiplier() -> float:
 	return RESPAWN_GRACE_MULTIPLIERS[difficulty]
+
+func get_life_goal_interval() -> int:
+	return int(SCORE_GOAL_INTERVAL * LIFE_GOAL_MULTIPLIERS[difficulty])
+
+## Shared by the shield powerup pickup and the free bonus shield granted
+## on a score-based 1-UP, so both always match and both scale with
+## difficulty (same grace curve as respawn invincibility).
+func get_shield_duration() -> float:
+	return SHIELD_BASE_DURATION * get_respawn_grace_multiplier()
 
 func advance_level() -> void:
 	level += 1

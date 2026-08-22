@@ -75,7 +75,7 @@ func _refresh_score() -> void:
 
 func _update_goal_bar(current: int, goal: int) -> void:
 	if _life_goal_bar and _life_goal_label:
-		var prev_goal: int = max(0, goal - GameState.SCORE_GOAL_INTERVAL)
+		var prev_goal: int = max(0, goal - GameState.get_life_goal_interval())
 		var progress: float = 0.0
 		if goal > prev_goal:
 			progress = float(current - prev_goal) / float(goal - prev_goal)

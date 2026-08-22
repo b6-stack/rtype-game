@@ -95,6 +95,8 @@ func _ready() -> void:
 
 	# Connect GameState weapon changes
 	GameState.weapon_changed.connect(_on_weapon_changed)
+	# Free bonus shield alongside every score-based 1-UP
+	GameState.life_awarded.connect(_on_life_awarded)
 
 	# Equip starting weapon
 	_equip_weapon(GameState.current_weapon_index)
@@ -271,6 +273,11 @@ func _respawn_safe() -> void:
 func grant_invincibility(duration: float = 6.0) -> void:
 	_is_invincible = true
 	_invincibility_timer = max(_invincibility_timer, duration)
+
+## Free shield bonus on every score-based 1-UP — same duration as the
+## shield powerup (GameState.get_shield_duration), scaled to difficulty.
+func _on_life_awarded(_new_lives: int) -> void:
+	grant_invincibility(GameState.get_shield_duration())
 
 func _clear_enemy_bullets_screen() -> void:
 	var tree := get_tree()
