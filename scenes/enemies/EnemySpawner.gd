@@ -73,6 +73,11 @@ const SPRITE_MANTA := preload("res://assets/sprites/enemy_manta_flyer.png")
 const SPRITE_CRYSTAL := preload("res://assets/sprites/enemy_crystal_sentinel.png")
 
 func _on_enemy_spawn_requested(pos: Vector2, enemy_type_id: int) -> void:
+	# Defense in depth: Boss Rush must never have regular enemies, no matter
+	# how this signal ended up firing (LevelGenerator already suppresses
+	# spawn generation during boss_rush_mode — this is the hard backstop).
+	if GameState.boss_rush_mode:
+		return
 	if enemy_parent == null:
 		return
 	if enemy_parent.get_child_count() >= MAX_ENEMIES:
