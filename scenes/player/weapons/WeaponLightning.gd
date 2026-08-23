@@ -11,7 +11,7 @@ func _do_fire(spawn_pos: Vector2) -> void:
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var bolt_count: int = 3 if charge_level < 0.6 else (4 if charge_level < 1.0 else 5)
 	var raw_dmg: float = damage * lerpf(1.6, 2.7, charge_level)
-	var zap_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level)))
+	var zap_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level) * get_charge_damage_scale()))
 	var zap_size: float = lerpf(1.2, 2.0, charge_level)
 	var chains: int = 3 if charge_level < 1.0 else 8
 

@@ -10,5 +10,5 @@ bullet_color = Color(1, 0, 1, 1)
 fire_rate = 8.0
 bullet_speed = 900.0
 damage = 2
-charge_time = 2.6
+charge_time = 1.6
 description = "High-frequency magenta laser stream."

@@ -17,6 +17,23 @@ var bullet_color: Color = Color.CYAN
 var bullet_speed: float = 800.0
 var damage: int = 10
 var weapon_index: int = 0
+## How long a full charge takes (seconds) — previously only read directly
+## from the resource file by Player.gd for the charge-bar fill rate, not
+## exposed here, so a weapon's own _do_charge_fire() had no way to scale
+## its payoff against its own commitment time. Dynamic per weapon (faster
+## fire_rate = shorter charge = smaller payoff, and vice versa) — see
+## WeaponData.tres files and get_charge_damage_scale() below.
+var charge_time: float = 3.0
+
+## Reference point charge_time (Wave's) that charge damage formulas are
+## tuned around — a weapon charging faster than baseline scales its charge
+## damage down proportionally (you get to use it more often), and a
+## weapon charging slower scales it up (you waited longer, it should hit
+## harder). Multiply into charge_fire damage formulas via this.
+const BASELINE_CHARGE_TIME: float = 2.8
+
+func get_charge_damage_scale() -> float:
+	return charge_time / BASELINE_CHARGE_TIME
 
 ## Preloaded bullet scene — shared across all weapons
 const BulletScene: PackedScene = preload("res://scenes/player/weapons/Bullet.tscn")
@@ -134,3 +151,4 @@ func init_from_data(data: WeaponData) -> void:
 	bullet_color  = data.bullet_color
 	bullet_speed  = data.bullet_speed
 	damage        = data.damage
+	charge_time   = data.charge_time

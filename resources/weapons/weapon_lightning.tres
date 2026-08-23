@@ -10,5 +10,5 @@ bullet_color = Color(1, 1, 1, 1)
 fire_rate = 2.5
 bullet_speed = 850.0
 damage = 8
-charge_time = 2.8
+charge_time = 2.9
 description = "Chain lightning arcs between enemies."

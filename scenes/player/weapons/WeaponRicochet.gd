@@ -13,7 +13,7 @@ func _do_fire(spawn_pos: Vector2) -> void:
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var bomb_count: int = 2 if charge_level < 0.6 else (3 if charge_level < 1.0 else 4)
 	var raw_dmg: float = damage * lerpf(1.5, 2.5, charge_level)
-	var cluster_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level)))
+	var cluster_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level) * get_charge_damage_scale()))
 	var cluster_size: float = lerpf(1.2, 1.9, charge_level)
 	var shard_count: int = 3 if charge_level < 1.0 else 4
 

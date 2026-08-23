@@ -155,13 +155,10 @@ func _physics_process(delta: float) -> void:
 			hud.set_charge(1.0)
 			hud.show_charge_bar(true)
 	elif _is_charging:
-		var weapon_charge_time := CHARGE_TIME
-		if _current_weapon:
-			var data_path: String = WEAPON_DATA_PATHS[GameState.current_weapon_index] \
-					if GameState.current_weapon_index < WEAPON_DATA_PATHS.size() else ""
-			if ResourceLoader.exists(data_path):
-				var data: WeaponData = load(data_path)
-				weapon_charge_time = data.charge_time
+		# Dynamic per weapon (WeaponBase.charge_time, populated from its
+		# WeaponData resource) rather than re-loading the resource file off
+		# disk every frame just to read one field.
+		var weapon_charge_time: float = _current_weapon.charge_time if _current_weapon else CHARGE_TIME
 		_charge_level = min(_charge_level + delta / weapon_charge_time, 1.0)
 		if hud:
 			hud.set_charge(_charge_level)

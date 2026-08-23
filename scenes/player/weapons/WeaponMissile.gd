@@ -32,7 +32,7 @@ func _do_fire(spawn_pos: Vector2) -> void:
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var count: int = 3 if charge_level < 0.6 else (4 if charge_level < 1.0 else 6)
 	var raw_dmg: float = damage * lerpf(1.5, 2.2, charge_level)
-	var missile_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level)))
+	var missile_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level) * get_charge_damage_scale()))
 	var missile_size: float = lerpf(1.2, 1.8, charge_level)
 
 	var angles: Array = [-35.0, -15.0, 15.0, 35.0, -50.0, 50.0]

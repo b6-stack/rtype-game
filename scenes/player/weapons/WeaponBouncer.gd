@@ -13,7 +13,7 @@ func _do_fire(spawn_pos: Vector2) -> void:
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var count: int = 3 if charge_level < 0.6 else (5 if charge_level < 1.0 else 7)
 	var raw_dmg: float = damage * lerpf(1.4, 2.4, charge_level)
-	var bouncer_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level)))
+	var bouncer_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level) * get_charge_damage_scale()))
 	var bouncer_size: float = lerpf(1.1, 1.9, charge_level)
 	var bouncer_col: Color = bullet_color.lightened(0.25 if charge_level < 1.0 else 0.7)
 
