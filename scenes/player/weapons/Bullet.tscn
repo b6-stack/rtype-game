@@ -1,15 +1,27 @@
-[gd_scene load_steps=3 format=3 uid="uid://rtype_bullet"]
+[gd_scene load_steps=4 format=3 uid="uid://rtype_bullet"]
 
 [ext_resource type="Script" path="res://scenes/player/weapons/Bullet.gd" id="1_bullet"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1"]
 radius = 4.0
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_shotdestroy"]
+radius = 24.0
+
 [node name="Bullet" type="Area2D"]
 script = ExtResource("1_bullet")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_1")
+
+[node name="ShotDestroyArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 8
+monitoring = false
+monitorable = false
+
+[node name="ShotDestroyShape" type="CollisionShape2D" parent="ShotDestroyArea"]
+shape = SubResource("CircleShape2D_shotdestroy")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 visible = false
@@ -25,3 +37,4 @@ color = Color(1, 1, 1, 0.95)
 
 [connection signal="area_entered" from="." to="." method="_on_area_entered"]
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="area_entered" from="ShotDestroyArea" to="." method="_on_shot_destroy_area_entered"]

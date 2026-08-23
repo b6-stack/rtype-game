@@ -19,6 +19,7 @@ var _lifetime: float = 0.0
 @onready var _sprite: Sprite2D = $Sprite2D
 @onready var _poly: Polygon2D = $Polygon2D
 @onready var _glow_core: Polygon2D = $GlowCore
+@onready var _shot_destroy_area: Area2D = $ShotDestroyArea
 
 const SPRITE_PLASMA := preload("res://assets/sprites/bullet_plasma_orb.png")
 const SPRITE_MISSILE := preload("res://assets/sprites/bullet_missile_rocket.png")
@@ -79,6 +80,7 @@ func setup(vel: Vector2, col: Color, dmg: int,
 	if _poly == null: _poly = $Polygon2D
 	if _glow_core == null: _glow_core = $GlowCore
 	if _sprite == null: _sprite = $Sprite2D
+	if _shot_destroy_area == null: _shot_destroy_area = $ShotDestroyArea
 
 	# The size-based plasma fallback is only for weapons that don't specify
 	# their own archetype shape (sprite_type == ""). An explicit archetype
@@ -131,9 +133,15 @@ func setup(vel: Vector2, col: Color, dmg: int,
 	else:
 		collision_layer = 4    # layer 3 (bit 2) = player bullet
 		collision_mask  = 16 | 32 | 1 # layer 5 (enemies) + layer 6 (bosses) + layer 1 (landscape terrain)
-		if destroys_shots:
-			collision_mask |= 8 # + layer 4 (enemy bullets), only when this shot can destroy them
 		add_to_group("player_bullet")
+
+	# ShotDestroyArea is a separate, much larger Area2D used only to detect
+	# enemy shots — kept apart from the small precise hitbox above because
+	# Godot applies collision_mask per-node, not per-shape, so we can't just
+	# add a bigger shape to the main Area2D without also loosening hits on
+	# enemies/bosses.
+	if _shot_destroy_area:
+		_shot_destroy_area.monitoring = destroys_shots and not enemy
 
 func _physics_process(delta: float) -> void:
 	global_position += velocity * delta
@@ -153,6 +161,13 @@ func _physics_process(delta: float) -> void:
 
 func _on_area_entered(area: Area2D) -> void:
 	_handle_collision(area)
+
+func _on_shot_destroy_area_entered(area: Area2D) -> void:
+	if not is_instance_valid(area):
+		return
+	if area is Bullet and area.is_enemy_bullet and not area.is_queued_for_deletion():
+		area.queue_free()
+		hit_target.emit(area.global_position)
 
 func _on_body_entered(body: Node2D) -> void:
 	if body is StaticBody2D or body.name == "StaticBody2D" or (body.collision_layer & 1) != 0:
@@ -193,14 +208,9 @@ func _handle_collision(target: Node) -> void:
 			hit_target.emit(global_position)
 			queue_free()
 	else:
-		# Shoot down an enemy shot (Laser's beam, or any weapon's Super Charge).
-		if destroys_enemy_bullets and target is Bullet and target.is_enemy_bullet:
-			target.queue_free()
-			hit_target.emit(global_position)
-			if pierce_count > 0:
-				pierce_count -= 1
-			else:
-				queue_free()
+		# Enemy-shot destruction is handled by the larger, separate ShotDestroyArea
+		# (see _on_shot_destroy_area_entered) so it doesn't need needlepoint accuracy.
+		if target is Bullet and target.is_enemy_bullet:
 			return
 
 		# If striking an active force-field or shield barrier, let the shield deflect/absorb
