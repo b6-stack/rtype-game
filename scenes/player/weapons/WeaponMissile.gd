@@ -4,7 +4,7 @@ extends WeaponBase
 ## Super Charge: 6-Missile Macross Swarm Salvo.
 
 var _active_missiles: Array = []
-const MAX_ACTIVE_PRIMARY_MISSILES: int = 2
+const MAX_ACTIVE_PRIMARY_MISSILES: int = 1
 
 func can_fire() -> bool:
 	_cleanup_active_missiles()
@@ -30,16 +30,25 @@ func _do_fire(spawn_pos: Vector2) -> void:
 		_attach_homing(b, 0.25)
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
-	var count: int = 3 if charge_level < 0.6 else (4 if charge_level < 1.0 else 6)
 	var raw_dmg: float = damage * lerpf(1.5, 2.2, charge_level)
 	var missile_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level) * get_charge_damage_scale()))
 	var missile_size: float = lerpf(1.2, 1.8, charge_level)
 
+	if charge_level < 1.0:
+		# Partial charge: one faster, harder-hitting missile — not a spread,
+		# so a quick tap-charge can't approximate the full 6-missile salvo.
+		var speed_mult: float = lerpf(1.3, 1.75, charge_level)
+		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * (bullet_speed * speed_mult),
+				bullet_color.lightened(0.25), missile_dmg, missile_size, "missile")
+		if b:
+			_attach_homing(b, 0.3)
+		return
+
+	# Full charge only: 6-Missile Macross Swarm Salvo.
 	var angles: Array = [-35.0, -15.0, 15.0, 35.0, -50.0, 50.0]
-	for i in count:
-		var angle: float = float(angles[i % angles.size()])
+	for angle in angles:
 		var vel: Vector2 = Vector2.RIGHT.rotated(deg_to_rad(angle)) * (bullet_speed * 1.1)
-		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.25 if charge_level < 1.0 else 0.6), missile_dmg, missile_size, "missile", 0, charge_level >= 1.0)
+		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.6), missile_dmg, missile_size, "missile", 0, true)
 		if b:
 			_attach_homing(b, 0.35)
 
@@ -54,18 +63,21 @@ const MISS_DETONATE_TIME: float = 1.6
 ## missile is still homing frees this WeaponMissile node (see
 ## Player.set_weapon), which would otherwise silently break the timer
 ## closure and leave the missile homing forever with no miss-detonation.
+##
+## Miss-detonation uses its own dedicated one-shot Timer instead of
+## manually accumulating elapsed time inside the repeating steering
+## timer's closure — a local variable captured by a lambda connected to
+## Timer.timeout does NOT reliably persist its mutations across separate
+## invocations in GDScript, so an `elapsed += ...` pattern there silently
+## never advances past 0 and the detonate threshold is never reached.
+## A real Timer node's own internal countdown doesn't have that problem.
 func _attach_homing(b: Bullet, turn_rate: float = 0.25) -> void:
 	var steer_timer := Timer.new()
 	steer_timer.wait_time = 0.04
 	steer_timer.autostart = true
 	b.add_child(steer_timer)
-	var elapsed: float = 0.0
 	steer_timer.timeout.connect(func():
 		if not is_instance_valid(b) or b.is_queued_for_deletion():
-			return
-		elapsed += steer_timer.wait_time
-		if elapsed >= MISS_DETONATE_TIME:
-			WeaponMissile._detonate_missed_missile(b)
 			return
 		var tree := b.get_tree()
 		if tree == null:
@@ -87,6 +99,15 @@ func _attach_homing(b: Bullet, turn_rate: float = 0.25) -> void:
 			var desired: Vector2 = (closest.global_position - b.global_position).normalized() * b.velocity.length()
 			b.velocity = b.velocity.lerp(desired, turn_rate)
 			b.rotation = b.velocity.angle()
+	)
+
+	var detonate_timer := Timer.new()
+	detonate_timer.wait_time = MISS_DETONATE_TIME
+	detonate_timer.one_shot = true
+	detonate_timer.autostart = true
+	b.add_child(detonate_timer)
+	detonate_timer.timeout.connect(func():
+		WeaponMissile._detonate_missed_missile(b)
 	)
 
 ## A missile that ran out its miss window explodes in place — small splash
