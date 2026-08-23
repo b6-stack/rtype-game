@@ -28,5 +28,6 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 		drill_dmg,
 		drill_size,
 		"drill",
-		pierces
+		pierces,
+		charge_level >= 1.0
 	)

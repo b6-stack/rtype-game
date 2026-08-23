@@ -10,6 +10,8 @@ var damage: int = 5
 var is_enemy_bullet: bool = false
 var bullet_type: String = "generic"
 var pierce_count: int = 0
+## Some weapons/Super Charges can shoot down enemy shots — see setup().
+var destroys_enemy_bullets: bool = false
 
 const MAX_LIFETIME: float = 4.0
 var _lifetime: float = 0.0
@@ -65,12 +67,14 @@ func _ready() -> void:
 	pass
 
 func setup(vel: Vector2, col: Color, dmg: int,
-		size_mult: float = 1.0, enemy: bool = false, sprite_type: String = "", pierces: int = 0) -> void:
+		size_mult: float = 1.0, enemy: bool = false, sprite_type: String = "", pierces: int = 0,
+		destroys_shots: bool = false) -> void:
 	velocity = vel
 	damage = dmg
 	is_enemy_bullet = enemy
 	bullet_type = sprite_type if sprite_type != "" else ("generic" if enemy else "vulcan")
 	pierce_count = pierces
+	destroys_enemy_bullets = destroys_shots
 
 	if _poly == null: _poly = $Polygon2D
 	if _glow_core == null: _glow_core = $GlowCore
@@ -127,6 +131,8 @@ func setup(vel: Vector2, col: Color, dmg: int,
 	else:
 		collision_layer = 4    # layer 3 (bit 2) = player bullet
 		collision_mask  = 16 | 32 | 1 # layer 5 (enemies) + layer 6 (bosses) + layer 1 (landscape terrain)
+		if destroys_shots:
+			collision_mask |= 8 # + layer 4 (enemy bullets), only when this shot can destroy them
 		add_to_group("player_bullet")
 
 func _physics_process(delta: float) -> void:
@@ -187,6 +193,16 @@ func _handle_collision(target: Node) -> void:
 			hit_target.emit(global_position)
 			queue_free()
 	else:
+		# Shoot down an enemy shot (Laser's beam, or any weapon's Super Charge).
+		if destroys_enemy_bullets and target is Bullet and target.is_enemy_bullet:
+			target.queue_free()
+			hit_target.emit(global_position)
+			if pierce_count > 0:
+				pierce_count -= 1
+			else:
+				queue_free()
+			return
+
 		# If striking an active force-field or shield barrier, let the shield deflect/absorb
 		if target.is_in_group("boss_shield") or target.is_in_group("enemy_shield"):
 			return

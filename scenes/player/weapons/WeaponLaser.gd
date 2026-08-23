@@ -1,6 +1,7 @@
 class_name WeaponLaser
 extends WeaponBase
 ## WeaponLaser — concentrated piercing high-velocity beam.
+## Cuts down enemy shots on contact (its own beam, not just the Super Charge).
 ## Super Charge: Hyper Mega-Beam — 5 parallel piercing laser beams across a wide column.
 
 func _do_fire(spawn_pos: Vector2) -> void:
@@ -11,7 +12,8 @@ func _do_fire(spawn_pos: Vector2) -> void:
 		damage,
 		0.85,
 		"laser",
-		1
+		1,
+		true
 	)
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
@@ -32,5 +34,6 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 			beam_damage,
 			beam_size,
 			"laser",
-			pierces
+			pierces,
+			true
 		)

@@ -28,5 +28,7 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 		bullet_size,
 		count,
 		spread_angle,
-		"vulcan"
+		"vulcan",
+		0,
+		charge_level >= 1.0
 	)

@@ -19,7 +19,7 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	for i in bolt_count:
 		var angle: float = float(angles[i % angles.size()])
 		var vel: Vector2 = Vector2.RIGHT.rotated(deg_to_rad(angle)) * (bullet_speed * 1.3)
-		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.4 if charge_level < 1.0 else 0.85), zap_dmg, zap_size, "lightning", 1)
+		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.4 if charge_level < 1.0 else 0.85), zap_dmg, zap_size, "lightning", 1, charge_level >= 1.0)
 		if b:
 			_chain_electric(b, chains)
 

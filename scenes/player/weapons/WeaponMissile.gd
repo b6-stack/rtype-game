@@ -39,17 +39,28 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	for i in count:
 		var angle: float = float(angles[i % angles.size()])
 		var vel: Vector2 = Vector2.RIGHT.rotated(deg_to_rad(angle)) * (bullet_speed * 1.1)
-		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.25 if charge_level < 1.0 else 0.6), missile_dmg, missile_size, "missile")
+		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.25 if charge_level < 1.0 else 0.6), missile_dmg, missile_size, "missile", 0, charge_level >= 1.0)
 		if b:
 			_attach_homing(b, 0.35)
+
+## Miss-detonation window: a missile that hasn't hit anything within this
+## long self-destructs instead of drifting off-screen — otherwise a miss
+## (no target found, or it flew past one) ties up one of only
+## MAX_ACTIVE_PRIMARY_MISSILES concurrent slots for up to Bullet.MAX_LIFETIME.
+const MISS_DETONATE_TIME: float = 1.6
 
 func _attach_homing(b: Bullet, turn_rate: float = 0.25) -> void:
 	var steer_timer := Timer.new()
 	steer_timer.wait_time = 0.04
 	steer_timer.autostart = true
 	b.add_child(steer_timer)
+	var elapsed: float = 0.0
 	steer_timer.timeout.connect(func():
 		if not is_instance_valid(b) or b.is_queued_for_deletion():
+			return
+		elapsed += steer_timer.wait_time
+		if elapsed >= MISS_DETONATE_TIME:
+			_detonate_missed_missile(b)
 			return
 		var tree := get_tree()
 		if tree == null:
@@ -72,3 +83,24 @@ func _attach_homing(b: Bullet, turn_rate: float = 0.25) -> void:
 			b.velocity = b.velocity.lerp(desired, turn_rate)
 			b.rotation = b.velocity.angle()
 	)
+
+## A missile that ran out its miss window explodes in place — small splash
+## damage so it isn't a total waste, then frees its slot immediately
+## rather than drifting for up to Bullet.MAX_LIFETIME (4s).
+func _detonate_missed_missile(b: Bullet) -> void:
+	if not is_instance_valid(b):
+		return
+	var pos: Vector2 = b.global_position
+	var tree := get_tree()
+	if tree:
+		for t in tree.get_nodes_in_group("enemies"):
+			if is_instance_valid(t) and t is Node2D and not t.is_queued_for_deletion():
+				if (t as Node2D).global_position.distance_to(pos) <= 70.0 and t.has_method("take_damage"):
+					t.take_damage(max(1, int(b.damage * 0.5)))
+	var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
+	var parent_node: Node = b.get_parent()
+	if parent_node:
+		parent_node.call_deferred("add_child", fx)
+		if fx.has_method("setup"):
+			fx.setup(pos, Color(1.0, 0.5, 0.0), 0.7)
+	b.queue_free()

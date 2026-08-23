@@ -20,7 +20,7 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var angles: Array = [-45.0, -30.0, -15.0, 0.0, 15.0, 30.0, 45.0]
 	for i in count:
 		var a: float = float(angles[i % angles.size()])
-		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT.rotated(deg_to_rad(a)) * bullet_speed, bouncer_col, bouncer_dmg, bouncer_size, "bouncer")
+		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT.rotated(deg_to_rad(a)) * bullet_speed, bouncer_col, bouncer_dmg, bouncer_size, "bouncer", 0, charge_level >= 1.0)
 		if b: _attach_bounce(b)
 
 func _attach_bounce(b: Bullet) -> void:

@@ -28,5 +28,6 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 		giant_damage,
 		giant_size,
 		"plasma",
-		pierces
+		pierces,
+		charge_level >= 1.0
 	)

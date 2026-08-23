@@ -16,7 +16,7 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var pull: float = lerpf(160.0, 360.0, charge_level)
 	var pierces: int = 2 if charge_level < 1.0 else 6
 
-	var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed * 0.65, bullet_color.lightened(0.4 if charge_level < 1.0 else 0.8), gravity_dmg, vortex_size, "gravity", pierces)
+	var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * bullet_speed * 0.65, bullet_color.lightened(0.4 if charge_level < 1.0 else 0.8), gravity_dmg, vortex_size, "gravity", pierces, charge_level >= 1.0)
 	if b:
 		_attach_vortex(b, radius, pull)
 

@@ -65,6 +65,13 @@ const SPAWN_GRACE_TIME: float = 2.0
 const SPAWN_GRACE_MAX_X: float = 380.0
 var _spawn_grace_timer: float = SPAWN_GRACE_TIME
 
+## Minimum gap after releasing ANY charge shot (even a barely-charged one)
+## before charging can start again — without this, rapidly tapping in
+## short bursts fires a stream of boosted partial-charge shots faster
+## than normal auto-fire, trivializing the "commit and wait" tradeoff.
+const CHARGE_COOLDOWN: float = 0.35
+var _charge_cooldown_timer: float = 0.0
+
 # ── State ──────────────────────────────────────────────────────
 var _current_weapon: WeaponBase = null
 var _target_pos: Vector2 = Vector2(280.0, 540.0)
@@ -112,6 +119,9 @@ func _physics_process(delta: float) -> void:
 		var hue: float = fmod(Time.get_ticks_msec() * 0.0006, 1.0)
 		_ultra_aura_ring.color = Color.from_hsv(hue, 0.85, 1.0, 0.45)
 		_ultra_aura_ring.rotation += delta * 2.0
+
+	if _charge_cooldown_timer > 0.0:
+		_charge_cooldown_timer -= delta
 
 	# Smooth movement toward touch/mouse position
 	global_position = global_position.lerp(_target_pos, MOVE_SMOOTH * delta)
@@ -207,6 +217,11 @@ func _on_move_input(viewport_pos: Vector2) -> void:
 func _on_charge_start() -> void:
 	if _is_dead:
 		return
+	# Still on cooldown from the last charge shot — ignore this press (the
+	# player just gets normal auto-fire instead) rather than letting rapid
+	# short taps spam boosted partial-charge shots faster than auto-fire.
+	if _charge_cooldown_timer > 0.0:
+		return
 	_is_charging = true
 	_charge_level = 0.0
 	_auto_fire = false
@@ -222,6 +237,7 @@ func _on_charge_end() -> void:
 	_auto_fire = true
 	if _current_weapon and _charge_level > 0.08:
 		_current_weapon.charge_fire(_muzzle.global_position, _charge_level)
+		_charge_cooldown_timer = CHARGE_COOLDOWN * lerpf(0.6, 1.0, _charge_level)
 	_charge_level = 0.0
 	if hud:
 		hud.show_charge_bar(false)

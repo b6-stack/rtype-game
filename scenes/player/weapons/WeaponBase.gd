@@ -73,15 +73,16 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 		_spawn_bullet(spawn_pos, Vector2.RIGHT * (bullet_speed * 1.05),
 				bullet_color.lightened(0.25), dmg, size_m)
 	else:
-		# Full Super Charge
+		# Full Super Charge — shoots down enemy shots too
 		var final_dmg: int = max(1, int(damage * 3.2))
 		_spawn_bullet(spawn_pos, Vector2.RIGHT * (bullet_speed * 1.15),
-				bullet_color.lightened(0.65), final_dmg, 2.6)
+				bullet_color.lightened(0.65), final_dmg, 2.6, "", 0, true)
 
 # ── Helpers ──────────────────────────────────────────────────
 
 func _spawn_bullet(pos: Vector2, velocity: Vector2,
-		col: Color, dmg: int, size_mult: float = 1.0, sprite_type: String = "", pierces: int = 0) -> Bullet:
+		col: Color, dmg: int, size_mult: float = 1.0, sprite_type: String = "", pierces: int = 0,
+		destroys_shots: bool = false) -> Bullet:
 	var container := _get_bullet_container()
 	if container == null:
 		push_warning("WeaponBase: bullet_container not set on %s" % weapon_name)
@@ -89,7 +90,7 @@ func _spawn_bullet(pos: Vector2, velocity: Vector2,
 	if GameState.ultra_mode_enabled:
 		col = Color.from_hsv(fmod(Time.get_ticks_msec() * 0.001, 1.0), 1.0, 1.0)
 	var b: Bullet = BulletScene.instantiate()
-	b.setup(velocity, col, dmg, size_mult, false, sprite_type, pierces)
+	b.setup(velocity, col, dmg, size_mult, false, sprite_type, pierces, destroys_shots)
 	b.global_position = pos
 	_safe_add_bullet.call_deferred(b, pos)
 	return b
@@ -113,16 +114,17 @@ func _get_bullet_container() -> Node:
 
 ## Spawns multiple bullets in an arc (angle_spread in degrees, count shots)
 func _spawn_spread(pos: Vector2, velocity: Vector2, col: Color,
-		dmg: int, size_mult: float, count: int, angle_spread: float, sprite_type: String = "", pierces: int = 0) -> void:
+		dmg: int, size_mult: float, count: int, angle_spread: float, sprite_type: String = "", pierces: int = 0,
+		destroys_shots: bool = false) -> void:
 	if count <= 1:
-		_spawn_bullet(pos, velocity, col, dmg, size_mult, sprite_type, pierces)
+		_spawn_bullet(pos, velocity, col, dmg, size_mult, sprite_type, pierces, destroys_shots)
 		return
 	var half := angle_spread * 0.5
 	var step := angle_spread / float(count - 1)
 	for i in count:
 		var angle_deg := -half + step * i
 		var rotated := velocity.rotated(deg_to_rad(angle_deg))
-		_spawn_bullet(pos, rotated, col, dmg, size_mult, sprite_type, pierces)
+		_spawn_bullet(pos, rotated, col, dmg, size_mult, sprite_type, pierces, destroys_shots)
 
 ## Initialise this weapon from a WeaponData resource
 func init_from_data(data: WeaponData) -> void:

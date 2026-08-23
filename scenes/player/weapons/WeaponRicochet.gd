@@ -20,7 +20,7 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var angles: Array = [-24.0, 24.0, -8.0, 8.0]
 	for i in bomb_count:
 		var angle: float = float(angles[i % angles.size()])
-		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT.rotated(deg_to_rad(angle)) * bullet_speed, bullet_color.lightened(0.3 if charge_level < 1.0 else 0.7), cluster_dmg, cluster_size, "ricochet")
+		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT.rotated(deg_to_rad(angle)) * bullet_speed, bullet_color.lightened(0.3 if charge_level < 1.0 else 0.7), cluster_dmg, cluster_size, "ricochet", 0, charge_level >= 1.0)
 		if b:
 			b.hit_target.connect(func(pos: Vector2):
 				_spawn_spread(pos, Vector2.RIGHT * bullet_speed * 0.8, bullet_color.lightened(0.4), max(1, int(damage * 0.75 * get_charge_tier_multiplier(charge_level))), 0.9, shard_count, 70.0, "ricochet")
