@@ -18,8 +18,15 @@ const LOOK_AHEAD_CHUNKS: int = 4    # how many chunks ahead to keep ready
 ## Difficulty scaling per level above 1 (level 1 = baseline density).
 const DENSITY_BONUS_PER_LEVEL: float = 0.4  # extra enemies per chunk per level
 const SPAWN_CHANCE_PER_LEVEL: float = 0.025 # extra spawn-roll chance per level
-const DENSITY_MULTIPLIER: int = 2           # overall density multiplier (2x enemy count per chunk)
-const MAX_ENEMIES_PER_CHUNK: int = 10        # segment_w = CHUNK_WIDTH / count must stay >= 60 for spawn spacing math
+## Overall density multiplier — was a flat 2x for every difficulty, which
+## meant Easy/Normal got just as packed as Hard at high levels (no dodgeable
+## gap left, 1-hit death making it feel like a cheap wall of fire). Now
+## scaled per difficulty so Hard keeps its full intensity while Easy/Normal
+## leave more room to actually maneuver.
+const DENSITY_MULTIPLIER_BY_DIFFICULTY: Array[float] = [1.3, 1.6, 2.0]  # Easy, Normal, Hard
+## Same reasoning — a shared hard cap of 10 let Easy/Normal chunks fill
+## edge-to-edge just like Hard once density_bonus stacked up at high levels.
+const MAX_ENEMIES_PER_CHUNK_BY_DIFFICULTY: Array[int] = [6, 8, 10]  # Easy, Normal, Hard
 const MAX_SPAWN_CHANCE: float = 0.95
 
 # Corridor state (Y values of corridor edges)
@@ -199,8 +206,10 @@ func _generate_spawn_data(chunk_world_x: float) -> Array:
 	enemy_count += density_bonus
 	spawn_chance = minf(MAX_SPAWN_CHANCE, spawn_chance * diff_mult + float(level - 1) * SPAWN_CHANCE_PER_LEVEL * diff_mult)
 
-	# Overall density multiplier (doubles how many enemies pack into each chunk).
-	enemy_count = mini(enemy_count * DENSITY_MULTIPLIER, MAX_ENEMIES_PER_CHUNK)
+	# Overall density multiplier — scaled per difficulty (see consts above).
+	var density_mult: float = DENSITY_MULTIPLIER_BY_DIFFICULTY[GameState.difficulty]
+	var max_per_chunk: int = MAX_ENEMIES_PER_CHUNK_BY_DIFFICULTY[GameState.difficulty]
+	enemy_count = mini(int(enemy_count * density_mult), max_per_chunk)
 
 	for i in range(enemy_count):
 		if _rng.randf() < spawn_chance:
