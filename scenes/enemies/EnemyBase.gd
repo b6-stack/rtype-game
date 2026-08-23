@@ -187,3 +187,14 @@ func get_player_direction() -> Vector2:
 	if player_ref and is_instance_valid(player_ref):
 		return (player_ref.global_position - global_position).normalized()
 	return Vector2.LEFT
+
+## On Easy/Normal, enemies that actively chase the player (Kamikaze, Stalker,
+## Zigzag, Diver) give up pursuit once they reach the left quarter of the
+## screen and just fly off-screen for despawn instead — being relentlessly
+## chased right up against the left edge read as unfair/annoying there.
+## Hard keeps full persistence.
+func _should_disengage() -> bool:
+	if GameState.difficulty == GameState.Difficulty.HARD:
+		return false
+	var screen_width: float = get_viewport_rect().size.x
+	return global_position.x < screen_width * 0.25

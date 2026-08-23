@@ -30,6 +30,9 @@ func _ready() -> void:
 
 
 func _move(delta: float) -> void:
+	if _state == State.APPROACH and _should_disengage():
+		_state = State.FLEE
+
 	match _state:
 		State.APPROACH:
 			velocity.x = -move_speed

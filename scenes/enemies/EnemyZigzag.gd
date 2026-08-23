@@ -21,6 +21,9 @@ func _ready() -> void:
 
 
 func _move(delta: float) -> void:
+	if _should_disengage():
+		velocity = Vector2.LEFT * move_speed * 1.5
+		return
 	_dir_timer -= delta
 	if _dir_timer <= 0.0:
 		_pick_new_direction()

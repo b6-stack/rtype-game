@@ -16,6 +16,9 @@ func _ready() -> void:
 	super._ready()
 
 func _move(_delta: float) -> void:
+	if _should_disengage():
+		velocity = Vector2(-move_speed * 1.8, 0.0)
+		return
 	if player_ref and is_instance_valid(player_ref):
 		velocity = get_player_direction() * move_speed * 1.8
 	else:

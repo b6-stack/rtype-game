@@ -22,6 +22,9 @@ func _ready() -> void:
 
 
 func _move(delta: float) -> void:
+	if _should_disengage():
+		velocity = Vector2(-move_speed * 1.5, 0.0)
+		return
 	velocity.x = -move_speed * 0.5
 	velocity.y = 0.0
 	if player_ref:
