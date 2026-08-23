@@ -7,7 +7,18 @@ var sfx_volume: float = 1.0
 var music_muted: bool = false
 var sfx_muted: bool = false
 
-var _music_player: AudioStreamPlayer
+## Music uses two alternating players instead of reassigning .stream on a
+## single one. AudioStreamPlayer.stop() only queues a command for the audio
+## mixer thread — it does not synchronously guarantee that thread has
+## released the old buffer before the next line runs. Reassigning .stream
+## on the player that may still be mid-callback on the native audio thread
+## is a use-after-free race (matches an observed SIGSEGV inside
+## AudioTrackCallback::onMoreData that persisted even after adding .stop()
+## calls). Swapping to the OTHER player — which has been idle since the
+## previous track change — sidesteps the race entirely.
+var _music_player_a: AudioStreamPlayer
+var _music_player_b: AudioStreamPlayer
+var _active_music_player: AudioStreamPlayer
 var _sfx_pool: Array[AudioStreamPlayer] = []
 const _POOL_SIZE: int = 16
 
@@ -69,9 +80,13 @@ const BOSS_THEMES: Array[Dictionary] = [
 ]
 
 func _ready() -> void:
-	_music_player = AudioStreamPlayer.new()
-	_music_player.bus = &"Master"
-	add_child(_music_player)
+	_music_player_a = AudioStreamPlayer.new()
+	_music_player_a.bus = &"Master"
+	add_child(_music_player_a)
+	_music_player_b = AudioStreamPlayer.new()
+	_music_player_b.bus = &"Master"
+	add_child(_music_player_b)
+	_active_music_player = _music_player_a
 
 	for i in _POOL_SIZE:
 		var p := AudioStreamPlayer.new()
@@ -86,38 +101,24 @@ func _ready() -> void:
 func play_level_music(level_num: int) -> void:
 	if music_muted:
 		return
-	if _current_level_music == level_num and not _is_boss_music and _music_player.playing:
+	if _current_level_music == level_num and not _is_boss_music and _active_music_player.playing:
 		return
 	_current_level_music = level_num
 	_is_boss_music = false
 	var stream: AudioStreamWAV = _get_or_create_level_track(level_num)
 	if stream:
-		# Stop before reassigning .stream — swapping the buffer reference
-		# while the audio mixer thread is still actively reading from the
-		# previous one is a plausible native-crash pattern on this device
-		# (SIGSEGV inside AudioTrack's mixer callback has been observed).
-		_music_player.stop()
-		_music_player.stream = stream
-		_music_player.volume_db = _vol_db(music_volume, music_muted)
-		_music_player.play()
+		_switch_music_track(stream)
 
 func play_boss_music(boss_index: int = 0) -> void:
 	if music_muted:
 		return
-	if _is_boss_music and _current_boss_music_index == boss_index and _music_player.playing:
+	if _is_boss_music and _current_boss_music_index == boss_index and _active_music_player.playing:
 		return
 	_is_boss_music = true
 	_current_boss_music_index = boss_index
 	var stream: AudioStreamWAV = _get_or_create_boss_track(boss_index)
 	if stream:
-		# Stop before reassigning .stream — swapping the buffer reference
-		# while the audio mixer thread is still actively reading from the
-		# previous one is a plausible native-crash pattern on this device
-		# (SIGSEGV inside AudioTrack's mixer callback has been observed).
-		_music_player.stop()
-		_music_player.stream = stream
-		_music_player.volume_db = _vol_db(music_volume, music_muted)
-		_music_player.play()
+		_switch_music_track(stream)
 
 ## Main menu theme — a fuller, multi-layered piece (chord progression +
 ## arpeggio + a repeating melodic hook + sub-bass + percussion) rather
@@ -130,14 +131,7 @@ func play_menu_music() -> void:
 		return
 	var stream: AudioStreamWAV = _get_or_create_menu_theme_track()
 	if stream:
-		# Stop before reassigning .stream — swapping the buffer reference
-		# while the audio mixer thread is still actively reading from the
-		# previous one is a plausible native-crash pattern on this device
-		# (SIGSEGV inside AudioTrack's mixer callback has been observed).
-		_music_player.stop()
-		_music_player.stream = stream
-		_music_player.volume_db = _vol_db(music_volume, music_muted)
-		_music_player.play()
+		_switch_music_track(stream)
 
 ## Triumphant looping fanfare for the win screen.
 func play_victory_music() -> void:
@@ -147,37 +141,40 @@ func play_victory_music() -> void:
 		return
 	var stream: AudioStreamWAV = _get_or_create_victory_track()
 	if stream:
-		# Stop before reassigning .stream — swapping the buffer reference
-		# while the audio mixer thread is still actively reading from the
-		# previous one is a plausible native-crash pattern on this device
-		# (SIGSEGV inside AudioTrack's mixer callback has been observed).
-		_music_player.stop()
-		_music_player.stream = stream
-		_music_player.volume_db = _vol_db(music_volume, music_muted)
-		_music_player.play()
+		_switch_music_track(stream)
 
 func play_music(stream: AudioStream, loop: bool = true) -> void:
 	if stream == null:
 		return
-	_music_player.stop()
-	_music_player.stream = stream
-	_music_player.volume_db = _vol_db(music_volume, music_muted)
-	_music_player.play()
+	_switch_music_track(stream)
 
 func stop_music() -> void:
-	_music_player.stop()
+	_active_music_player.stop()
 	_current_level_music = -1
 	_is_boss_music = false
 
+## Switches to the given track on whichever player is currently idle (the
+## other one), then stops the previously-active player. Never reassigns
+## .stream on a player that might still be mid-callback on the native audio
+## thread — see the comment on _music_player_a/b above.
+func _switch_music_track(stream: AudioStream) -> void:
+	var next_player: AudioStreamPlayer = _music_player_b if _active_music_player == _music_player_a else _music_player_a
+	var prev_player: AudioStreamPlayer = _active_music_player
+	next_player.stream = stream
+	next_player.volume_db = _vol_db(music_volume, music_muted)
+	next_player.play()
+	_active_music_player = next_player
+	prev_player.stop()
+
 func set_music_volume(vol: float) -> void:
 	music_volume = clamp(vol, 0.0, 1.0)
-	if _music_player:
-		_music_player.volume_db = _vol_db(music_volume, music_muted)
+	if _active_music_player:
+		_active_music_player.volume_db = _vol_db(music_volume, music_muted)
 
 func toggle_music_mute() -> void:
 	music_muted = !music_muted
-	if _music_player:
-		_music_player.volume_db = _vol_db(music_volume, music_muted)
+	if _active_music_player:
+		_active_music_player.volume_db = _vol_db(music_volume, music_muted)
 
 # ── High-Level SFX API ─────────────────────────────────────────
 
@@ -214,11 +211,14 @@ func play_sfx(stream: AudioStream) -> void:
 	if stream == null or sfx_muted:
 		return
 	var player := _get_free_sfx_player()
-	# _get_free_sfx_player() falls back to reusing a still-playing pool
-	# player once all _POOL_SIZE slots are busy (e.g. a chaotic boss fight
-	# with lots of enemies dying at once) — stop it first so its .stream
-	# isn't swapped out from under the audio mixer thread mid-playback.
-	player.stop()
+	if player == null:
+		# All _POOL_SIZE slots are busy (e.g. a chaotic boss fight with lots
+		# of enemies dying at once). Drop the sound rather than force-reusing
+		# a still-playing player — reassigning .stream on one that may still
+		# be mid-callback on the native audio thread is a use-after-free
+		# race (matches an observed SIGSEGV inside
+		# AudioTrackCallback::onMoreData).
+		return
 	player.stream = stream
 	player.volume_db = _vol_db(sfx_volume, sfx_muted)
 	player.play()
@@ -523,7 +523,7 @@ func _get_free_sfx_player() -> AudioStreamPlayer:
 	for p in _sfx_pool:
 		if not p.playing:
 			return p
-	return _sfx_pool[0]
+	return null
 
 func _vol_db(vol: float, muted: bool) -> float:
 	if muted or vol <= 0.0:
