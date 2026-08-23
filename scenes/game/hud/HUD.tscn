@@ -65,10 +65,10 @@ theme_override_constants/separation = 6
 
 [node name="LevelLabel" type="Label" parent="Control"]
 layout_mode = 1
-anchor_left = 0.5
+anchor_left = 0.0
 anchor_right = 0.5
-offset_left = -80.0
-offset_right = 80.0
+offset_left = 420.0
+offset_right = -50.0
 offset_top = 8.0
 offset_bottom = 44.0
 text = "BLUE CAVE"
@@ -99,19 +99,19 @@ offset_right = 220.0
 offset_bottom = -48.0
 theme_override_constants/separation = 8
 
-[node name="WeaponIcon" type="TextureRect" parent="Control/WeaponRow"]
-custom_minimum_size = Vector2(32, 32)
-layout_mode = 2
-size_flags_vertical = 4
-expand_mode = 1
-stretch_mode = 5
-
 [node name="WeaponLabel" type="Label" parent="Control/WeaponRow"]
 layout_mode = 2
 size_flags_vertical = 4
 text = "VULCAN"
 theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.2, 1.0, 0.8, 1)
+
+[node name="WeaponIcon" type="TextureRect" parent="Control/WeaponRow"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
 
 [node name="ChargeBar" type="ProgressBar" parent="Control"]
 layout_mode = 1
