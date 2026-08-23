@@ -138,7 +138,7 @@ func _build_ultra_weapon_row() -> void:
 
 	for i in WEAPON_NAMES.size():
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(120, 56)
+		btn.custom_minimum_size = Vector2(148, 56)
 		btn.text = WEAPON_NAMES[i]
 		btn.add_theme_font_size_override("font_size", 12)
 		var icon_path := WEAPON_ICON_PATHS[i] if i < WEAPON_ICON_PATHS.size() else ""

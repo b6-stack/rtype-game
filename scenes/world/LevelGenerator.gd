@@ -207,10 +207,30 @@ func _generate_spawn_data(chunk_world_x: float) -> Array:
 			var segment_w: float = CHUNK_WIDTH / float(enemy_count)
 			var x: float = segment_w * i + _rng.randf_range(30.0, segment_w - 30.0)
 			var y: float = _rng.randf_range(_corridor_top + 45.0, _corridor_bottom - 45.0)
-			var eid: int = enemy_pool[_rng.randi() % enemy_pool.size()]
+			var eid: int = _pick_enemy_type(enemy_pool)
 			spawns.append({"type": "enemy", "pos": Vector2(x, y), "id": eid})
 
 	return spawns
+
+## Turret, Bomber, Spreader, Shield, Splitter, Charger, Tanker, Overseer —
+## the higher-HP archetypes that take noticeably more hits to kill.
+const TANKY_ENEMY_IDS: Array[int] = [4, 5, 6, 8, 13, 14, 15, 19]
+## On Easy/Normal, a tanky pick this often gets rerolled to a non-tanky type
+## from the same pool — cuts down how much of the screen is tanky enemies
+## without removing the archetype entirely. Hard keeps full density.
+const TANKY_REROLL_CHANCE: float = 0.65
+
+func _pick_enemy_type(pool: Array[int]) -> int:
+	var eid: int = pool[_rng.randi() % pool.size()]
+	if GameState.difficulty == GameState.Difficulty.HARD or eid not in TANKY_ENEMY_IDS:
+		return eid
+	if _rng.randf() >= TANKY_REROLL_CHANCE:
+		return eid
+	var non_tanky: Array[int] = []
+	for id in pool:
+		if id not in TANKY_ENEMY_IDS:
+			non_tanky.append(id)
+	return non_tanky[_rng.randi() % non_tanky.size()] if non_tanky.size() > 0 else eid
 
 func _get_enemy_pool_for_level(level: int) -> Array[int]:
 	## Returns which enemy type IDs are valid for the given level.
