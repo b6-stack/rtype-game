@@ -66,14 +66,26 @@ func _process(delta: float) -> void:
 			_version_holding = false
 			GameState.test_unlock_boss_rush()
 			_setup_boss_rush_button()
-			AudioManager.play_full_charge_ready_sfx()
+			_flash_unlock_feedback(_version_label)
 	if _title_holding and not GameState.is_ultra_mode_available():
 		_title_hold_elapsed += delta
 		if _title_hold_elapsed >= TITLE_HOLD_UNLOCK_TIME:
 			_title_holding = false
 			GameState.test_unlock_ultra_mode()
 			_setup_ultra_mode_button()
-			AudioManager.play_full_charge_ready_sfx()
+			_flash_unlock_feedback(_title_label)
+
+## Purely visual unlock feedback — a brief white flash-and-return on the
+## held label. Deliberately NOT playing an SFX here: every crash report
+## for this trick has coincided with the SFX firing at this exact moment
+## while the looping menu music was mid-playback (shrinking the music
+## loop didn't stop it recurring), so this drops the extra simultaneous
+## audio playback entirely as the next isolation step.
+func _flash_unlock_feedback(label: Label) -> void:
+	var original: Color = label.modulate
+	var tw := create_tween()
+	tw.tween_property(label, "modulate", Color(2.0, 2.0, 2.0), 0.1)
+	tw.tween_property(label, "modulate", original, 0.3)
 
 func _on_start_pressed() -> void:
 	GameState.start_game()
