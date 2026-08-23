@@ -9,7 +9,8 @@ extends CanvasLayer
 @onready var _charge_bar: ProgressBar = $Control/ChargeBar
 @onready var _charge_label: Label = $Control/ChargeBar/ChargeLabel
 @onready var _pause_btn: Button = $Control/PauseButton
-@onready var _weapon_label: Label = $Control/WeaponLabel
+@onready var _weapon_label: Label = $Control/WeaponRow/WeaponLabel
+@onready var _weapon_icon_rect: TextureRect = $Control/WeaponRow/WeaponIcon
 @onready var _level_label: Label = $Control/LevelLabel
 
 signal pause_requested
@@ -104,32 +105,23 @@ const WEAPON_ICON_PATHS: Array[String] = [
 	"res://assets/sprites/weapons/icon_lightning.png",
 ]
 
-var _weapon_icon_rect: TextureRect
-
 func _refresh_weapon() -> void:
 	const NAMES := ["VULCAN","LASER","PLASMA","MISSILE","WAVE",
 					"BOUNCER","DRILL","RICOCHET","GRAVITY","LIGHTNING"]
 	var idx := GameState.current_weapon_index
 	if _weapon_label:
-		_weapon_label.text = "WPN: %s" % (NAMES[idx] if idx < NAMES.size() else "?")
-		
-		# Add or update TextureRect icon badge next to weapon label
-		if _weapon_icon_rect == null or not is_instance_valid(_weapon_icon_rect):
-			_weapon_icon_rect = TextureRect.new()
-			_weapon_icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			_weapon_icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			_weapon_icon_rect.custom_minimum_size = Vector2(40, 40)
-			_weapon_icon_rect.size = Vector2(40, 40)
-			_weapon_icon_rect.position = Vector2(270.0, -8.0)
-			_weapon_label.add_child(_weapon_icon_rect)
-			
+		_weapon_label.text = NAMES[idx] if idx < NAMES.size() else "?"
+	if _weapon_icon_rect:
 		var path := WEAPON_ICON_PATHS[idx] if idx < WEAPON_ICON_PATHS.size() else ""
 		if ResourceLoader.exists(path):
 			_weapon_icon_rect.texture = load(path)
-			_weapon_icon_rect.visible = true
 
 func _refresh_level() -> void:
-	_level_label.text = "LVL %d" % GameState.level
+	var idx: int = GameState.level - 1
+	if idx >= 0 and idx < GameState.LEVEL_NAMES.size():
+		_level_label.text = GameState.LEVEL_NAMES[idx].to_upper()
+	else:
+		_level_label.text = "LVL %d" % GameState.level
 
 func _start_charge_ready_pulse() -> void:
 	_stop_charge_pulse()

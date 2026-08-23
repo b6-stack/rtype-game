@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "2.2.4"
+const APP_VERSION := "2.3.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -23,6 +23,14 @@ const MAX_LIVES: int = 5
 const STARTING_LIVES: int = 3
 const TOTAL_LEVELS: int = 10
 const SCORE_GOAL_INTERVAL: int = 5000
+
+## Level biome names (index 0 = level 1) — same names already used as
+## comments in LevelGenerator.LEVEL_COLORS / AudioManager.LEVEL_THEMES,
+## exposed as real data here so the HUD can display them.
+const LEVEL_NAMES: Array[String] = [
+	"Blue Cave", "Red Cavern", "Green Base", "Brown Fortress", "Purple Alien",
+	"Teal Station", "Crimson Core", "Gold Final", "Cosmic Void", "Solar Core",
+]
 
 enum Difficulty { EASY, NORMAL, HARD }
 const DIFFICULTY_NAMES: Array[String] = ["EASY", "NORMAL", "HARD"]
@@ -153,6 +161,9 @@ func add_score(points: int) -> void:
 func lose_life() -> void:
 	lives = max(0, lives - 1)
 	lives_changed.emit(lives)
+	# Dying (whether it costs the run or just a respawn) resets the weapon
+	# back to Vulcan — losing your upgrade is part of the cost of a hit.
+	set_weapon(0)
 	if lives <= 0:
 		is_game_over = true
 		game_over.emit()
