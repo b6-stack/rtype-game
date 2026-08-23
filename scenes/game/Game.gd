@@ -43,6 +43,7 @@ func _ready() -> void:
 	_enemy_spawner.bullet_container = _enemy_bullets
 	_enemy_spawner.player_ref     = _player
 	_enemy_spawner.powerup_spawner = _powerup_spawner
+	_enemy_spawner.level_generator = _level_gen
 
 	_boss_manager.boss_parent     = _bosses_node
 	_boss_manager.bullet_container = _enemy_bullets

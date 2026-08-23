@@ -56,6 +56,7 @@ var enemy_parent: Node = null
 var bullet_container: Node = null
 var player_ref: Node = null
 var powerup_spawner: PowerUpSpawner = null
+var level_generator: LevelGenerator = null
 
 ## Max enemies alive at once (performance cap)
 const MAX_ENEMIES: int = 45
@@ -101,6 +102,7 @@ func _on_enemy_spawn_requested(pos: Vector2, enemy_type_id: int) -> void:
 
 	enemy.bullet_container = bullet_container
 	enemy.player_ref = player_ref
+	enemy.level_generator = level_generator
 	enemy.add_to_group("enemies")
 
 	enemy_parent.add_child(enemy)

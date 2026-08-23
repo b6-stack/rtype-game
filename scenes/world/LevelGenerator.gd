@@ -28,6 +28,10 @@ const DENSITY_MULTIPLIER_BY_DIFFICULTY: Array[float] = [1.3, 1.6, 2.0]  # Easy, 
 ## edge-to-edge just like Hard once density_bonus stacked up at high levels.
 const MAX_ENEMIES_PER_CHUNK_BY_DIFFICULTY: Array[int] = [6, 8, 10]  # Easy, Normal, Hard
 const MAX_SPAWN_CHANCE: float = 0.95
+## Minimum gap kept between an enemy's spawn Y and the corridor walls, so
+## the player isn't forced to thread the needle against a wall just to
+## reach an enemy that spawned pressed right up against it.
+const SPAWN_WALL_MARGIN: float = 60.0
 
 # Corridor state (Y values of corridor edges)
 var _corridor_top: float = 200.0
@@ -146,6 +150,23 @@ func _spawn_next_chunk_at(spawn_x: float) -> void:
 	var wall_col: Color = LEVEL_COLORS[level_col_idx]
 	chunk.build(_corridor_top, _corridor_bottom, new_top, new_bot, wall_col, scroll_speed, _rng, GameState.level)
 
+	# Boss trigger check MUST run before generating this chunk's own spawn
+	# data — otherwise the very chunk that triggers the boss could still
+	# queue an enemy spawn (deferred to end of frame) moments before
+	# is_boss_active flips true, producing an errant enemy right after
+	# BossManager already cleared the screen for the fight.
+	#
+	# Gated on real elapsed time as well as chunk count, since the initial
+	# look-ahead batch spawns several chunks in one frame and would
+	# otherwise let a small countdown (like Boss Rush's) hit zero before
+	# the player has even seen the level start.
+	if not is_boss_active:
+		if _chunks_until_boss > 0:
+			_chunks_until_boss -= 1
+		if _chunks_until_boss <= 0 and _level_elapsed_time >= MIN_TIME_BEFORE_BOSS:
+			_chunks_until_boss = BOSS_RUSH_CHUNKS_UNTIL_BOSS if GameState.boss_rush_mode else _boss_chunk_interval
+			boss_trigger_reached.emit(GameState.level)
+
 	# Generate spawn data for this chunk (if not fighting boss)
 	if not is_boss_active:
 		var spawns: Array = _generate_spawn_data(chunk_parent.global_position.x)
@@ -161,17 +182,6 @@ func _spawn_next_chunk_at(spawn_x: float) -> void:
 	_corridor_top = new_top
 	_corridor_bottom = new_bot
 	_chunk_index += 1
-
-	# Boss trigger — gated on real elapsed time as well as chunk count, since
-	# the initial look-ahead batch spawns several chunks in one frame and
-	# would otherwise let a small countdown (like Boss Rush's) hit zero
-	# before the player has even seen the level start.
-	if not is_boss_active:
-		if _chunks_until_boss > 0:
-			_chunks_until_boss -= 1
-		if _chunks_until_boss <= 0 and _level_elapsed_time >= MIN_TIME_BEFORE_BOSS:
-			_chunks_until_boss = BOSS_RUSH_CHUNKS_UNTIL_BOSS if GameState.boss_rush_mode else _boss_chunk_interval
-			boss_trigger_reached.emit(GameState.level)
 
 func _generate_spawn_data(chunk_world_x: float) -> Array:
 	var spawns: Array = []
@@ -215,7 +225,7 @@ func _generate_spawn_data(chunk_world_x: float) -> Array:
 		if _rng.randf() < spawn_chance:
 			var segment_w: float = CHUNK_WIDTH / float(enemy_count)
 			var x: float = segment_w * i + _rng.randf_range(30.0, segment_w - 30.0)
-			var y: float = _rng.randf_range(_corridor_top + 45.0, _corridor_bottom - 45.0)
+			var y: float = _rng.randf_range(_corridor_top + SPAWN_WALL_MARGIN, _corridor_bottom - SPAWN_WALL_MARGIN)
 			var eid: int = _pick_enemy_type(enemy_pool)
 			spawns.append({"type": "enemy", "pos": Vector2(x, y), "id": eid})
 

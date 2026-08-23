@@ -43,6 +43,7 @@ func _spawn_minis_deferred(spawn_center: Vector2) -> void:
 		mini.enemy_color = Color(0.8, 0.8, 0.2)
 		mini.bullet_container = bullet_container
 		mini.player_ref = player_ref
+		mini.level_generator = level_generator
 		mini.add_to_group("enemies")
 		enemy_parent.add_child(mini)
 		mini.global_position = spawn_center + Vector2(0.0, offset_y)

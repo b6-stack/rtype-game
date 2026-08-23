@@ -24,6 +24,16 @@ var bullet_container: Node = null
 ## Reference to player — injected by EnemySpawner
 var player_ref: Node = null
 
+## Reference to the level generator — injected by EnemySpawner. Used to
+## despawn enemies that end up too close to (or inside) the corridor
+## walls — the corridor shifts chunk to chunk, so an enemy's spawn Y can
+## drift into what's now wall territory as it scrolls left. Left alone,
+## it would sit half-embedded in the landscape, forcing the player to
+## hug the wall to reach it, and homing missiles would crash into the
+## wall chasing it instead of tracking real threats.
+var level_generator: LevelGenerator = null
+const WALL_DESPAWN_MARGIN: float = 60.0
+
 const EnemyBulletScene: PackedScene = preload("res://scenes/player/weapons/Bullet.tscn")
 
 ## Player weapons only fire rightward, so an enemy this close to (or past)
@@ -70,6 +80,13 @@ func _physics_process(delta: float) -> void:
 	# Auto-destroy shortly after scrolling off the left edge
 	if global_position.x < DESPAWN_MARGIN_X:
 		queue_free()
+		return
+
+	# Despawn if too close to (or inside) the corridor walls.
+	if level_generator:
+		var bounds: Vector2 = level_generator.get_corridor_bounds()
+		if global_position.y < bounds.x + WALL_DESPAWN_MARGIN or global_position.y > bounds.y - WALL_DESPAWN_MARGIN:
+			queue_free()
 
 # ── Override these ────────────────────────────────────────────
 
