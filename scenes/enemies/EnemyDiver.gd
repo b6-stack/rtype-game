@@ -16,8 +16,8 @@ const BURST_INTERVAL: float = 0.12
 
 
 func _ready() -> void:
-	max_health = 30
-	current_health = 30
+	max_health = 15
+	current_health = 15
 	move_speed = 200.0
 	score_value = 200
 	shoot_cooldown = 999.0  # Manual burst control

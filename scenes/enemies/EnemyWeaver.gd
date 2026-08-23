@@ -5,8 +5,8 @@ extends EnemyBase
 
 
 func _ready() -> void:
-	max_health = 25
-	current_health = 25
+	max_health = 12
+	current_health = 12
 	move_speed = 160.0
 	score_value = 150
 	shoot_cooldown = 2.2

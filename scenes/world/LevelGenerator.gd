@@ -214,13 +214,18 @@ func _generate_spawn_data(chunk_world_x: float) -> Array:
 
 func _get_enemy_pool_for_level(level: int) -> Array[int]:
 	## Returns which enemy type IDs are valid for the given level.
+	## Tankier archetypes (Turret, Bomber, Spreader, Shield, etc. — several
+	## hits to kill even with base weapon damage) felt out of place this
+	## early on Easy/Normal, so their tiers unlock one level later there.
+	## Hard keeps the original, earlier schedule.
 	var pool: Array[int] = [0, 1, 2, 7]  # Grunt, Weaver, Diver, Zigzag
-	if level >= 2: pool.append_array([3, 5, 8])       # Sniper, Turret, Bomber
-	if level >= 3: pool.append_array([4, 6, 9])       # Spreader, Shield, Stalker
-	if level >= 4: pool.append_array([10, 11, 14])    # Circler, Kamikaze, Charger
-	if level >= 5: pool.append_array([12, 13, 16])    # Cloaker, Splitter, Formation
-	if level >= 6: pool.append_array([15, 17])        # Tanker, Boomerang
-	if level >= 7: pool.append_array([18, 19])        # Leech, Overseer
+	var tier_level: int = level if GameState.difficulty == GameState.Difficulty.HARD else level - 1
+	if tier_level >= 2: pool.append_array([3, 5, 8])       # Sniper, Turret, Bomber
+	if tier_level >= 3: pool.append_array([4, 6, 9])       # Spreader, Shield, Stalker
+	if tier_level >= 4: pool.append_array([10, 11, 14])    # Circler, Kamikaze, Charger
+	if tier_level >= 5: pool.append_array([12, 13, 16])    # Cloaker, Splitter, Formation
+	if tier_level >= 6: pool.append_array([15, 17])        # Tanker, Boomerang
+	if tier_level >= 7: pool.append_array([18, 19])        # Leech, Overseer
 	return pool
 
 func get_corridor_bounds() -> Vector2:
