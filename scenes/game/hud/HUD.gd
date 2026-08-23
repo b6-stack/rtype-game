@@ -12,6 +12,7 @@ extends CanvasLayer
 @onready var _weapon_label: Label = $Control/WeaponRow/WeaponLabel
 @onready var _weapon_icon_rect: TextureRect = $Control/WeaponRow/WeaponIcon
 @onready var _level_label: Label = $Control/LevelLabel
+@onready var _ultra_weapon_row: HBoxContainer = $Control/UltraWeaponRow
 
 signal pause_requested
 
@@ -32,6 +33,7 @@ func _ready() -> void:
 	_refresh_weapon()
 	_refresh_level()
 	_update_goal_bar(GameState.score, GameState.next_life_score_goal)
+	_build_ultra_weapon_row()
 
 # ── Public API ────────────────────────────────────────────────
 
@@ -105,16 +107,59 @@ const WEAPON_ICON_PATHS: Array[String] = [
 	"res://assets/sprites/weapons/icon_lightning.png",
 ]
 
+const WEAPON_NAMES: Array[String] = ["VULCAN","LASER","PLASMA","MISSILE","WAVE",
+		"BOUNCER","DRILL","RICOCHET","GRAVITY","LIGHTNING"]
+
+var _ultra_weapon_buttons: Array[Button] = []
+
 func _refresh_weapon() -> void:
-	const NAMES := ["VULCAN","LASER","PLASMA","MISSILE","WAVE",
-					"BOUNCER","DRILL","RICOCHET","GRAVITY","LIGHTNING"]
 	var idx := GameState.current_weapon_index
 	if _weapon_label:
-		_weapon_label.text = NAMES[idx] if idx < NAMES.size() else "?"
+		_weapon_label.text = WEAPON_NAMES[idx] if idx < WEAPON_NAMES.size() else "?"
 	if _weapon_icon_rect:
 		var path := WEAPON_ICON_PATHS[idx] if idx < WEAPON_ICON_PATHS.size() else ""
 		if ResourceLoader.exists(path):
 			_weapon_icon_rect.texture = load(path)
+	_refresh_ultra_weapon_highlight()
+
+## Ultra Mode reward: a row of buttons along the bottom letting the player
+## jump straight to any weapon instead of only cycling via pickups.
+func _build_ultra_weapon_row() -> void:
+	if _ultra_weapon_row == null:
+		return
+	if not GameState.ultra_mode_enabled:
+		_ultra_weapon_row.visible = false
+		return
+
+	_ultra_weapon_row.visible = true
+	for child in _ultra_weapon_row.get_children():
+		child.queue_free()
+	_ultra_weapon_buttons.clear()
+
+	for i in WEAPON_NAMES.size():
+		var btn := Button.new()
+		btn.custom_minimum_size = Vector2(120, 56)
+		btn.text = WEAPON_NAMES[i]
+		btn.add_theme_font_size_override("font_size", 12)
+		var icon_path := WEAPON_ICON_PATHS[i] if i < WEAPON_ICON_PATHS.size() else ""
+		if ResourceLoader.exists(icon_path):
+			btn.icon = load(icon_path)
+			btn.expand_icon = true
+			btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		btn.pressed.connect(_on_ultra_weapon_button_pressed.bind(i))
+		_ultra_weapon_row.add_child(btn)
+		_ultra_weapon_buttons.append(btn)
+
+	_refresh_ultra_weapon_highlight()
+
+func _on_ultra_weapon_button_pressed(index: int) -> void:
+	GameState.set_weapon(index)
+
+func _refresh_ultra_weapon_highlight() -> void:
+	var idx := GameState.current_weapon_index
+	for i in _ultra_weapon_buttons.size():
+		_ultra_weapon_buttons[i].modulate = Color(0.4, 1.0, 0.6) if i == idx else Color.WHITE
 
 func _refresh_level() -> void:
 	var idx: int = GameState.level - 1

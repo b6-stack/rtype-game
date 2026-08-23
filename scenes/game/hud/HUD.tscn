@@ -94,9 +94,9 @@ layout_mode = 1
 offset_left = 16.0
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -84.0
+offset_top = -144.0
 offset_right = 220.0
-offset_bottom = -48.0
+offset_bottom = -108.0
 theme_override_constants/separation = 8
 
 [node name="WeaponLabel" type="Label" parent="Control/WeaponRow"]
@@ -121,8 +121,8 @@ anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = -300.0
 offset_right = 300.0
-offset_top = -60.0
-offset_bottom = -16.0
+offset_top = -120.0
+offset_bottom = -76.0
 value = 0.0
 show_percentage = false
 theme_override_colors/font_color = Color(0, 1, 1, 1)
@@ -137,3 +137,16 @@ horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(0, 0, 0, 0.9)
+
+[node name="UltraWeaponRow" type="HBoxContainer" parent="Control"]
+visible = false
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -690.0
+offset_right = 690.0
+offset_top = -64.0
+offset_bottom = -8.0
+theme_override_constants/separation = 8
