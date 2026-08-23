@@ -49,6 +49,11 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 ## MAX_ACTIVE_PRIMARY_MISSILES concurrent slots for up to Bullet.MAX_LIFETIME.
 const MISS_DETONATE_TIME: float = 1.6
 
+## Bound to the Bullet itself (not to this WeaponMissile instance) via
+## b.get_tree() and a static detonate call — switching weapons while a
+## missile is still homing frees this WeaponMissile node (see
+## Player.set_weapon), which would otherwise silently break the timer
+## closure and leave the missile homing forever with no miss-detonation.
 func _attach_homing(b: Bullet, turn_rate: float = 0.25) -> void:
 	var steer_timer := Timer.new()
 	steer_timer.wait_time = 0.04
@@ -60,9 +65,9 @@ func _attach_homing(b: Bullet, turn_rate: float = 0.25) -> void:
 			return
 		elapsed += steer_timer.wait_time
 		if elapsed >= MISS_DETONATE_TIME:
-			_detonate_missed_missile(b)
+			WeaponMissile._detonate_missed_missile(b)
 			return
-		var tree := get_tree()
+		var tree := b.get_tree()
 		if tree == null:
 			return
 		var targets: Array = []
@@ -87,7 +92,9 @@ func _attach_homing(b: Bullet, turn_rate: float = 0.25) -> void:
 ## A missile that ran out its miss window explodes in place — small splash
 ## damage so it isn't a total waste, then frees its slot immediately
 ## rather than drifting for up to Bullet.MAX_LIFETIME (4s).
-func _detonate_missed_missile(b: Bullet) -> void:
+## Static so the timer closure above never needs this WeaponMissile
+## instance to still be alive — only the Bullet itself.
+static func _detonate_missed_missile(b: Bullet) -> void:
 	if not is_instance_valid(b):
 		return
 	var pos: Vector2 = b.global_position

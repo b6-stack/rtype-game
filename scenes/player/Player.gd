@@ -204,7 +204,7 @@ func _apply_keyboard_fallback(delta: float) -> void:
 
 # ── Input signals ──────────────────────────────────────────────
 
-const FINGER_OFFSET := Vector2(140.0, 0.0)
+const FINGER_OFFSET := Vector2(200.0, 0.0)
 
 func _on_move_input(viewport_pos: Vector2) -> void:
 	var target := viewport_pos + FINGER_OFFSET
