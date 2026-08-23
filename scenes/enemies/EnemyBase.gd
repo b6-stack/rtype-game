@@ -72,6 +72,19 @@ func _physics_process(delta: float) -> void:
 	_move(delta)
 	move_and_slide()
 
+	# Hard backstop alongside the wall-proximity despawn below: if an enemy
+	# actually makes physical contact with the landscape (a stray movement
+	# pattern pushing it in, or a corridor tightening faster than the
+	# despawn margin caught), destroy it immediately rather than let it
+	# sit embedded in the wall — for its own protection as much as the
+	# player's, since a homing missile chasing it would otherwise crash
+	# into the landscape instead of tracking a real threat.
+	for i in get_slide_collision_count():
+		var collider: Object = get_slide_collision(i).get_collider()
+		if collider and (collider is StaticBody2D or (collider is CollisionObject2D and (collider.collision_layer & 1) != 0)):
+			queue_free()
+			return
+
 	_shoot_timer -= delta
 	if _shoot_timer <= 0.0 and shoot_cooldown > 0.0:
 		_shoot_timer = shoot_cooldown
