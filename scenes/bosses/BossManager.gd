@@ -59,6 +59,7 @@ func _spawn_boss(index: int) -> void:
 		return
 
 	_fight_active = true
+	_clear_regular_enemies()
 	AudioManager.play_boss_sfx()
 	AudioManager.play_boss_music(index)
 
@@ -102,6 +103,33 @@ func _spawn_boss(index: int) -> void:
 	boss_fight_started.emit(boss.boss_name, boss.max_health)
 	if hud and hud.has_method("show_boss_bar"):
 		hud.show_boss_bar(boss.boss_name, boss.max_health)
+
+## Regular enemies (and their bullets already in flight) retreat the instant
+## a boss fight begins — letting them linger alongside boss attacks was a
+## common source of cheap, hard-to-avoid hits once the player's attention
+## and dodging is committed to the boss. No score/explosion; they just
+## fade out and vanish, distinct from being killed.
+func _clear_regular_enemies() -> void:
+	var tree := get_tree()
+	if tree == null:
+		return
+	for e in tree.get_nodes_in_group("enemies"):
+		if is_instance_valid(e) and e is Node2D:
+			# Stop it dead immediately (no more moving/shooting/colliding) so
+			# it can't land one last cheap hit during the fade-out.
+			if "_is_dead" in e:
+				e._is_dead = true
+			e.collision_layer = 0
+			e.collision_mask = 0
+			var hurtbox: Area2D = e.get_node_or_null("HurtBox")
+			if hurtbox:
+				hurtbox.monitoring = false
+			var tw := e.create_tween()
+			tw.tween_property(e, "modulate:a", 0.0, 0.25)
+			tw.tween_callback(e.queue_free)
+	for b in tree.get_nodes_in_group("enemy_bullet"):
+		if is_instance_valid(b):
+			b.queue_free()
 
 func _on_boss_entrance_complete() -> void:
 	pass  # Boss is now in arena; fight logic handled by BossBase
