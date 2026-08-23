@@ -92,6 +92,11 @@ func play_level_music(level_num: int) -> void:
 	_is_boss_music = false
 	var stream: AudioStreamWAV = _get_or_create_level_track(level_num)
 	if stream:
+		# Stop before reassigning .stream — swapping the buffer reference
+		# while the audio mixer thread is still actively reading from the
+		# previous one is a plausible native-crash pattern on this device
+		# (SIGSEGV inside AudioTrack's mixer callback has been observed).
+		_music_player.stop()
 		_music_player.stream = stream
 		_music_player.volume_db = _vol_db(music_volume, music_muted)
 		_music_player.play()
@@ -105,6 +110,11 @@ func play_boss_music(boss_index: int = 0) -> void:
 	_current_boss_music_index = boss_index
 	var stream: AudioStreamWAV = _get_or_create_boss_track(boss_index)
 	if stream:
+		# Stop before reassigning .stream — swapping the buffer reference
+		# while the audio mixer thread is still actively reading from the
+		# previous one is a plausible native-crash pattern on this device
+		# (SIGSEGV inside AudioTrack's mixer callback has been observed).
+		_music_player.stop()
 		_music_player.stream = stream
 		_music_player.volume_db = _vol_db(music_volume, music_muted)
 		_music_player.play()
@@ -120,6 +130,11 @@ func play_menu_music() -> void:
 		return
 	var stream: AudioStreamWAV = _get_or_create_menu_theme_track()
 	if stream:
+		# Stop before reassigning .stream — swapping the buffer reference
+		# while the audio mixer thread is still actively reading from the
+		# previous one is a plausible native-crash pattern on this device
+		# (SIGSEGV inside AudioTrack's mixer callback has been observed).
+		_music_player.stop()
 		_music_player.stream = stream
 		_music_player.volume_db = _vol_db(music_volume, music_muted)
 		_music_player.play()
@@ -132,6 +147,11 @@ func play_victory_music() -> void:
 		return
 	var stream: AudioStreamWAV = _get_or_create_victory_track()
 	if stream:
+		# Stop before reassigning .stream — swapping the buffer reference
+		# while the audio mixer thread is still actively reading from the
+		# previous one is a plausible native-crash pattern on this device
+		# (SIGSEGV inside AudioTrack's mixer callback has been observed).
+		_music_player.stop()
 		_music_player.stream = stream
 		_music_player.volume_db = _vol_db(music_volume, music_muted)
 		_music_player.play()
@@ -139,6 +159,7 @@ func play_victory_music() -> void:
 func play_music(stream: AudioStream, loop: bool = true) -> void:
 	if stream == null:
 		return
+	_music_player.stop()
 	_music_player.stream = stream
 	_music_player.volume_db = _vol_db(music_volume, music_muted)
 	_music_player.play()
@@ -193,6 +214,11 @@ func play_sfx(stream: AudioStream) -> void:
 	if stream == null or sfx_muted:
 		return
 	var player := _get_free_sfx_player()
+	# _get_free_sfx_player() falls back to reusing a still-playing pool
+	# player once all _POOL_SIZE slots are busy (e.g. a chaotic boss fight
+	# with lots of enemies dying at once) — stop it first so its .stream
+	# isn't swapped out from under the audio mixer thread mid-playback.
+	player.stop()
 	player.stream = stream
 	player.volume_db = _vol_db(sfx_volume, sfx_muted)
 	player.play()
