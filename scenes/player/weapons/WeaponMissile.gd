@@ -98,7 +98,7 @@ static func _detonate_missed_missile(b: Bullet) -> void:
 	if not is_instance_valid(b):
 		return
 	var pos: Vector2 = b.global_position
-	var tree := get_tree()
+	var tree := b.get_tree()
 	if tree:
 		for t in tree.get_nodes_in_group("enemies"):
 			if is_instance_valid(t) and t is Node2D and not t.is_queued_for_deletion():
