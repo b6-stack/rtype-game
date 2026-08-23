@@ -59,9 +59,13 @@ func take_damage(amount: int) -> void:
 
 
 func _on_shield_hit(area: Area2D) -> void:
-	# Deflect or destroy the bullet that entered the shield
-	var bullet: Node = area.get_parent() if area.get_parent() else area
-	if "velocity" in bullet:
-		(bullet as CharacterBody2D).velocity.x = absf((bullet as CharacterBody2D).velocity.x)
-	elif bullet.has_method("queue_free"):
-		bullet.queue_free()
+	# Deflect or destroy the bullet that entered the shield. `area` is the
+	# Bullet itself (Bullet extends Area2D directly) — NOT a child needing
+	# get_parent(). The previous version called area.get_parent(), which is
+	# the shared PlayerBullets container, and queue_free()'d THAT on every
+	# shield hit — destroying every in-flight player bullet and leaving the
+	# container permanently broken for the rest of the run.
+	if area is Bullet:
+		area.velocity.x = absf(area.velocity.x)
+	elif is_instance_valid(area):
+		area.queue_free()

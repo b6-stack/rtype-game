@@ -63,10 +63,9 @@ func _drop_mine_deferred(spawn_pos: Vector2) -> void:
 	)
 
 	# Scroll mine with terrain
-	var mover := Node.new()
-	mine.add_child(mover)
-	mover.set_script(load("res://scenes/enemies/EnemyBase.gd")) # or custom timer
-	
+	var scroll_tween := mine.create_tween()
+	scroll_tween.tween_property(mine, "global_position:x", spawn_pos.x - SCROLL_SPEED * 4.0, 4.0)
+
 	var timer := Timer.new()
 	timer.wait_time = 4.0
 	timer.one_shot = true
