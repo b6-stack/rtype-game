@@ -22,7 +22,7 @@ var _claw_fire_timer: float = 0.0
 var _sweep_timer: float = 0.0
 var _sweep_bullet_accum: float = 0.0
 const SWEEP_DURATION: float = 1.8
-const SWEEP_BULLET_INTERVAL: float = 0.03
+const SWEEP_BULLET_INTERVAL: float = 0.05
 
 # ── Phase 2 – Charge + Grunts ─────────────────────────────────────────────────
 enum ChargeState { IDLE, CHARGING, RECOVERING }
@@ -129,7 +129,7 @@ func _phase2_charge_grunts(delta: float) -> void:
 				_charge_state = ChargeState.CHARGING
 				_charge_state_timer = 0.0
 		ChargeState.CHARGING:
-			velocity.x = -1200.0
+			velocity.x = -950.0
 			velocity.y = 0.0
 			if _charge_state_timer >= 0.7:
 				_charge_state = ChargeState.RECOVERING
@@ -148,9 +148,9 @@ func _phase2_charge_grunts(delta: float) -> void:
 
 	# Also fire radial during charge phase
 	_radial_timer += delta
-	if _radial_timer >= 2.0:
+	if _radial_timer >= 2.4:
 		_radial_timer = 0.0
-		_fire_radial(8, 500.0, 18, Color(1.0, 0.4, 0.1, 1.0), _time * 20.0)
+		_fire_radial(6, 500.0, 18, Color(1.0, 0.4, 0.1, 1.0), _time * 20.0)
 
 
 # ── Phase 3: All-Out ──────────────────────────────────────────────────────────
@@ -162,11 +162,11 @@ func _phase3_all_out(delta: float) -> void:
 	_claw_top.rotation_degrees = _claw_angle
 	_claw_bottom.rotation_degrees = -_claw_angle
 
-	# Rapid radial 12-shot
+	# Rapid radial shot
 	_radial_timer += delta
-	if _radial_timer >= 1.0:
+	if _radial_timer >= 1.2:
 		_radial_timer = 0.0
-		_fire_radial(12, 560.0, 20, Color(1.0, 0.2, 0.2, 1.0), _time * 30.0)
+		_fire_radial(10, 560.0, 20, Color(1.0, 0.2, 0.2, 1.0), _time * 30.0)
 
 	# Teleport every 3.5s
 	_teleport_timer += delta

@@ -57,10 +57,10 @@ func _ready() -> void:
 	_resting_modulate = boss_color.lightened(0.45)
 	# Start fully offscreen to the right, whatever the actual screen width is.
 	_entry_start_x = get_viewport_rect().size.x + 250.0
-	# Resting arena position — centered in the 45%-75% horizontal band (see
+	# Resting arena position — centered in the 58%-75% horizontal band (see
 	# the default drift in _physics_process) rather than a fixed pixel value,
 	# so it stays correct across different screen widths.
-	_arena_x = get_viewport_rect().size.x * 0.60
+	_arena_x = get_viewport_rect().size.x * 0.665
 	global_position.x = _entry_start_x
 	global_position.y = 540.0
 	add_to_group("bosses")
@@ -86,14 +86,18 @@ func _physics_process(delta: float) -> void:
 		_do_entry(delta)
 		return
 
-	# Default gentle drift within the center 45%-75% of the screen width —
-	# most bosses have their own patrol/state movement that sets velocity
-	# every frame in _phase_attack() below and simply overrides this, but a
-	# few (Abyss Gate, Dread Star, Omega's final phase, Hyperion's
-	# horizontal axis) never touched velocity at all and just sat at one
-	# spot for the whole fight. This gives those a sensible default instead.
+	# Default gentle drift within the tighter 58%-75% band of the screen
+	# width — kept closer to the right side to leave the player more of a
+	# safe zone on the left. Most bosses have their own patrol/state
+	# movement that sets velocity every frame in _phase_attack() below and
+	# simply overrides this, but a few (Abyss Gate, Dread Star, Omega's
+	# final phase, Hyperion's horizontal axis) never touched velocity at
+	# all and just sat at one spot for the whole fight — this gives those
+	# a sensible default instead. Deliberate excursions outside this band
+	# (Behemoth's ram, Omega's charge dash) still work as designed since
+	# they set velocity.x themselves afterward, overriding this default.
 	var screen_w: float = get_viewport_rect().size.x
-	velocity.x = cos(_time * 0.5) * (screen_w * 0.12)
+	velocity.x = cos(_time * 0.5) * (screen_w * 0.085)
 	velocity.y = sin(_time * 0.35) * 70.0
 
 	_phase_attack(delta)
