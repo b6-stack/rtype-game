@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "2.9.3"
+const APP_VERSION := "2.10.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -62,6 +62,19 @@ const ULTRA_MODE_SCORE_MULT: float = 1.15
 const MAX_SCORE_MULTIPLIER: float = 1.25
 ## Ultra Mode combat bonuses.
 const ULTRA_MODE_BOSS_DAMAGE_MULT: float = 3.0
+
+## Options menu settings.
+enum FireDensity { LOW, NORMAL, HIGH }
+const FIRE_DENSITY_NAMES: Array[String] = ["LOW", "NORMAL", "HIGH"]
+## Multiplier applied on top of difficulty's own fire-rate scaling — a
+## player-adjustable knob for how much enemies shoot, independent of
+## difficulty (which also affects speed/density, not just fire rate).
+const FIRE_DENSITY_MULTIPLIERS: Array[float] = [0.7, 1.0, 1.3]
+var sound_enabled: bool = true
+var enemy_fire_density: int = FireDensity.NORMAL
+## Defaults to false (off) — losing your weapon on death is the existing,
+## established behavior; this is an opt-in convenience, not a rules change.
+var keep_weapon_on_death: bool = false
 
 var score: int = 0
 var lives: int = STARTING_LIVES
@@ -174,8 +187,10 @@ func lose_life() -> void:
 	lives = max(0, lives - 1)
 	lives_changed.emit(lives)
 	# Dying (whether it costs the run or just a respawn) resets the weapon
-	# back to Vulcan — losing your upgrade is part of the cost of a hit.
-	set_weapon(0)
+	# back to Vulcan — losing your upgrade is part of the cost of a hit —
+	# unless the player opted into keeping it via the Options menu.
+	if not keep_weapon_on_death:
+		set_weapon(0)
 	if lives <= 0:
 		is_game_over = true
 		game_over.emit()
@@ -200,6 +215,26 @@ func set_difficulty(new_difficulty: int) -> void:
 	difficulty = clampi(new_difficulty, Difficulty.EASY, Difficulty.HARD)
 	_save()
 	difficulty_changed.emit(difficulty)
+
+# ── Options menu ──────────────────────────────────────────────
+
+func set_sound_enabled(enabled: bool) -> void:
+	sound_enabled = enabled
+	AudioManager.music_muted = not enabled
+	AudioManager.sfx_muted = not enabled
+	AudioManager.set_music_volume(AudioManager.music_volume)  # refresh currently-playing volume
+	_save()
+
+func set_enemy_fire_density(density: int) -> void:
+	enemy_fire_density = clampi(density, FireDensity.LOW, FireDensity.HIGH)
+	_save()
+
+func get_fire_density_multiplier() -> float:
+	return FIRE_DENSITY_MULTIPLIERS[enemy_fire_density]
+
+func set_keep_weapon_on_death(keep: bool) -> void:
+	keep_weapon_on_death = keep
+	_save()
 
 func unlock_boss_rush() -> void:
 	if boss_rush_unlocked:
@@ -318,6 +353,9 @@ func _save() -> void:
 	cfg.set_value("data", "difficulty", difficulty)
 	cfg.set_value("data", "boss_rush_unlocked", boss_rush_unlocked)
 	cfg.set_value("data", "ultra_mode_unlocked", ultra_mode_unlocked)
+	cfg.set_value("data", "sound_enabled", sound_enabled)
+	cfg.set_value("data", "enemy_fire_density", enemy_fire_density)
+	cfg.set_value("data", "keep_weapon_on_death", keep_weapon_on_death)
 	cfg.save("user://save.cfg")
 
 func _load_save() -> void:
@@ -328,3 +366,6 @@ func _load_save() -> void:
 		difficulty = clampi(cfg.get_value("data", "difficulty", Difficulty.NORMAL), Difficulty.EASY, Difficulty.HARD)
 		boss_rush_unlocked = cfg.get_value("data", "boss_rush_unlocked", false)
 		ultra_mode_unlocked = cfg.get_value("data", "ultra_mode_unlocked", false)
+		sound_enabled = cfg.get_value("data", "sound_enabled", true)
+		enemy_fire_density = clampi(cfg.get_value("data", "enemy_fire_density", FireDensity.NORMAL), FireDensity.LOW, FireDensity.HIGH)
+		keep_weapon_on_death = cfg.get_value("data", "keep_weapon_on_death", false)

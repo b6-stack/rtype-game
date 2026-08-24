@@ -20,6 +20,17 @@ extends Control
 @onready var _god_mode_btn: Button = $CheatsOverlay/Panel/VBox/CheatGodModeBtn
 @onready var _max_charge_btn: Button = $CheatsOverlay/Panel/VBox/CheatMaxChargeBtn
 
+@onready var _options_open_btn: Button = $Center/VBox/OptionsOpenBtn
+@onready var _options_overlay: Control = $OptionsOverlay
+@onready var _options_close_btn: Button = $OptionsOverlay/Panel/VBox/CloseBtn
+@onready var _sound_btn: Button = $OptionsOverlay/Panel/VBox/SoundBtn
+@onready var _keep_weapon_btn: Button = $OptionsOverlay/Panel/VBox/KeepWeaponBtn
+@onready var _fire_density_buttons: Array[Button] = [
+	$OptionsOverlay/Panel/VBox/FireDensityRow/LowBtn,
+	$OptionsOverlay/Panel/VBox/FireDensityRow/NormalBtn,
+	$OptionsOverlay/Panel/VBox/FireDensityRow/HighBtn,
+]
+
 const STAR_COUNT: int = 120
 var _stars: Array[Dictionary] = []
 
@@ -50,6 +61,7 @@ func _ready() -> void:
 	_setup_ultra_mode_button()
 	_setup_difficulty_buttons()
 	_setup_cheat_buttons()
+	_setup_options_menu()
 	_generate_stars()
 	# Animate title in
 	$Center/VBox/TitleLabel.modulate.a = 0.0
@@ -223,6 +235,51 @@ func _setup_difficulty_buttons() -> void:
 
 func _on_difficulty_pressed(index: int) -> void:
 	GameState.set_difficulty(index)
+
+# ── Options menu ──────────────────────────────────────────────
+
+func _setup_options_menu() -> void:
+	_options_open_btn.pressed.connect(_on_options_open_pressed)
+	_options_close_btn.pressed.connect(_on_options_close_pressed)
+	_sound_btn.pressed.connect(_on_sound_toggle_pressed)
+	_keep_weapon_btn.pressed.connect(_on_keep_weapon_toggle_pressed)
+	for i in _fire_density_buttons.size():
+		var btn: Button = _fire_density_buttons[i]
+		btn.button_pressed = (i == GameState.enemy_fire_density)
+		btn.pressed.connect(_on_fire_density_pressed.bind(i))
+	_update_options_btn_texts()
+
+func _on_options_open_pressed() -> void:
+	_options_overlay.visible = true
+
+func _on_options_close_pressed() -> void:
+	_options_overlay.visible = false
+
+func _on_sound_toggle_pressed() -> void:
+	GameState.set_sound_enabled(!GameState.sound_enabled)
+	_update_options_btn_texts()
+
+func _on_keep_weapon_toggle_pressed() -> void:
+	GameState.set_keep_weapon_on_death(!GameState.keep_weapon_on_death)
+	_update_options_btn_texts()
+
+func _on_fire_density_pressed(index: int) -> void:
+	GameState.set_enemy_fire_density(index)
+
+func _update_options_btn_texts() -> void:
+	if GameState.sound_enabled:
+		_sound_btn.text = "🔊 SOUND: ON"
+		_sound_btn.modulate = Color.WHITE
+	else:
+		_sound_btn.text = "🔇 SOUND: OFF"
+		_sound_btn.modulate = Color(1, 1, 1, 0.6)
+
+	if GameState.keep_weapon_on_death:
+		_keep_weapon_btn.text = "KEEP WEAPON ON DEATH: YES"
+		_keep_weapon_btn.modulate = Color(0.3, 1.0, 0.4)
+	else:
+		_keep_weapon_btn.text = "KEEP WEAPON ON DEATH: NO"
+		_keep_weapon_btn.modulate = Color.WHITE
 
 # ── Starfield ─────────────────────────────────────────────────
 

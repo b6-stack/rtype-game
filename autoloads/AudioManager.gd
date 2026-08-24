@@ -80,6 +80,11 @@ const BOSS_THEMES: Array[Dictionary] = [
 ]
 
 func _ready() -> void:
+	# GameState (autoload order: GameState before AudioManager) has already
+	# loaded the persisted sound setting by the time this runs.
+	music_muted = not GameState.sound_enabled
+	sfx_muted = not GameState.sound_enabled
+
 	_music_player_a = AudioStreamPlayer.new()
 	_music_player_a.bus = &"Master"
 	add_child(_music_player_a)

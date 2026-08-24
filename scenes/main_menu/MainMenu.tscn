@@ -1,9 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://rtype_mainmenu"]
+[gd_scene load_steps=5 format=3 uid="uid://rtype_mainmenu"]
 
 [ext_resource type="Script" path="res://scenes/main_menu/MainMenu.gd" id="1_mm"]
 [ext_resource type="Script" path="res://scenes/main_menu/StarContainer.gd" id="2_sc"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_dg"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_fd"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -122,6 +124,13 @@ custom_minimum_size = Vector2(360, 56)
 theme_override_font_sizes/font_size = 24
 theme_override_colors/font_color = Color(1.0, 0.85, 0.2, 1)
 
+[node name="OptionsOpenBtn" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "OPTIONS"
+custom_minimum_size = Vector2(360, 56)
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.5, 0.85, 1.0, 1)
+
 [node name="HiScoreLabel" type="Label" parent="Center/VBox"]
 layout_mode = 2
 text = "HIGH SCORE: 0"
@@ -196,6 +205,97 @@ custom_minimum_size = Vector2(400, 52)
 theme_override_font_sizes/font_size = 22
 
 [node name="CloseBtn" type="Button" parent="CheatsOverlay/Panel/VBox"]
+layout_mode = 2
+text = "CLOSE"
+custom_minimum_size = Vector2(400, 52)
+theme_override_font_sizes/font_size = 22
+
+[node name="OptionsOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Scrim" type="ColorRect" parent="OptionsOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.75)
+
+[node name="Panel" type="PanelContainer" parent="OptionsOverlay"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_right = 260.0
+offset_top = -260.0
+offset_bottom = 260.0
+
+[node name="VBox" type="VBoxContainer" parent="OptionsOverlay/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TitleLabel" type="Label" parent="OptionsOverlay/Panel/VBox"]
+layout_mode = 2
+text = "OPTIONS"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 30
+theme_override_colors/font_color = Color(0.5, 0.85, 1.0, 1)
+
+[node name="SoundBtn" type="Button" parent="OptionsOverlay/Panel/VBox"]
+layout_mode = 2
+text = "🔊 SOUND: ON"
+custom_minimum_size = Vector2(400, 52)
+theme_override_font_sizes/font_size = 22
+
+[node name="FireDensityLabel" type="Label" parent="OptionsOverlay/Panel/VBox"]
+layout_mode = 2
+text = "ENEMY FIRE VOLUME"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.6, 0.8, 1.0, 1)
+
+[node name="FireDensityRow" type="HBoxContainer" parent="OptionsOverlay/Panel/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="LowBtn" type="Button" parent="OptionsOverlay/Panel/VBox/FireDensityRow"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_fd")
+text = "LOW"
+custom_minimum_size = Vector2(120, 52)
+theme_override_font_sizes/font_size = 20
+
+[node name="NormalBtn" type="Button" parent="OptionsOverlay/Panel/VBox/FireDensityRow"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_fd")
+text = "NORMAL"
+custom_minimum_size = Vector2(120, 52)
+theme_override_font_sizes/font_size = 20
+
+[node name="HighBtn" type="Button" parent="OptionsOverlay/Panel/VBox/FireDensityRow"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_fd")
+text = "HIGH"
+custom_minimum_size = Vector2(120, 52)
+theme_override_font_sizes/font_size = 20
+
+[node name="KeepWeaponBtn" type="Button" parent="OptionsOverlay/Panel/VBox"]
+layout_mode = 2
+text = "KEEP WEAPON ON DEATH: NO"
+custom_minimum_size = Vector2(400, 52)
+theme_override_font_sizes/font_size = 22
+
+[node name="CloseBtn" type="Button" parent="OptionsOverlay/Panel/VBox"]
 layout_mode = 2
 text = "CLOSE"
 custom_minimum_size = Vector2(400, 52)
