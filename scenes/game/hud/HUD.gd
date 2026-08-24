@@ -85,30 +85,30 @@ func _update_goal_bar(current: int, goal: int) -> void:
 		_life_goal_bar.value = clamp(progress * 100.0, 0.0, 100.0)
 		_life_goal_label.text = "1-UP GOAL: %d" % goal
 
-## Icon row above a small cap (matches Hard's max of 5, gives a little
-## headroom) so Normal/Easy's much higher reserve (10/15) doesn't turn
-## into a long strip of tiny boxes eating HUD space — falls back to a
-## compact "current / max" label instead.
-const LIVES_ICON_DISPLAY_CAP: int = 6
-
+## Always a box row, regardless of max lives — box size shrinks as the
+## count grows (Normal/Easy's much higher reserve, 10/15) so it stays a
+## reasonable width instead of running off the HUD.
 func _refresh_lives() -> void:
 	for child in _lives_container.get_children():
 		child.queue_free()
 	var max_lives: int = GameState.get_max_lives()
-	if max_lives <= LIVES_ICON_DISPLAY_CAP:
-		for i in max_lives:
-			var icon := ColorRect.new()
-			icon.custom_minimum_size = Vector2(24, 18)
-			icon.color = Color(0.2, 1.0, 0.5) if i < GameState.lives else Color(0.2, 0.2, 0.2)
-			_lives_container.add_child(icon)
+	var box_size: Vector2
+	var separation: int
+	if max_lives <= 6:
+		box_size = Vector2(24, 18)
+		separation = 6
+	elif max_lives <= 12:
+		box_size = Vector2(18, 16)
+		separation = 4
 	else:
-		var label := Label.new()
-		label.text = "LIVES: %d / %d" % [GameState.lives, max_lives]
-		label.add_theme_font_size_override("font_size", 20)
-		label.add_theme_color_override("font_color", Color(0.2, 1.0, 0.5))
-		label.add_theme_color_override("font_outline_color", Color.BLACK)
-		label.add_theme_constant_override("outline_size", 3)
-		_lives_container.add_child(label)
+		box_size = Vector2(12, 14)
+		separation = 3
+	_lives_container.add_theme_constant_override("separation", separation)
+	for i in max_lives:
+		var icon := ColorRect.new()
+		icon.custom_minimum_size = box_size
+		icon.color = Color(0.2, 1.0, 0.5) if i < GameState.lives else Color(0.2, 0.2, 0.2)
+		_lives_container.add_child(icon)
 
 const WEAPON_ICON_PATHS: Array[String] = [
 	"res://assets/sprites/weapons/icon_vulcan.png",
