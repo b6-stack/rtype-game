@@ -78,11 +78,13 @@ func _physics_process(delta: float) -> void:
 	# despawn margin caught), destroy it immediately rather than let it
 	# sit embedded in the wall — for its own protection as much as the
 	# player's, since a homing missile chasing it would otherwise crash
-	# into the landscape instead of tracking a real threat.
+	# into the landscape instead of tracking a real threat. Goes through
+	# the normal death explosion+SFX (_die()) rather than silently
+	# vanishing — popping out of existence read as visually broken.
 	for i in get_slide_collision_count():
 		var collider: Object = get_slide_collision(i).get_collider()
 		if collider and (collider is StaticBody2D or (collider is CollisionObject2D and (collider.collision_layer & 1) != 0)):
-			queue_free()
+			_die()
 			return
 
 	_shoot_timer -= delta
@@ -95,11 +97,13 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 		return
 
-	# Despawn if too close to (or inside) the corridor walls.
+	# Despawn if too close to (or inside) the corridor walls — same
+	# explosion-first treatment as the landscape collision backstop above.
 	if level_generator:
 		var bounds: Vector2 = level_generator.get_corridor_bounds()
 		if global_position.y < bounds.x + WALL_DESPAWN_MARGIN or global_position.y > bounds.y - WALL_DESPAWN_MARGIN:
-			queue_free()
+			_die()
+			return
 
 # ── Override these ────────────────────────────────────────────
 
