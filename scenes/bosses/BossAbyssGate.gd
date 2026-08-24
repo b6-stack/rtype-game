@@ -107,23 +107,57 @@ func _spawn_gravity_well() -> void:
 	well.collision_mask = 0
 	well.global_position = global_position + Vector2(randf_range(-200, 200), randf_range(-150, 150))
 
-	# Visual
-	var poly: Polygon2D = Polygon2D.new()
-	poly.polygon = _build_circle_poly(30.0, 12)
-	poly.color = Color(0.3, 0.0, 0.6, 0.5)
-	well.add_child(poly)
-
-	# Outer indicator ring
+	# Layered, animated visual — a flat static circle read as decoration
+	# rather than an active hazard. Two counter-rotating warning rings, a
+	# pulsing core, and orbiting debris chips that spiral inward sell the
+	# "actively pulling you in" read at a glance.
 	var ring: Polygon2D = Polygon2D.new()
-	ring.polygon = _build_circle_poly(GRAVITY_WELL_RADIUS, 24)
-	ring.color = Color(0.3, 0.0, 0.6, 0.12)
+	ring.polygon = _build_circle_poly(GRAVITY_WELL_RADIUS, 28)
+	ring.color = Color(0.7, 0.1, 1.0, 0.16)
 	well.add_child(ring)
+	var ring_tween := ring.create_tween().set_loops()
+	ring_tween.tween_property(ring, "rotation", TAU, 3.0).set_trans(Tween.TRANS_LINEAR)
+
+	var swirl: Polygon2D = Polygon2D.new()
+	swirl.polygon = _build_circle_poly(GRAVITY_WELL_RADIUS * 0.55, 20)
+	swirl.color = Color(0.5, 0.0, 0.9, 0.22)
+	well.add_child(swirl)
+	var swirl_tween := swirl.create_tween().set_loops()
+	swirl_tween.tween_property(swirl, "rotation", -TAU, 1.8).set_trans(Tween.TRANS_LINEAR)
+
+	var core: Polygon2D = Polygon2D.new()
+	core.polygon = _build_circle_poly(30.0, 14)
+	core.color = Color(0.6, 0.1, 1.0, 0.75)
+	well.add_child(core)
+	var core_tween := core.create_tween().set_loops()
+	core_tween.tween_property(core, "scale", Vector2(1.3, 1.3), 0.4).set_trans(Tween.TRANS_SINE)
+	core_tween.tween_property(core, "scale", Vector2(0.85, 0.85), 0.4).set_trans(Tween.TRANS_SINE)
+
+	for i in 6:
+		var chip := Polygon2D.new()
+		chip.polygon = _build_circle_poly(5.0, 6)
+		chip.color = Color(0.85, 0.5, 1.0, 0.9)
+		var start_angle: float = (TAU / 6.0) * i
+		chip.position = Vector2(cos(start_angle), sin(start_angle)) * GRAVITY_WELL_RADIUS
+		well.add_child(chip)
+		var chip_tween := chip.create_tween().set_loops()
+		chip_tween.tween_method(_orbit_chip.bind(chip, start_angle), 0.0, TAU, 1.6).set_trans(Tween.TRANS_LINEAR)
 
 	well.set_meta("force", GRAVITY_WELL_FORCE)
 	well.set_meta("radius", GRAVITY_WELL_RADIUS)
 
 	bullet_container.add_child(well)
 	_gravity_wells.append(well)
+
+
+## Orbits a debris chip around the well's center while spiraling it inward
+## over the loop, so it reads as being pulled in rather than just circling.
+func _orbit_chip(chip: Polygon2D, start_angle: float, t: float) -> void:
+	if not is_instance_valid(chip):
+		return
+	var angle: float = start_angle + t
+	var radius: float = lerpf(GRAVITY_WELL_RADIUS, 8.0, t / TAU)
+	chip.position = Vector2(cos(angle), sin(angle)) * radius
 
 
 func _update_gravity_wells(delta: float) -> void:

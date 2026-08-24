@@ -10,5 +10,5 @@ bullet_color = Color(0, 1, 0, 1)
 fire_rate = 1.2
 bullet_speed = 420.0
 damage = 14
-charge_time = 3.3
+charge_time = 2.8
 description = "Slow but devastating plasma ball."

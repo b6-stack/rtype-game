@@ -10,5 +10,5 @@ bullet_color = Color(0, 0, 1, 1)
 fire_rate = 3.0
 bullet_speed = 650.0
 damage = 6
-charge_time = 2.8
+charge_time = 2.4
 description = "Penetrating wave beam through terrain."

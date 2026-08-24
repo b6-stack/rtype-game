@@ -10,5 +10,5 @@ bullet_color = Color(1, 1, 0, 1)
 fire_rate = 2.5
 bullet_speed = 650.0
 damage = 7
-charge_time = 2.9
+charge_time = 2.5
 description = "Bullets that bounce off walls."

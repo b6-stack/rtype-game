@@ -10,5 +10,5 @@ bullet_color = Color(1, 0.5, 0, 1)
 fire_rate = 1.4
 bullet_speed = 550.0
 damage = 10
-charge_time = 3.2
+charge_time = 2.7
 description = "Homing missile with heavy impact."
