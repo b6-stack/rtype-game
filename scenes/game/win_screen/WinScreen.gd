@@ -10,7 +10,7 @@ extends Control
 
 func _ready() -> void:
 	_score_label.text = "FINAL SCORE: %d" % GameState.score
-	_hi_label.text = "HIGH SCORE: %d" % GameState.high_score
+	_hi_label.text = "HIGH SCORE: %d" % GameState.get_display_high_score()
 	_menu_btn.pressed.connect(GameState.go_to_menu)
 
 	# Unlocks are only earned on a legitimate run — cheats (one-shot or

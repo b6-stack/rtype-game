@@ -9,7 +9,7 @@ extends Control
 
 func _ready() -> void:
 	_score_label.text = "SCORE: %d" % GameState.score
-	_hi_label.text = "BEST: %d" % GameState.high_score
+	_hi_label.text = "BEST: %d" % GameState.get_display_high_score()
 	_continue_btn.pressed.connect(GameState.continue_game)
 	_retry_btn.pressed.connect(GameState.start_boss_rush if GameState.boss_rush_mode else GameState.start_game)
 	_menu_btn.pressed.connect(GameState.go_to_menu)

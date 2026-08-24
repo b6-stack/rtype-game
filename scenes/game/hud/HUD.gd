@@ -74,7 +74,7 @@ func show_charge_bar(visible: bool) -> void:
 
 func _refresh_score() -> void:
 	_score_label.text = "SCORE: %d" % GameState.score
-	_hi_score_label.text = "BEST: %d" % GameState.high_score
+	_hi_score_label.text = "BEST: %d" % GameState.get_display_high_score()
 
 func _update_goal_bar(current: int, goal: int) -> void:
 	if _life_goal_bar and _life_goal_label:
@@ -85,14 +85,30 @@ func _update_goal_bar(current: int, goal: int) -> void:
 		_life_goal_bar.value = clamp(progress * 100.0, 0.0, 100.0)
 		_life_goal_label.text = "1-UP GOAL: %d" % goal
 
+## Icon row above a small cap (matches Hard's max of 5, gives a little
+## headroom) so Normal/Easy's much higher reserve (10/15) doesn't turn
+## into a long strip of tiny boxes eating HUD space — falls back to a
+## compact "current / max" label instead.
+const LIVES_ICON_DISPLAY_CAP: int = 6
+
 func _refresh_lives() -> void:
 	for child in _lives_container.get_children():
 		child.queue_free()
-	for i in GameState.MAX_LIVES:
-		var icon := ColorRect.new()
-		icon.custom_minimum_size = Vector2(24, 18)
-		icon.color = Color(0.2, 1.0, 0.5) if i < GameState.lives else Color(0.2, 0.2, 0.2)
-		_lives_container.add_child(icon)
+	var max_lives: int = GameState.get_max_lives()
+	if max_lives <= LIVES_ICON_DISPLAY_CAP:
+		for i in max_lives:
+			var icon := ColorRect.new()
+			icon.custom_minimum_size = Vector2(24, 18)
+			icon.color = Color(0.2, 1.0, 0.5) if i < GameState.lives else Color(0.2, 0.2, 0.2)
+			_lives_container.add_child(icon)
+	else:
+		var label := Label.new()
+		label.text = "LIVES: %d / %d" % [GameState.lives, max_lives]
+		label.add_theme_font_size_override("font_size", 20)
+		label.add_theme_color_override("font_color", Color(0.2, 1.0, 0.5))
+		label.add_theme_color_override("font_outline_color", Color.BLACK)
+		label.add_theme_constant_override("outline_size", 3)
+		_lives_container.add_child(label)
 
 const WEAPON_ICON_PATHS: Array[String] = [
 	"res://assets/sprites/weapons/icon_vulcan.png",
@@ -184,7 +200,7 @@ func _stop_charge_pulse() -> void:
 
 func _on_score_changed(new_score: int) -> void:
 	_score_label.text = "SCORE: %d" % new_score
-	_hi_score_label.text = "BEST: %d" % GameState.high_score
+	_hi_score_label.text = "BEST: %d" % GameState.get_display_high_score()
 	var tw := _score_label.create_tween()
 	tw.tween_property(_score_label, "scale", Vector2(1.15, 1.15), 0.08)
 	tw.tween_property(_score_label, "scale", Vector2.ONE, 0.08)

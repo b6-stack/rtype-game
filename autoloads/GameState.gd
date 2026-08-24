@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "2.8.3"
+const APP_VERSION := "2.9.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -19,7 +19,10 @@ signal life_awarded(new_lives: int)
 signal difficulty_changed(new_difficulty: int)
 signal game_over
 
-const MAX_LIVES: int = 5
+## Reserve lives cap by difficulty — lower difficulties get more room to
+## recover from a rough run; Hard stays tight since a life lost there
+## matters more.
+const MAX_LIVES_BY_DIFFICULTY: Array[int] = [15, 10, 5]  # Easy, Normal, Hard
 const STARTING_LIVES: int = 3
 const TOTAL_LEVELS: int = 10
 const SCORE_GOAL_INTERVAL: int = 5000
@@ -69,6 +72,11 @@ var god_mode_enabled: bool = false
 var always_max_charge_enabled: bool = false
 var cheats_used: bool = false
 var high_score: int = 0
+## Boss Rush has a very different scoring pace/shape than the campaign
+## (all 10 bosses back-to-back, no regular waves) — tracked as its own
+## high score so a big campaign run doesn't set an unreachable "BEST" for
+## Boss Rush, or vice versa.
+var boss_rush_high_score: int = 0
 var is_game_over: bool = false
 ## Boss Rush: back-to-back fights against all 10 bosses, no regular waves
 ## between them. Read by LevelGenerator (short lead-in, no filler spawns)
@@ -146,7 +154,11 @@ func add_score(points: int) -> void:
 		mult *= ULTRA_MODE_SCORE_MULT
 	mult = minf(mult, MAX_SCORE_MULTIPLIER)
 	score += int(points * mult)
-	if score > high_score:
+	if boss_rush_mode:
+		if score > boss_rush_high_score:
+			boss_rush_high_score = score
+			_save()
+	elif score > high_score:
 		high_score = score
 		_save()
 	score_changed.emit(score)
@@ -169,9 +181,16 @@ func lose_life() -> void:
 		game_over.emit()
 
 func gain_life() -> void:
-	if lives < MAX_LIVES:
+	if lives < get_max_lives():
 		lives += 1
 		lives_changed.emit(lives)
+
+func get_max_lives() -> int:
+	return MAX_LIVES_BY_DIFFICULTY[difficulty]
+
+## Whichever high score is relevant to the currently-active mode.
+func get_display_high_score() -> int:
+	return boss_rush_high_score if boss_rush_mode else high_score
 
 func set_weapon(index: int) -> void:
 	current_weapon_index = index
@@ -290,6 +309,7 @@ func go_to_game_over() -> void:
 func _save() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("data", "high_score", high_score)
+	cfg.set_value("data", "boss_rush_high_score", boss_rush_high_score)
 	cfg.set_value("data", "difficulty", difficulty)
 	cfg.set_value("data", "boss_rush_unlocked", boss_rush_unlocked)
 	cfg.set_value("data", "ultra_mode_unlocked", ultra_mode_unlocked)
@@ -299,6 +319,7 @@ func _load_save() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load("user://save.cfg") == OK:
 		high_score = cfg.get_value("data", "high_score", 0)
+		boss_rush_high_score = cfg.get_value("data", "boss_rush_high_score", 0)
 		difficulty = clampi(cfg.get_value("data", "difficulty", Difficulty.NORMAL), Difficulty.EASY, Difficulty.HARD)
 		boss_rush_unlocked = cfg.get_value("data", "boss_rush_unlocked", false)
 		ultra_mode_unlocked = cfg.get_value("data", "ultra_mode_unlocked", false)
