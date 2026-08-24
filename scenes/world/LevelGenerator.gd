@@ -99,6 +99,19 @@ func initialize(level: int, speed: float) -> void:
 		_spawn_next_chunk_at(spawn_x)
 		spawn_x += CHUNK_WIDTH
 
+	_spawn_level_start_weapon_drop()
+
+## A random (non-Vulcan) weapon drop early in every level — the player
+## otherwise faces every level/boss on the reset-to-default weapon after
+## any death, which got old fast. Positioned on the right at vertical
+## center so it scrolls into reach a few seconds in, well before the boss.
+func _spawn_level_start_weapon_drop() -> void:
+	if powerup_spawner == null:
+		return
+	var weapon_index: int = _rng.randi_range(1, 9)
+	var drop_pos := Vector2(CHUNK_WIDTH * 2.0, SCREEN_HEIGHT / 2.0)
+	powerup_spawner.spawn_powerup_at(drop_pos, weapon_index, "weapon")
+
 func _process(delta: float) -> void:
 	_level_elapsed_time += delta
 	if chunk_parent == null:
