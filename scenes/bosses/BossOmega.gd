@@ -22,7 +22,7 @@ var _claw_fire_timer: float = 0.0
 var _sweep_timer: float = 0.0
 var _sweep_bullet_accum: float = 0.0
 const SWEEP_DURATION: float = 1.8
-const SWEEP_BULLET_INTERVAL: float = 0.05
+const SWEEP_BULLET_INTERVAL: float = 0.08
 
 # ── Phase 2 – Charge + Grunts ─────────────────────────────────────────────────
 enum ChargeState { IDLE, CHARGING, RECOVERING }
@@ -94,7 +94,7 @@ func _phase0_claws(delta: float) -> void:
 	_claw_bottom.rotation_degrees = -_claw_angle
 
 	_claw_fire_timer += delta
-	if _claw_fire_timer >= 0.9:
+	if _claw_fire_timer >= 1.2:
 		_claw_fire_timer = 0.0
 		_fire_three_way(540.0, Color(1.0, 0.3, 0.1, 1.0), 14)
 
@@ -110,9 +110,9 @@ func _phase1_sweep(delta: float) -> void:
 	if _sweep_bullet_accum >= SWEEP_BULLET_INTERVAL:
 		_sweep_bullet_accum = 0.0
 		var t: float = _sweep_timer / SWEEP_DURATION
-		# Triple sweep
-		for i: int in range(3):
-			var base_deg: float = 150.0 + i * 30.0
+		# Double sweep
+		for i: int in range(2):
+			var base_deg: float = 150.0 + i * 60.0
 			var current_deg: float = base_deg - t * 180.0
 			var vel: Vector2 = Vector2.from_angle(deg_to_rad(current_deg)) * 820.0
 			_spawn_boss_bullet(vel, Color(1.0, 0.9, 0.0, 1.0), 20)
@@ -148,9 +148,9 @@ func _phase2_charge_grunts(delta: float) -> void:
 
 	# Also fire radial during charge phase
 	_radial_timer += delta
-	if _radial_timer >= 2.4:
+	if _radial_timer >= 2.8:
 		_radial_timer = 0.0
-		_fire_radial(6, 500.0, 18, Color(1.0, 0.4, 0.1, 1.0), _time * 20.0)
+		_fire_radial(5, 500.0, 18, Color(1.0, 0.4, 0.1, 1.0), _time * 20.0)
 
 
 # ── Phase 3: All-Out ──────────────────────────────────────────────────────────
@@ -164,19 +164,19 @@ func _phase3_all_out(delta: float) -> void:
 
 	# Rapid radial shot
 	_radial_timer += delta
-	if _radial_timer >= 1.2:
+	if _radial_timer >= 1.6:
 		_radial_timer = 0.0
-		_fire_radial(10, 560.0, 20, Color(1.0, 0.2, 0.2, 1.0), _time * 30.0)
+		_fire_radial(7, 560.0, 20, Color(1.0, 0.2, 0.2, 1.0), _time * 30.0)
 
-	# Teleport every 3.5s
+	# Teleport every 4s
 	_teleport_timer += delta
-	if _teleport_timer >= 3.5:
+	if _teleport_timer >= 4.0:
 		_teleport_timer = 0.0
 		_do_teleport()
 
-	# Gravity wells every 5s
+	# Gravity wells every 6.5s
 	_well_timer += delta
-	if _well_timer >= 5.0:
+	if _well_timer >= 6.5:
 		_well_timer = 0.0
 		_spawn_gravity_well()
 
