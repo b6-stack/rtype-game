@@ -14,14 +14,17 @@ func _ready() -> void:
 	size_scale = 1.6
 	super._ready()
 
-## Reserves the left 30-40% of the screen as maneuvering room — the
-## player's finger IS the control and the ship sits to the right of that
-## band, so a fully omnidirectional spiral/radial (the pulsar's identity)
-## was flooding the exact space the player needs to dodge in. Bullets
-## that would fly predominantly leftward are simply not spawned, leaving
-## a consistent safe lane instead. Direct aimed shots at the player are
-## unaffected — those are singular and telegraphed, not blanket clutter.
-const SAFE_LANE_DIR_X_THRESHOLD: float = -0.5
+## Reserves a narrow safe lane toward the player as maneuvering room —
+## the player's finger IS the control and the ship sits to the right of
+## that band, so a fully omnidirectional spiral/radial (the pulsar's
+## identity) was flooding the exact space the player needs to dodge in.
+## Bullets that would fly within this arc of due-left are simply not
+## spawned. Kept narrow (45 degrees, not the original 120) so the pattern
+## still mostly reads as a genuine 360-degree spiral like the other
+## bosses — just missing one small wedge — rather than looking broken.
+## Direct aimed shots at the player are unaffected — those are singular
+## and telegraphed, not blanket clutter.
+const SAFE_LANE_DIR_X_THRESHOLD: float = -0.9239
 
 func _phase_attack(delta: float) -> void:
 	_spin_angle += delta * 120.0

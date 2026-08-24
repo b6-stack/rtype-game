@@ -55,7 +55,12 @@ var _next_chunk_x: float = 1920.0
 ## Boss Rush's) instantly — the boss warning/arrival could fire before the
 ## player has seen a single frame of gameplay. This enforces a minimum
 ## real-time buffer regardless of how fast the chunk countdown reaches zero.
-const MIN_TIME_BEFORE_BOSS: float = 7.0
+## Regular campaign levels felt too short (~5s in some cases) before the
+## boss triggered — bumped substantially so there's real time to play the
+## level. Boss Rush keeps its own short floor since back-to-back boss
+## fights (no regular waves between them) is the whole point of that mode.
+const MIN_TIME_BEFORE_BOSS: float = 35.0
+const MIN_TIME_BEFORE_BOSS_RUSH: float = 7.0
 var _level_elapsed_time: float = 0.0
 
 ## Level color themes [top wall color, bottom wall color]
@@ -163,7 +168,8 @@ func _spawn_next_chunk_at(spawn_x: float) -> void:
 	if not is_boss_active:
 		if _chunks_until_boss > 0:
 			_chunks_until_boss -= 1
-		if _chunks_until_boss <= 0 and _level_elapsed_time >= MIN_TIME_BEFORE_BOSS:
+		var min_time: float = MIN_TIME_BEFORE_BOSS_RUSH if GameState.boss_rush_mode else MIN_TIME_BEFORE_BOSS
+		if _chunks_until_boss <= 0 and _level_elapsed_time >= min_time:
 			_chunks_until_boss = BOSS_RUSH_CHUNKS_UNTIL_BOSS if GameState.boss_rush_mode else _boss_chunk_interval
 			boss_trigger_reached.emit(GameState.level)
 

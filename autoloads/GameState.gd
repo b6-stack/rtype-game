@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "2.9.2"
+const APP_VERSION := "2.9.3"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -292,6 +292,11 @@ func continue_game() -> void:
 func start_boss_rush() -> void:
 	reset()
 	boss_rush_mode = true
+	# Back-to-back boss fights with no regular waves to recover from a hit
+	# between them — start with the full difficulty-scaled reserve instead
+	# of the campaign's flat starting count.
+	lives = get_max_lives()
+	lives_changed.emit(lives)
 	get_tree().paused = false
 	get_tree().change_scene_to_file(GAME_SCENE)
 
