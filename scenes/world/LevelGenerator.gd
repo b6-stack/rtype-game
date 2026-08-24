@@ -55,11 +55,16 @@ var _next_chunk_x: float = 1920.0
 ## Boss Rush's) instantly — the boss warning/arrival could fire before the
 ## player has seen a single frame of gameplay. This enforces a minimum
 ## real-time buffer regardless of how fast the chunk countdown reaches zero.
-## Regular campaign levels felt too short (~5s in some cases) before the
-## boss triggered — bumped substantially so there's real time to play the
-## level. Boss Rush keeps its own short floor since back-to-back boss
-## fights (no regular waves between them) is the whole point of that mode.
-const MIN_TIME_BEFORE_BOSS: float = 35.0
+## Regular campaign levels felt too short before the boss triggered — the
+## chunk-count gate alone (20 chunks) takes ~43s at level 1's scroll speed
+## but only ~22s at level 10's much faster scroll (chunks refill faster
+## the quicker the world scrolls), so it can't guarantee a minimum length
+## on its own across all levels. This time floor is the actual guarantee:
+## set comfortably above 60s so "at least a minute" holds even at the
+## fastest level's scroll speed. Boss Rush keeps its own short floor since
+## back-to-back boss fights (no regular waves between them) is the whole
+## point of that mode.
+const MIN_TIME_BEFORE_BOSS: float = 65.0
 const MIN_TIME_BEFORE_BOSS_RUSH: float = 7.0
 var _level_elapsed_time: float = 0.0
 
