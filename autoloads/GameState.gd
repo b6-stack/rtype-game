@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "2.9.0"
+const APP_VERSION := "2.9.1"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
