@@ -131,14 +131,12 @@ func _phase2_charge_grunts(delta: float) -> void:
 		ChargeState.CHARGING:
 			velocity.x = -1200.0
 			velocity.y = 0.0
-			move_and_slide()
 			if _charge_state_timer >= 0.7:
 				_charge_state = ChargeState.RECOVERING
 				_charge_state_timer = 0.0
 		ChargeState.RECOVERING:
 			velocity.x = (_home_x - position.x) * 3.5
 			velocity.y = 0.0
-			move_and_slide()
 			if _charge_state_timer >= 1.0:
 				_charge_state = ChargeState.IDLE
 				_charge_state_timer = 0.0
@@ -186,6 +184,11 @@ func _phase3_all_out(delta: float) -> void:
 
 
 # ── Shared Helpers ────────────────────────────────────────────────────────────
+## Vertical-only patrol; horizontal drift comes from BossBase's default
+## movement, set before _phase_attack() runs. Deliberately doesn't touch
+## velocity.x, and doesn't call move_and_slide() itself — BossBase calls
+## it once after _phase_attack() returns; calling it here too was
+## double-applying movement every physics frame.
 func _patrol(delta: float) -> void:
 	var center_y: float = 540.0
 	if position.y > center_y + PATROL_RANGE:
@@ -193,8 +196,6 @@ func _patrol(delta: float) -> void:
 	elif position.y < center_y - PATROL_RANGE:
 		_patrol_dir = 1
 	velocity.y = _patrol_dir * PATROL_SPEED
-	velocity.x = 0.0
-	move_and_slide()
 
 
 func _fire_three_way(speed: float, col: Color, dmg: int) -> void:

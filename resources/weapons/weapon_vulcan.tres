@@ -10,5 +10,5 @@ bullet_color = Color(0, 1, 1, 1)
 fire_rate = 5.0
 bullet_speed = 750.0
 damage = 5
-charge_time = 1.9
+charge_time = 1.4
 description = "Rapid-fire vulcan cannon."

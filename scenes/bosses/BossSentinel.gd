@@ -99,12 +99,24 @@ func _on_entrance_ready() -> void:
 		s.visible = true
 		s.monitoring = true
 
+## Slow weapons (Plasma, Gravity) travel far enough behind their fire cue
+## that reacting to the shield's CURRENT open/closed state doesn't help —
+## by the time a slow shot arrives, the fast-rotating/fading shield has
+## often already flipped back up, making them unreasonably hard to land.
+## Bullets under this speed pierce straight through instead of being
+## deflected, regardless of shield state.
+const SLOW_PIERCE_SPEED_THRESHOLD: float = 500.0
+
 func _on_shield_hit(area: Area2D, shield_idx: int) -> void:
 	if not _shield_active:
 		return
 	if area is Bullet and not area.is_enemy_bullet:
+		if area.velocity.length() < SLOW_PIERCE_SPEED_THRESHOLD:
+			return
 		_deflect_bullet(area, shield_idx)
 	elif area.is_in_group("player_bullet"):
+		if "velocity" in area and area.velocity.length() < SLOW_PIERCE_SPEED_THRESHOLD:
+			return
 		_deflect_bullet(area, shield_idx)
 
 func _deflect_bullet(bullet_node: Node, shield_idx: int) -> void:
@@ -149,6 +161,9 @@ func _phase_attack(delta: float) -> void:
 			_cross_timer = 0.0
 			_fire_cross()
 
+## Vertical-only patrol; horizontal drift comes from BossBase's default
+## movement, set before _phase_attack() runs — deliberately doesn't touch
+## velocity.x.
 func _patrol(_delta: float) -> void:
 	var center_y: float = 540.0
 	if global_position.y > center_y + PATROL_RANGE:
@@ -156,7 +171,6 @@ func _patrol(_delta: float) -> void:
 	elif global_position.y < center_y - PATROL_RANGE:
 		_patrol_dir = 1
 	velocity.y = _patrol_dir * PATROL_SPEED
-	velocity.x = 0.0
 
 func _rotate_shields(delta: float) -> void:
 	var speed: float = 50.0  # degrees per second phase 0

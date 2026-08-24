@@ -48,6 +48,11 @@ func _phase_attack(delta: float) -> void:
 		_fire_spread(spread_count)
 
 
+## Vertical-only patrol; horizontal drift comes from BossBase's default
+## movement, set before _phase_attack() runs. Deliberately doesn't touch
+## velocity.x, and doesn't call move_and_slide() itself — BossBase calls
+## it once after _phase_attack() returns; calling it here too was
+## double-applying movement every physics frame.
 func _patrol(delta: float) -> void:
 	var center_y: float = 540.0
 	if position.y > center_y + PATROL_RANGE:
@@ -55,8 +60,6 @@ func _patrol(delta: float) -> void:
 	elif position.y < center_y - PATROL_RANGE:
 		_patrol_dir = 1
 	velocity.y = _patrol_dir * PATROL_SPEED
-	velocity.x = 0.0
-	move_and_slide()
 
 
 func _spawn_grunt() -> void:
