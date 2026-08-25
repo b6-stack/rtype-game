@@ -32,7 +32,7 @@ func _move(delta: float) -> void:
 		_buff_allies()
 
 func _shoot() -> void:
-	_fire_at_player(bullet_speed, bullet_damage, bullet_color)
+	_fire_at_player()
 
 func _buff_allies() -> void:
 	var enemies = get_tree().get_nodes_in_group("enemies")

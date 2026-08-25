@@ -88,10 +88,23 @@ func _spawn_boss(index: int) -> void:
 	# Assign distinct boss sprite texture
 	var sprite_node = boss.get_node_or_null("Visual/Sprite2D") as Sprite2D
 	if sprite_node:
-		if index in [1, 2, 4, 6, 8, 9]:
-			sprite_node.texture = preload("res://assets/sprites/boss_titan_cruiser.png")
+		var sprite_paths = [
+			"res://assets/sprites/boss_iron_claw.png",     # 0
+			"res://assets/sprites/boss_hydra.png",         # 1
+			"res://assets/sprites/boss_behemoth.png",      # 2
+			"res://assets/sprites/boss_sentinel.png",      # 3
+			"res://assets/sprites/boss_swarm_queen.png",   # 4
+			"res://assets/sprites/boss_photon_core.png",   # 5
+			"res://assets/sprites/boss_abyss_gate.png",    # 6
+			"res://assets/sprites/boss_omega.png",         # 7
+			"res://assets/sprites/boss_dread_star.png",    # 8
+			"res://assets/sprites/boss_hyperion.png"       # 9
+		]
+		
+		if index >= 0 and index < sprite_paths.size():
+			sprite_node.texture = load(sprite_paths[index])
 		else:
-			sprite_node.texture = preload("res://assets/sprites/boss_ship.png")
+			sprite_node.texture = load("res://assets/sprites/boss_ship.png")
 		# Scale is left to BossBase's entrance animation (starts small and grows in).
 
 	# Wire signals
