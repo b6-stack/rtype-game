@@ -23,8 +23,13 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * (bullet_speed * 1.05), wave_col, wave_dmg, wave_size, "wave", pierces, charge_level >= 1.0)
 		if b: _attach_wave(b, 1.0 if amp > 0 else -1.0, absf(amp))
 
+## A closure-local var mutated via `+=` inside a lambda connected to a
+## repeating Timer.timeout does NOT reliably persist its mutations across
+## separate invocations in GDScript (confirmed the hard way on the missile
+## weapon's miss-detonation countdown) -- so oscillation phase is derived
+## from the engine's own monotonic clock instead of an accumulator.
 func _attach_wave(b: Bullet, phase_sign: float, amplitude: float) -> void:
-	var time: float = 0.0
+	var start_ticks: int = Time.get_ticks_msec()
 	var timer := Timer.new()
 	timer.wait_time = 0.016
 	timer.autostart = true
@@ -32,6 +37,6 @@ func _attach_wave(b: Bullet, phase_sign: float, amplitude: float) -> void:
 	timer.timeout.connect(func():
 		if not is_instance_valid(b) or b.is_queued_for_deletion():
 			return
-		time += 0.016
-		b.velocity.y = cos(time * 11.0) * amplitude * phase_sign
+		var elapsed: float = float(Time.get_ticks_msec() - start_ticks) / 1000.0
+		b.velocity.y = cos(elapsed * 11.0) * amplitude * phase_sign
 	)
