@@ -9,7 +9,7 @@ func _do_fire(spawn_pos: Vector2) -> void:
 		_attach_vortex(b, 180.0, 120.0)
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
-	var raw_dmg: float = damage * 2.5 * charge_level + 16.0
+	var raw_dmg: float = damage * 3.3 * charge_level + 21.0
 	var gravity_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level) * get_charge_damage_scale()))
 	var vortex_size: float = lerpf(1.8, 3.2, charge_level)
 	var radius: float = lerpf(220.0, 380.0, charge_level)

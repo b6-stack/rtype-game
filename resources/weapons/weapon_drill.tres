@@ -9,6 +9,6 @@ weapon_index = 6
 bullet_color = Color(1, 0, 0, 1)
 fire_rate = 2.0
 bullet_speed = 800.0
-damage = 10
+damage = 12
 charge_time = 2.6
 description = "Spinning drill pierces multiple enemies."

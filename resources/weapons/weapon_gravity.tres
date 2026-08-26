@@ -9,6 +9,6 @@ weapon_index = 8
 bullet_color = Color(0, 0, 0.6, 1)
 fire_rate = 1.4
 bullet_speed = 480.0
-damage = 9
+damage = 11
 charge_time = 2.7
 description = "Gravity orb that pulls enemies inward."

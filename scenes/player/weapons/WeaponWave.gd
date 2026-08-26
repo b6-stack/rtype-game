@@ -11,7 +11,7 @@ func _do_fire(spawn_pos: Vector2) -> void:
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var wave_count: int = 2 if charge_level < 0.6 else (3 if charge_level < 1.0 else 4)
-	var raw_dmg: float = damage * lerpf(1.6, 2.7, charge_level)
+	var raw_dmg: float = damage * lerpf(1.8, 3.0, charge_level)
 	var wave_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level) * get_charge_damage_scale()))
 	var wave_size: float = lerpf(1.3, 2.4, charge_level)
 	var wave_col: Color = bullet_color.lightened(0.3 if charge_level < 1.0 else 0.75)

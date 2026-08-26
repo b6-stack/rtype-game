@@ -16,7 +16,7 @@ func _do_fire(spawn_pos: Vector2) -> void:
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 	var beam_count: int = 2 if charge_level < 0.6 else (3 if charge_level < 1.0 else 5)
-	var raw_beam_dmg: float = damage * lerpf(1.4, 2.4, charge_level)
+	var raw_beam_dmg: float = damage * lerpf(1.8, 3.4, charge_level)
 	var beam_damage: int = max(1, int(raw_beam_dmg * get_charge_tier_multiplier(charge_level) * get_charge_damage_scale()))
 	var beam_size: float = lerpf(1.0, 2.2, charge_level)
 	var beam_col: Color = bullet_color.lightened(0.35 if charge_level < 1.0 else 0.8)
