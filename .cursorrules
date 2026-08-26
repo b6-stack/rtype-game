@@ -1,0 +1,13 @@
+# R-Type Game (Starlight Vanguard) — AI Agent Rules
+
+## Sprite & Art Generation Guidelines
+- **Chroma Key Requirement:** All generated 2D game sprites (ships, bosses, enemies, pickups, projectiles) must be created on a solid pure magenta `#FF00FF` background.
+- **No Dark/White Backgrounds:** Never generate sprite artwork on black, dark gray, or white backgrounds. Dark backgrounds cause metallic hulls, shadows, and cockpits to turn translucent or see-through when alpha-keyed.
+- **Clean Silhouette:** Keep artwork solid and opaque with clean silhouette boundaries without soft airbrush halos or drop shadows.
+- **Extraction Tool:** Always extract sprites using `python process_art.py <input> <output> [--no-crop]`.
+- **Boss Sprites:** Boss sprites must keep the full 1024x1024 centered canvas (`--no-crop`) so center pivots and collision boxes remain aligned.
+
+## Engine & Scripting Rules
+- **Engine:** Godot 4.5+ (GDScript).
+- **Deferred Physics Operations:** All node removals, additions, and collision shape changes during collision callbacks must use `.call_deferred()`.
+- **Typing:** Explicitly type variable declarations; avoid ambiguous Variant assignments.

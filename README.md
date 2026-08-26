@@ -126,5 +126,8 @@ When developing or debugging this project with an Antigravity agent:
    ```powershell
    & "<path-to-godot>_console.exe" --headless --editor --quit
    ```
-3. **Art Pipeline:** Generate sprites on pure magenta `#FF00FF` background without outside glow or drop shadows, then run `python process_art.py <input.jpg> <output.png>`.
+3. **Art & Sprite Pipeline (CRITICAL):**
+   - **Chroma Key Background:** All future generated sprite artwork MUST be rendered on a solid pure magenta (`#FF00FF`) chroma-key background (or another unambiguous, non-art color) without drop shadows, semi-transparent halos, or outer glows.
+   - **Solid Foregrounds:** Never use black or white backgrounds for sprite generation. Black/dark backgrounds blend into dark hulls and cause interior metal/cockpits to become see-through during alpha extraction.
+   - **Extraction:** Run `python process_art.py <input.jpg> <output.png> [--no-crop]` to extract sprites. The script guarantees 100% full alpha opacity (`alpha = 255`) across the entire ship body while cleanly keying out the background.
 4. **GDScript Typing:** Avoid ambiguous `:=` assignments from `Variant` returns; specify explicit types `var x: Type = ...` to prevent parser warnings.
