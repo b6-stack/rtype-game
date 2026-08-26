@@ -64,7 +64,7 @@ var _next_chunk_x: float = 1920.0
 ## fastest level's scroll speed. Boss Rush keeps its own short floor since
 ## back-to-back boss fights (no regular waves between them) is the whole
 ## point of that mode.
-const MIN_TIME_BEFORE_BOSS: float = 65.0
+const MIN_TIME_BEFORE_BOSS: float = 130.0
 const MIN_TIME_BEFORE_BOSS_RUSH: float = 7.0
 var _level_elapsed_time: float = 0.0
 

@@ -18,13 +18,27 @@ func _ready() -> void:
 ## the player's finger IS the control and the ship sits to the right of
 ## that band, so a fully omnidirectional spiral/radial (the pulsar's
 ## identity) was flooding the exact space the player needs to dodge in.
-## Bullets that would fly within this arc of due-left are simply not
-## spawned. Kept narrow (45 degrees, not the original 120) so the pattern
-## still mostly reads as a genuine 360-degree spiral like the other
-## bosses — just missing one small wedge — rather than looking broken.
+## Bullets that would fly within this arc are simply not spawned. Kept
+## narrow (45 degrees, not the original 120) so the pattern still mostly
+## reads as a genuine 360-degree spiral like the other bosses — just
+## missing one small wedge — rather than looking broken.
 ## Direct aimed shots at the player are unaffected — those are singular
 ## and telegraphed, not blanket clutter.
-const SAFE_LANE_DIR_X_THRESHOLD: float = -0.9239
+##
+## The lane's center sweeps slowly around due-left instead of sitting
+## fixed there, so the player can't just camp at the boss's exact height
+## and tank-free-fire from a permanently safe spot — they have to track
+## where the gap currently is.
+const SAFE_LANE_HALF_WIDTH_RAD: float = 0.3927  # 22.5 degrees
+const SAFE_LANE_SWEEP_AMPLITUDE_RAD: float = 0.6109  # 35 degrees
+const SAFE_LANE_SWEEP_PERIOD: float = 5.0
+
+func _safe_lane_center_angle() -> float:
+	return PI + sin(_time * TAU / SAFE_LANE_SWEEP_PERIOD) * SAFE_LANE_SWEEP_AMPLITUDE_RAD
+
+func _in_safe_lane(dir: Vector2) -> bool:
+	var diff: float = wrapf(dir.angle() - _safe_lane_center_angle(), -PI, PI)
+	return absf(diff) < SAFE_LANE_HALF_WIDTH_RAD
 
 func _phase_attack(delta: float) -> void:
 	_spin_angle += delta * 120.0
@@ -53,7 +67,7 @@ func _phase_attack(delta: float) -> void:
 
 func _fire_spiral_bullet(angle_deg: float, speed: float, col: Color, dmg: int) -> void:
 	var dir := Vector2.LEFT.rotated(deg_to_rad(angle_deg))
-	if dir.x < SAFE_LANE_DIR_X_THRESHOLD:
+	if _in_safe_lane(dir):
 		return
 	_spawn_boss_bullet(dir * speed, col, dmg)
 
@@ -61,6 +75,6 @@ func _fire_radial_avoiding_safe_lane(count: int, speed: float, dmg: int, col: Co
 	for i in count:
 		var angle: float = TAU / float(count) * i + deg_to_rad(angle_offset_deg)
 		var dir := Vector2.RIGHT.rotated(angle)
-		if dir.x < SAFE_LANE_DIR_X_THRESHOLD:
+		if _in_safe_lane(dir):
 			continue
 		_spawn_boss_bullet(dir * speed, col, dmg)

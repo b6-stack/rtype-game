@@ -108,8 +108,19 @@ func _phase_attack(delta: float) -> void:
 ## Same narrow safe-lane reservation as Dread Star — the sweep's start
 ## angles pass close to due-left at the beginning of each cycle, flooding
 ## the player's maneuvering room. Kept narrow (45 degrees) so the sweep
-## still mostly reads as a full arc rather than looking broken.
-const SAFE_LANE_DIR_X_THRESHOLD: float = -0.9239
+## still mostly reads as a full arc rather than looking broken. The
+## lane's center sweeps slowly instead of sitting fixed at due-left, so
+## the player can't camp at one height and tank-free-fire indefinitely.
+const SAFE_LANE_HALF_WIDTH_RAD: float = 0.3927  # 22.5 degrees
+const SAFE_LANE_SWEEP_AMPLITUDE_RAD: float = 0.6109  # 35 degrees
+const SAFE_LANE_SWEEP_PERIOD: float = 5.0
+
+func _safe_lane_center_angle() -> float:
+	return PI + sin(_time * TAU / SAFE_LANE_SWEEP_PERIOD) * SAFE_LANE_SWEEP_AMPLITUDE_RAD
+
+func _in_safe_lane(dir: Vector2) -> bool:
+	var diff: float = wrapf(dir.angle() - _safe_lane_center_angle(), -PI, PI)
+	return absf(diff) < SAFE_LANE_HALF_WIDTH_RAD
 
 func _fire_sweep_bullets() -> void:
 	var t: float = _sweep_timer / SWEEP_DURATION  # 0..1
@@ -118,7 +129,7 @@ func _fire_sweep_bullets() -> void:
 		var current_deg: float = sweep["start_deg"] + sweep["dir"] * t * SWEEP_DEGREES
 		var rad: float = deg_to_rad(current_deg)
 		var vel: Vector2 = Vector2(cos(rad), sin(rad)) * sweep["speed"]
-		if vel.normalized().x < SAFE_LANE_DIR_X_THRESHOLD:
+		if _in_safe_lane(vel):
 			continue
 		_spawn_boss_bullet(vel, sweep["color"], sweep["dmg"])
 
@@ -141,7 +152,7 @@ func _fire_radial_avoiding_safe_lane(count: int, speed: float, dmg: int, col: Co
 	for i in count:
 		var angle: float = TAU / float(count) * i + deg_to_rad(angle_offset_deg)
 		var dir := Vector2.RIGHT.rotated(angle)
-		if dir.x < SAFE_LANE_DIR_X_THRESHOLD:
+		if _in_safe_lane(dir):
 			continue
 		_spawn_boss_bullet(dir * speed, col, dmg)
 
