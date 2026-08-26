@@ -27,6 +27,28 @@ var _patrol_dir: int = 1
 const PATROL_SPEED: float = 100.0
 const PATROL_RANGE: float = 200.0
 
+## The phase-3 radial (all heads gone, boss desperate) is a full 360
+## spread — reserves a shifting safe lane the same way Dread Star/Photon
+## Core/Hyperion do, so the player isn't trapped by it.
+const SAFE_LANE_HALF_WIDTH_RAD: float = 0.3927  # 22.5 degrees
+const SAFE_LANE_SWEEP_AMPLITUDE_RAD: float = 0.6109  # 35 degrees
+const SAFE_LANE_SWEEP_PERIOD: float = 4.5
+
+func _safe_lane_center_angle() -> float:
+	return PI + sin(_time * TAU / SAFE_LANE_SWEEP_PERIOD) * SAFE_LANE_SWEEP_AMPLITUDE_RAD
+
+func _in_safe_lane(dir: Vector2) -> bool:
+	var diff: float = wrapf(dir.angle() - _safe_lane_center_angle(), -PI, PI)
+	return absf(diff) < SAFE_LANE_HALF_WIDTH_RAD
+
+func _fire_radial_avoiding_safe_lane(count: int, speed: float, dmg: int, col: Color, angle_offset_deg: float) -> void:
+	for i in count:
+		var angle: float = TAU / float(count) * i + deg_to_rad(angle_offset_deg)
+		var dir: Vector2 = Vector2.RIGHT.rotated(angle)
+		if _in_safe_lane(dir):
+			continue
+		_spawn_boss_bullet(dir * speed, col, dmg)
+
 
 func _ready() -> void:
 	boss_name = "Hydra"
@@ -138,7 +160,7 @@ func _phase_attack(delta: float) -> void:
 		_radial_timer += delta
 		if _radial_timer >= 1.5:
 			_radial_timer = 0.0
-			_fire_radial(8, 480.0, 14, Color(0.1, 1.0, 0.4, 1.0), _time * 30.0)
+			_fire_radial_avoiding_safe_lane(8, 480.0, 14, Color(0.1, 1.0, 0.4, 1.0), _time * 30.0)
 
 
 ## Vertical-only patrol; horizontal drift comes from BossBase's default

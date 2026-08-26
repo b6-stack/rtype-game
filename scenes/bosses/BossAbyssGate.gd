@@ -152,7 +152,7 @@ func _spawn_gravity_well() -> void:
 
 ## Orbits a debris chip around the well's center while spiraling it inward
 ## over the loop, so it reads as being pulled in rather than just circling.
-func _orbit_chip(chip: Polygon2D, start_angle: float, t: float) -> void:
+func _orbit_chip(t: float, chip: Polygon2D, start_angle: float) -> void:
 	if not is_instance_valid(chip):
 		return
 	var angle: float = start_angle + t

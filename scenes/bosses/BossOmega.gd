@@ -1,7 +1,8 @@
 class_name BossOmega
 extends BossBase
 
-## Omega — Final Boss, 4 phases combining all previous patterns.
+## Omega — Level 8 boss, 4 phases combining several previous patterns.
+## (Hyperion Prime, Level 10, is the true final boss.)
 ## Phase 0: Spinning claw attack (IronClaw-style).
 ## Phase 1: Laser sweep (PhotonCore-style).
 ## Phase 2: Charge + spawn grunts (Behemoth+SwarmQueen-style).
@@ -11,6 +12,28 @@ extends BossBase
 var _patrol_dir: int = 1
 const PATROL_SPEED: float = 100.0
 const PATROL_RANGE: float = 230.0
+
+## The dense phase 2/3 radials are exactly the "camp the safe spot" case
+## — reserves a shifting safe lane the same way Dread Star/Photon Core/
+## Hydra/Behemoth/Hyperion do.
+const SAFE_LANE_HALF_WIDTH_RAD: float = 0.3927  # 22.5 degrees
+const SAFE_LANE_SWEEP_AMPLITUDE_RAD: float = 0.6109  # 35 degrees
+const SAFE_LANE_SWEEP_PERIOD: float = 4.5
+
+func _safe_lane_center_angle() -> float:
+	return PI + sin(_time * TAU / SAFE_LANE_SWEEP_PERIOD) * SAFE_LANE_SWEEP_AMPLITUDE_RAD
+
+func _in_safe_lane(dir: Vector2) -> bool:
+	var diff: float = wrapf(dir.angle() - _safe_lane_center_angle(), -PI, PI)
+	return absf(diff) < SAFE_LANE_HALF_WIDTH_RAD
+
+func _fire_radial_avoiding_safe_lane(count: int, speed: float, dmg: int, col: Color, angle_offset_deg: float) -> void:
+	for i in count:
+		var angle: float = TAU / float(count) * i + deg_to_rad(angle_offset_deg)
+		var dir: Vector2 = Vector2.RIGHT.rotated(angle)
+		if _in_safe_lane(dir):
+			continue
+		_spawn_boss_bullet(dir * speed, col, dmg)
 
 # ── Phase 0 – Claw ────────────────────────────────────────────────────────────
 var _claw_top: Polygon2D
@@ -150,7 +173,7 @@ func _phase2_charge_grunts(delta: float) -> void:
 	_radial_timer += delta
 	if _radial_timer >= 2.8:
 		_radial_timer = 0.0
-		_fire_radial(5, 500.0, 18, Color(1.0, 0.4, 0.1, 1.0), _time * 20.0)
+		_fire_radial_avoiding_safe_lane(5, 500.0, 18, Color(1.0, 0.4, 0.1, 1.0), _time * 20.0)
 
 
 # ── Phase 3: All-Out ──────────────────────────────────────────────────────────
@@ -166,7 +189,7 @@ func _phase3_all_out(delta: float) -> void:
 	_radial_timer += delta
 	if _radial_timer >= 1.6:
 		_radial_timer = 0.0
-		_fire_radial(7, 560.0, 20, Color(1.0, 0.2, 0.2, 1.0), _time * 30.0)
+		_fire_radial_avoiding_safe_lane(7, 560.0, 20, Color(1.0, 0.2, 0.2, 1.0), _time * 30.0)
 
 	# Teleport every 4s
 	_teleport_timer += delta
@@ -228,41 +251,47 @@ func _spawn_gravity_well() -> void:
 	well.collision_mask = 0
 	well.global_position = global_position + Vector2(randf_range(-250, 250), randf_range(-180, 180))
 
-	# Layered, animated visual — a flat static circle read as decoration
-	# rather than an active hazard. Two counter-rotating warning rings, a
-	# pulsing core, and orbiting debris chips that spiral inward sell the
-	# "actively pulling you in" read at a glance.
-	var ring: Polygon2D = Polygon2D.new()
-	ring.polygon = _build_circle_poly(GRAVITY_RADIUS, 28)
-	ring.color = Color(1.0, 0.3, 0.05, 0.16)
-	well.add_child(ring)
-	var ring_tween := ring.create_tween().set_loops()
-	ring_tween.tween_property(ring, "rotation", TAU, 3.0).set_trans(Tween.TRANS_LINEAR)
-
-	var swirl: Polygon2D = Polygon2D.new()
-	swirl.polygon = _build_circle_poly(GRAVITY_RADIUS * 0.55, 20)
-	swirl.color = Color(0.9, 0.1, 0.0, 0.22)
-	well.add_child(swirl)
-	var swirl_tween := swirl.create_tween().set_loops()
-	swirl_tween.tween_property(swirl, "rotation", -TAU, 1.8).set_trans(Tween.TRANS_LINEAR)
+	# Deliberately NOT Abyss Gate's smooth-swirling-portal look (rotating
+	# rings, orbiting circular chips) — Omega's whole identity is jagged
+	# battle-damaged armor, so its trap reads as a cracking singularity
+	# tearing itself apart: a strobing jagged fracture ring (flickers
+	# on/off instead of spinning), a harshly-pulsing angular void core,
+	# and square debris shards that both spiral inward AND tumble on
+	# their own axis, unlike Abyss Gate's serene circular orbit.
+	var fracture_ring: Polygon2D = Polygon2D.new()
+	fracture_ring.polygon = _build_jagged_star_poly(GRAVITY_RADIUS, GRAVITY_RADIUS * 0.72, 10)
+	fracture_ring.color = Color(1.0, 0.15, 0.0, 0.28)
+	well.add_child(fracture_ring)
+	var strobe_tween := fracture_ring.create_tween().set_loops()
+	strobe_tween.tween_property(fracture_ring, "modulate:a", 0.15, 0.08)
+	strobe_tween.tween_property(fracture_ring, "modulate:a", 1.0, 0.05)
+	strobe_tween.tween_interval(0.18)
 
 	var core: Polygon2D = Polygon2D.new()
-	core.polygon = _build_circle_poly(30.0, 14)
-	core.color = Color(1.0, 0.2, 0.0, 0.75)
+	core.polygon = _build_jagged_star_poly(28.0, 14.0, 7)
+	core.color = Color(0.15, 0.0, 0.0, 0.9)
 	well.add_child(core)
 	var core_tween := core.create_tween().set_loops()
-	core_tween.tween_property(core, "scale", Vector2(1.3, 1.3), 0.4).set_trans(Tween.TRANS_SINE)
-	core_tween.tween_property(core, "scale", Vector2(0.85, 0.85), 0.4).set_trans(Tween.TRANS_SINE)
+	core_tween.tween_property(core, "scale", Vector2(1.5, 1.5), 0.12).set_trans(Tween.TRANS_EXPO)
+	core_tween.tween_property(core, "scale", Vector2(0.7, 0.7), 0.22).set_trans(Tween.TRANS_EXPO)
+	core_tween.tween_interval(0.1)
+
+	var core_rim: Polygon2D = Polygon2D.new()
+	core_rim.polygon = _build_circle_poly(30.0, 16)
+	core_rim.color = Color(1.0, 0.3, 0.0, 0.6)
+	well.add_child(core_rim)
 
 	for i in 6:
-		var chip := Polygon2D.new()
-		chip.polygon = _build_circle_poly(5.0, 6)
-		chip.color = Color(1.0, 0.55, 0.15, 0.9)
-		var start_angle: float = (TAU / 6.0) * i
-		chip.position = Vector2(cos(start_angle), sin(start_angle)) * GRAVITY_RADIUS
-		well.add_child(chip)
-		var chip_tween := chip.create_tween().set_loops()
-		chip_tween.tween_method(_orbit_chip.bind(chip, start_angle), 0.0, TAU, 1.6).set_trans(Tween.TRANS_LINEAR)
+		var shard := Polygon2D.new()
+		shard.polygon = PackedVector2Array([Vector2(-5, -5), Vector2(5, -5), Vector2(5, 5), Vector2(-5, 5)])
+		shard.color = Color(0.6, 0.1, 0.0, 0.95)
+		var start_angle: float = (TAU / 6.0) * i + randf_range(-0.2, 0.2)
+		shard.position = Vector2(cos(start_angle), sin(start_angle)) * GRAVITY_RADIUS
+		well.add_child(shard)
+		var shard_tween := shard.create_tween().set_loops()
+		shard_tween.tween_method(_orbit_chip.bind(shard, start_angle), 0.0, TAU, 1.3).set_trans(Tween.TRANS_LINEAR)
+		var spin_tween := shard.create_tween().set_loops()
+		spin_tween.tween_property(shard, "rotation", TAU, 0.5).set_trans(Tween.TRANS_LINEAR)
 
 	well.set_meta("force", GRAVITY_FORCE)
 	well.set_meta("radius", GRAVITY_RADIUS)
@@ -270,9 +299,21 @@ func _spawn_gravity_well() -> void:
 	_gravity_wells.append(well)
 
 
+## Alternating outer/inner-radius polygon — a jagged "fractured" look in
+## place of a smooth circle, distinct from Abyss Gate's rounded rings.
+func _build_jagged_star_poly(outer_radius: float, inner_radius: float, points: int) -> PackedVector2Array:
+	var pts: PackedVector2Array = PackedVector2Array()
+	var step: float = TAU / float(points * 2)
+	for i in points * 2:
+		var r: float = outer_radius if i % 2 == 0 else inner_radius
+		var a: float = step * i
+		pts.append(Vector2(cos(a) * r, sin(a) * r))
+	return pts
+
+
 ## Orbits a debris chip around the well's center while spiraling it inward
 ## over the loop, so it reads as being pulled in rather than just circling.
-func _orbit_chip(chip: Polygon2D, start_angle: float, t: float) -> void:
+func _orbit_chip(t: float, chip: Polygon2D, start_angle: float) -> void:
 	if not is_instance_valid(chip):
 		return
 	var angle: float = start_angle + t

@@ -22,6 +22,28 @@ var _patrol_dir: int = 1
 const PATROL_SPEED: float = 70.0
 const PATROL_RANGE: float = 180.0
 
+## A sustained full-360 radial every 1.5-2s is exactly the "camp the safe
+## spot" case — reserves a shifting safe lane the same way Dread Star/
+## Photon Core/Hydra/Hyperion do.
+const SAFE_LANE_HALF_WIDTH_RAD: float = 0.3927  # 22.5 degrees
+const SAFE_LANE_SWEEP_AMPLITUDE_RAD: float = 0.6109  # 35 degrees
+const SAFE_LANE_SWEEP_PERIOD: float = 4.5
+
+func _safe_lane_center_angle() -> float:
+	return PI + sin(_time * TAU / SAFE_LANE_SWEEP_PERIOD) * SAFE_LANE_SWEEP_AMPLITUDE_RAD
+
+func _in_safe_lane(dir: Vector2) -> bool:
+	var diff: float = wrapf(dir.angle() - _safe_lane_center_angle(), -PI, PI)
+	return absf(diff) < SAFE_LANE_HALF_WIDTH_RAD
+
+func _fire_radial_avoiding_safe_lane(count: int, speed: float, dmg: int, col: Color, angle_offset_deg: float) -> void:
+	for i in count:
+		var angle: float = TAU / float(count) * i + deg_to_rad(angle_offset_deg)
+		var dir: Vector2 = Vector2.RIGHT.rotated(angle)
+		if _in_safe_lane(dir):
+			continue
+		_spawn_boss_bullet(dir * speed, col, dmg)
+
 func _ready() -> void:
 	boss_name = "Behemoth"
 	max_health = 1500
@@ -85,7 +107,7 @@ func _handle_radial(delta: float) -> void:
 	_radial_timer += delta
 	if _radial_timer >= fire_rate:
 		_radial_timer = 0.0
-		_fire_radial(shot_count, 420.0, 16, Color(0.8, 0.4, 0.1, 1.0), _time * 15.0)
+		_fire_radial_avoiding_safe_lane(shot_count, 420.0, 16, Color(0.8, 0.4, 0.1, 1.0), _time * 15.0)
 
 func _on_phase_change(new_phase: int) -> void:
 	match new_phase:
