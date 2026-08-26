@@ -7,7 +7,7 @@ var _barrage_timer: float = 0.0
 
 func _ready() -> void:
 	boss_name = "Dread Star"
-	max_health = 2500
+	max_health = 4375
 	phase_count = 3
 	score_value = 25000
 	boss_color = Color(0.9, 0.2, 0.8)

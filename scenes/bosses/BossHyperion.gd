@@ -32,7 +32,7 @@ func _in_safe_lane(dir: Vector2) -> bool:
 
 func _ready() -> void:
 	boss_name = "Hyperion Prime"
-	max_health = 2800
+	max_health = 7000
 	phase_count = 4
 	score_value = 50000
 	boss_color = Color(1.0, 0.85, 0.1)
@@ -58,11 +58,13 @@ func _phase0_radial_aimed(_delta: float) -> void:
 		_fire_radial_avoiding_safe_lane(8, 450.0, 2, Color.GOLD, _time * 20.0)
 		_fire_at_player(600.0, 2, Color.ORANGE)
 
-## Phase 1 — adds a Photon-Core-style sweeping beam alongside a lighter
-## radial burst, so the player has to track two different threat shapes
-## at once instead of just one radial pattern.
+## Phase 1 — adds a Photon-Core-style sweeping beam and an occasional,
+## rare ramming charge (a taste of what's coming) alongside a lighter
+## radial burst, so the player has three different threat shapes to
+## track instead of just one radial pattern.
 func _phase1_sweep_radial(delta: float) -> void:
 	_sweep_timer += delta
+	_handle_charge(delta, 2.6, -700.0, 0.5, 1.0)
 	if _pattern_timer >= 1.4:
 		_pattern_timer = 0.0
 		_fire_radial_avoiding_safe_lane(8, 470.0, 2, Color.ORANGE, _time * 45.0)
@@ -73,40 +75,27 @@ func _phase1_sweep_radial(delta: float) -> void:
 		if not _in_safe_lane(dir):
 			_spawn_boss_bullet(dir * 700.0, Color.CYAN, 2)
 
-## Phase 2 — adds a Behemoth-style ramming charge (a real positional
-## threat, not just more bullets) alongside the dual counter-rotating
-## radial from before.
+## Phase 2 — a full Behemoth-style ramming charge cycle (a real
+## positional threat, not just more bullets) alongside the dual
+## counter-rotating radial from before.
 func _phase2_charge_dual_radial(delta: float) -> void:
-	_charge_timer += delta
-	match _charge_state:
-		ChargeState.IDLE:
-			if _charge_timer >= 1.6:
-				_home_x = position.x
-				_charge_state = ChargeState.CHARGING
-				_charge_timer = 0.0
-		ChargeState.CHARGING:
-			velocity.x = -800.0
-			if _charge_timer >= 0.6 or position.x <= 250.0:
-				_charge_state = ChargeState.RECOVERING
-				_charge_timer = 0.0
-		ChargeState.RECOVERING:
-			velocity.x = clamp((_home_x - position.x) * 3.0, 150.0, 900.0)
-			if position.x >= _home_x - 10.0 or _charge_timer >= 1.0:
-				position.x = _home_x
-				_charge_state = ChargeState.IDLE
-				_charge_timer = 0.0
+	_handle_charge(delta, 1.6, -800.0, 0.6, 1.0)
 
 	if _pattern_timer >= 1.1:
 		_pattern_timer = 0.0
 		_fire_radial_avoiding_safe_lane(10, 500.0, 2, Color.CYAN, -_time * 60.0)
 		_fire_radial_avoiding_safe_lane(6, 380.0, 2, Color.MAGENTA, _time * 30.0)
 
-## Phase 3 — everything at once: the densest radial storm, aimed fire,
-## and a short-range teleport (Abyss-Gate/Dread-Star style) to keep the
+## Phase 3 — everything at once: furious back-to-back ramming charges
+## (matching Behemoth's own phase-1 escalation: faster cycle, harder
+## charge speed), the densest radial storm, aimed fire, and a
+## short-range teleport (Abyss-Gate/Dread-Star style) to keep the
 ## player from settling into one dodge rhythm. The safe lane is what
 ## keeps this survivable despite the volume -- there is always exactly
 ## one guaranteed gap, it just keeps moving.
 func _phase3_everything(delta: float) -> void:
+	_handle_charge(delta, 1.0, -1000.0, 0.6, 0.8)
+
 	if _pattern_timer >= 0.6:
 		_pattern_timer = 0.0
 		_fire_radial_avoiding_safe_lane(12, 540.0, 2, Color.YELLOW, sin(_time * 3.0) * 90.0)
@@ -116,6 +105,31 @@ func _phase3_everything(delta: float) -> void:
 	if _teleport_timer >= 5.0:
 		_teleport_timer = 0.0
 		_do_teleport()
+
+## Shared Behemoth-style ramming charge state machine — idle/charge/recover
+## durations and charge speed are tuned per phase so later phases feel
+## more furious, the same way Behemoth itself escalates between its two
+## phases.
+func _handle_charge(delta: float, idle_duration: float, charge_speed: float,
+		charge_duration: float, recover_duration: float) -> void:
+	_charge_timer += delta
+	match _charge_state:
+		ChargeState.IDLE:
+			if _charge_timer >= idle_duration:
+				_home_x = position.x
+				_charge_state = ChargeState.CHARGING
+				_charge_timer = 0.0
+		ChargeState.CHARGING:
+			velocity.x = charge_speed
+			if _charge_timer >= charge_duration or position.x <= 250.0:
+				_charge_state = ChargeState.RECOVERING
+				_charge_timer = 0.0
+		ChargeState.RECOVERING:
+			velocity.x = clamp((_home_x - position.x) * 3.0, 150.0, 900.0)
+			if position.x >= _home_x - 10.0 or _charge_timer >= recover_duration:
+				position.x = _home_x
+				_charge_state = ChargeState.IDLE
+				_charge_timer = 0.0
 
 func _do_teleport() -> void:
 	var margin: float = 120.0

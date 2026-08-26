@@ -22,7 +22,7 @@ var _flash_color: bool = false
 
 func _ready() -> void:
 	boss_name = "Abyss Gate"
-	max_health = 1300
+	max_health = 2200
 	phase_count = 4
 	boss_color = Color(0.25, 0.0, 0.45, 1.0)
 	size_scale = 1.2

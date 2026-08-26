@@ -33,7 +33,7 @@ const PATROL_RANGE: float = 220.0
 
 func _ready() -> void:
 	boss_name = "Sentinel"
-	max_health = 1000
+	max_health = 1600
 	phase_count = 3
 	boss_color = Color(0.35, 0.65, 0.95, 1.0)
 	size_scale = 1.15

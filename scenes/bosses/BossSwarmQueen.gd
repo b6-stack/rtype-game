@@ -20,7 +20,7 @@ const PATROL_RANGE: float = 260.0
 
 func _ready() -> void:
 	boss_name = "Swarm Queen"
-	max_health = 900
+	max_health = 1450
 	phase_count = 2
 	boss_color = Color(0.6, 0.1, 0.7, 1.0)
 	size_scale = 1.0

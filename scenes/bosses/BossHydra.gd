@@ -52,7 +52,7 @@ func _fire_radial_avoiding_safe_lane(count: int, speed: float, dmg: int, col: Co
 
 func _ready() -> void:
 	boss_name = "Hydra"
-	max_health = 1200
+	max_health = 1850
 	phase_count = 3
 	boss_color = Color(0.1, 0.8, 0.3, 1.0)
 	size_scale = 1.2

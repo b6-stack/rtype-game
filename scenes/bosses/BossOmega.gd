@@ -66,7 +66,7 @@ const GRAVITY_RADIUS: float = 180.0
 
 func _ready() -> void:
 	boss_name = "Omega"
-	max_health = 2000
+	max_health = 3450
 	phase_count = 4
 	boss_color = Color(0.6, 0.0, 0.0, 1.0)
 	size_scale = 1.5

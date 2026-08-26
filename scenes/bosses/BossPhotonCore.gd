@@ -23,7 +23,7 @@ const PATROL_RANGE: float = 200.0
 
 func _ready() -> void:
 	boss_name = "Photon Core"
-	max_health = 1100
+	max_health = 1800
 	phase_count = 3
 	boss_color = Color(1.0, 0.9, 0.1, 1.0)
 	size_scale = 1.0

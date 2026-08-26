@@ -46,7 +46,7 @@ func _fire_radial_avoiding_safe_lane(count: int, speed: float, dmg: int, col: Co
 
 func _ready() -> void:
 	boss_name = "Behemoth"
-	max_health = 1500
+	max_health = 2350
 	phase_count = 2
 	boss_color = Color(0.35, 0.2, 0.1, 1.0)
 	size_scale = 1.8

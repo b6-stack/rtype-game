@@ -21,7 +21,7 @@ var _fire_timer: float = 0.0
 
 func _ready() -> void:
 	boss_name = "Iron Claw"
-	max_health = 800
+	max_health = 1200
 	phase_count = 2
 	boss_color = Color(0.6, 0.6, 0.65, 1.0)
 	size_scale = 1.0
