@@ -30,13 +30,13 @@ func _do_fire(spawn_pos: Vector2) -> void:
 		_attach_homing(b, 0.25)
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
-	var raw_dmg: float = damage * lerpf(1.5, 2.2, charge_level)
-	var missile_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level) * get_charge_damage_scale()))
 	var missile_size: float = lerpf(1.2, 1.8, charge_level)
 
 	if charge_level < 1.0:
 		# Partial charge: one faster, harder-hitting missile — not a spread,
 		# so a quick tap-charge can't approximate the full 6-missile salvo.
+		var raw_dmg: float = damage * lerpf(1.5, 2.2, charge_level)
+		var missile_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level) * get_charge_damage_scale()))
 		var speed_mult: float = lerpf(1.3, 1.75, charge_level)
 		var b: Bullet = _spawn_bullet(spawn_pos, Vector2.RIGHT * (bullet_speed * speed_mult),
 				bullet_color.lightened(0.25), missile_dmg, missile_size, "missile")
@@ -44,11 +44,21 @@ func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
 			_attach_homing(b, 0.3)
 		return
 
-	# Full charge only: 6-Missile Macross Swarm Salvo.
+	# Full charge only: 6-Missile Macross Swarm Salvo. Every missile homes
+	# and is very likely to connect, so unlike a normal charged shot the
+	# salvo's total output was landing as a single ~25% boss-health burst
+	# from one charge cycle -- far too strong for a homing, low-skill
+	# payoff. Kept deliberately weak per-missile (a separate, much lower
+	# formula than the partial-charge shot above) so the salvo reads as
+	# guaranteed chip damage / add-clearing utility rather than a burst
+	# nuke; total output across all 6 hits should land well under 5% of
+	# any boss's health.
+	var salvo_raw_dmg: float = damage * 0.45
+	var salvo_missile_dmg: int = max(1, int(salvo_raw_dmg * get_charge_damage_scale()))
 	var angles: Array = [-35.0, -15.0, 15.0, 35.0, -50.0, 50.0]
 	for angle in angles:
 		var vel: Vector2 = Vector2.RIGHT.rotated(deg_to_rad(angle)) * (bullet_speed * 1.1)
-		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.6), missile_dmg, missile_size, "missile", 0, true)
+		var b: Bullet = _spawn_bullet(spawn_pos, vel, bullet_color.lightened(0.6), salvo_missile_dmg, missile_size, "missile", 0, true)
 		if b:
 			_attach_homing(b, 0.35)
 
