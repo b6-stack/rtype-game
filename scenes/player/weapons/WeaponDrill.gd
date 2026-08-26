@@ -15,7 +15,10 @@ func _do_fire(spawn_pos: Vector2) -> void:
 	)
 
 func _do_charge_fire(spawn_pos: Vector2, charge_level: float) -> void:
-	var raw_dmg: float = damage * 3.3 * charge_level + 23.0
+	# Same logic as Plasma/Gravity: this is a slow, heavy, single-target
+	# charge payoff that has to actually connect, so a full charge is
+	# meant to hit hard -- ~18-20% of an early/mid boss's health.
+	var raw_dmg: float = damage * 16.0 * charge_level + 115.0
 	var drill_dmg: int = max(1, int(raw_dmg * get_charge_tier_multiplier(charge_level) * get_charge_damage_scale()))
 	var drill_size: float = lerpf(1.8, 3.8, charge_level)
 	var drill_col: Color = bullet_color.lightened(0.35 if charge_level < 1.0 else 0.8)
