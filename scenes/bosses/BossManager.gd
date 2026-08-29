@@ -162,10 +162,9 @@ func _on_boss_died() -> void:
 	if hud and hud.has_method("hide_boss_bar"):
 		hud.hide_boss_bar()
 
-	# Drop guaranteed weapon power-up on boss defeat
+	# Drop guaranteed weapon power-up on boss defeat (random non-equipped weapon)
 	if powerup_spawner:
-		var next_weapon_idx: int = (GameState.current_weapon_index + 1) % 10
-		powerup_spawner.spawn_powerup_at(boss_pos, next_weapon_idx, "weapon")
+		powerup_spawner.spawn_powerup_at(boss_pos, -1, "weapon")
 
 	boss_fight_ended.emit()
 

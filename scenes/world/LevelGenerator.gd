@@ -112,9 +112,8 @@ func initialize(level: int, speed: float) -> void:
 func _spawn_level_start_weapon_drop() -> void:
 	if powerup_spawner == null:
 		return
-	var weapon_index: int = _rng.randi_range(1, 9)
 	var drop_pos := Vector2(CHUNK_WIDTH * 2.0, SCREEN_HEIGHT / 2.0)
-	powerup_spawner.spawn_powerup_at(drop_pos, weapon_index, "weapon")
+	powerup_spawner.spawn_powerup_at(drop_pos, -1, "weapon")
 
 func _process(delta: float) -> void:
 	_level_elapsed_time += delta
