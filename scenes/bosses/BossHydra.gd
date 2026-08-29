@@ -121,8 +121,12 @@ func _on_head_hit(area: Area2D, head_index: int) -> void:
 	var head: HydraHead = _heads[head_index]
 	if not head.alive:
 		return
-	# Bullet damage — use 15 as default hit damage
-	head.hp -= 15
+	var dmg: int = 15
+	if area is Bullet and not area.is_enemy_bullet:
+		dmg = area.damage
+	elif "damage" in area:
+		dmg = area.damage
+	head.hp -= dmg
 	if head.hp <= 0:
 		_destroy_head(head_index)
 
@@ -168,7 +172,7 @@ func _phase_attack(delta: float) -> void:
 ## velocity.x, and doesn't call move_and_slide() itself — BossBase calls
 ## it once after _phase_attack() returns; calling it here too was
 ## double-applying movement every physics frame.
-func _patrol(delta: float) -> void:
+func _patrol(_delta: float) -> void:
 	var center_y: float = 540.0
 	if position.y > center_y + PATROL_RANGE:
 		_patrol_dir = -1

@@ -63,9 +63,9 @@ func set_charge(normalized: float) -> void:
 		if _charge_label:
 			_charge_label.text = "CHARGING 80% [RED]"
 
-func show_charge_bar(is_visible: bool) -> void:
-	_charge_bar.visible = is_visible
-	if not is_visible:
+func show_charge_bar(p_visible: bool) -> void:
+	_charge_bar.visible = p_visible
+	if not p_visible:
 		_charge_level = 0.0
 		_charge_bar.value = 0.0
 		_stop_charge_pulse()
@@ -242,14 +242,17 @@ func _on_level_changed(_lvl: int) -> void:
 # ── Boss Warning Arrival System ───────────────────────────────
 
 const BOSS_HINTS: Dictionary = {
-	"Iron Claw": "Focus fire on the central core when its rotating pincers open between strikes!",
-	"Hydra": "Destroy the 3 outer heads first to expose and breach the main core!",
-	"Behemoth": "Heavy ramming charger! Maneuver vertically to evade its high-speed rushes.",
-	"Sentinel": "Force-field barrier! Time your shots to shoot between the rotating shield gaps.",
-	"Swarm Queen": "Bio-hive matriarch! Clear the spawned swarm drones, then charge your shots.",
-	"Photon Core": "Sweeping particle laser! Slip behind the beam arc as it rotates across the arena.",
-	"Abyss Gate": "Dimensional warper! Evade gravity wells and predict its warp positions.",
-	"Omega": "Ultimate flagship! Adapt across all phases and unleash maximum Super Charges!"
+	"Iron Claw": "Focus fire on the central core between pincer strikes! Claws spin faster below 50% HP.",
+	"Hydra": "Destroy the 3 serpentine heads one by one to eliminate independent fire and expose the core!",
+	"Behemoth": "Heavy ramming juggernaut! Maneuver vertically to dodge high-speed charges, then punish on recovery.",
+	"Sentinel": "Rotating force-field barrier! Shots bounce off shields — time charged shots through rotating gaps.",
+	"Swarm Queen": "Bio-hive matriarch! Vaporize spawned drone escorts with spread shots, then blast the queen.",
+	"Photon Core": "Sweeping particle laser! Trace behind the rotating beam arc to stay safe while delivering fire.",
+	"Abyss Gate": "Dimensional warper! Evade gravity wells that pull your ship and predict warp relocation points.",
+	"Omega": "Apex armada flagship! Adapt across all phases: claw spins, sweeping lasers, ram rushes, and radial storms.",
+	"Dread Star": "Cosmic pulsar dreadnought! Maneuver within the sweeping safe lane gap to dodge spiral bullet storms.",
+	"Hyperion": "Titan flagship apocalypse! Track the shifting safe lane while dodging sweeping lasers, ram rushes, and warps.",
+	"Hyperion Prime": "Titan flagship apocalypse! Track the shifting safe lane while dodging sweeping lasers, ram rushes, and warps."
 }
 
 var _warning_container: Control = null
