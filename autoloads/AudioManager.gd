@@ -44,39 +44,372 @@ var _current_level_music: int = -1
 var _current_boss_music_index: int = -1
 var _is_boss_music: bool = false
 
-## Per-level theme parameters (index 0 = level 1), matching each level's
-## biome name/mood in LevelGenerator.LEVEL_COLORS.
-## NOTE: "duration" must be an exact multiple of the arp cycle length
-## (arp.size() * step) — otherwise the melody is cut off mid-phrase when
-## the WAV loops back to the start, producing an audible jump/"glitch"
-## on every repeat. (Level 1 originally didn't follow this and was the
-## one instance that got noticed — its sparse arrangement had nothing
-## else to mask the discontinuity. Values below are all aligned.)
+## 10 Level Full Scores (matching LevelGenerator biomes & moods)
 const LEVEL_THEMES: Array[Dictionary] = [
-	{ "root": 130.81, "arp": [1.0, 1.2, 1.333, 1.5, 1.778], "step": 0.35, "bass_style": "drone", "brightness": 0.0, "percussion": 0.0, "tremolo": 0.0, "voices": 1, "duration": 3.5 },   # 1 Blue Cave — mysterious, sparse (5 * 0.35 * 2)
-	{ "root": 146.83, "arp": [1.0, 1.125, 1.2, 1.333, 1.5], "step": 0.20, "bass_style": "pulse", "brightness": 0.25, "percussion": 0.18, "tremolo": 0.0, "voices": 1, "duration": 3.0 },  # 2 Red Cavern — aggressive, driving (5 * 0.20 * 3)
-	{ "root": 164.81, "arp": [1.0, 1.2, 1.0, 1.333, 1.5, 1.2], "step": 0.24, "bass_style": "wobble", "brightness": 0.15, "percussion": 0.14, "tremolo": 0.15, "voices": 1, "duration": 2.88 }, # 3 Green Base — organic, syncopated (6 * 0.24 * 2)
-	{ "root": 174.61, "arp": [1.0, 1.0, 1.25, 1.5], "step": 0.22, "bass_style": "march", "brightness": 0.35, "percussion": 0.22, "tremolo": 0.0, "voices": 1, "duration": 2.64 },        # 4 Brown Fortress — militaristic (4 * 0.22 * 3)
-	{ "root": 196.00, "arp": [1.0, 1.122, 1.26, 1.414, 1.587], "step": 0.30, "bass_style": "drone", "brightness": 0.1, "percussion": 0.05, "tremolo": 0.35, "voices": 1, "duration": 3.0 }, # 5 Purple Alien — eerie, dissonant (5 * 0.30 * 2)
-	{ "root": 220.00, "arp": [1.0, 1.125, 1.25, 1.333, 1.5, 1.667, 1.875, 2.0], "step": 0.11, "bass_style": "pulse", "brightness": 0.4, "percussion": 0.28, "tremolo": 0.0, "voices": 1, "duration": 2.64 }, # 6 Teal Station — techy, fast (8 * 0.11 * 3)
-	{ "root": 246.94, "arp": [1.0, 1.2, 1.333, 1.5], "step": 0.15, "bass_style": "stab", "brightness": 0.35, "percussion": 0.24, "tremolo": 0.0, "voices": 1, "duration": 2.4 },        # 7 Crimson Core — intense (4 * 0.15 * 4, already aligned)
-	{ "root": 261.63, "arp": [1.0, 1.125, 1.25, 1.333, 1.5, 1.667, 1.875], "step": 0.20, "bass_style": "march", "brightness": 0.45, "percussion": 0.16, "tremolo": 0.0, "voices": 1, "duration": 2.8 }, # 8 Gold Final — triumphant (7 * 0.20 * 2, already aligned)
-	{ "root": 146.83, "arp": [1.0, 1.122, 1.0, 0.944], "step": 0.5, "bass_style": "drone", "brightness": 0.0, "percussion": 0.03, "tremolo": 0.2, "voices": 1, "duration": 4.0 },       # 9 Cosmic Void — ambient, spacious (4 * 0.5 * 2, already aligned)
-	{ "root": 329.63, "arp": [1.0, 1.25, 1.5, 1.875, 2.0, 1.5], "step": 0.14, "bass_style": "pulse", "brightness": 0.5, "percussion": 0.3, "tremolo": 0.0, "voices": 1, "duration": 2.52 }, # 10 Solar Core — blazing (6 * 0.14 * 3)
+	# Level 1: Blue Cave — Subterranean Echoes (Cm - Ab - Eb - Bb)
+	{
+		"title": "Subterranean Echoes",
+		"chord_roots": [130.81, 103.83, 155.56, 116.54],
+		"chord_thirds": [1.2, 1.25, 1.25, 1.25],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.5, 1.333, 1.2, 1.0, 1.2, 1.333, 1.5, 1.778],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.2, 1.5, 1.778],
+		"arp_step": 0.125,
+		"bass_style": "pulse",
+		"drum_style": "ambient_pulse",
+		"brightness": 0.3,
+		"tremolo": 0.1,
+		"voices": 1,
+		"duration": 4.0
+	},
+	# Level 2: Red Cavern — Magma Veins (Dm - Bb - Gm - A)
+	{
+		"title": "Magma Veins",
+		"chord_roots": [146.83, 116.54, 98.00, 110.00],
+		"chord_thirds": [1.2, 1.25, 1.2, 1.25],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.2, 1.5, 1.414, 1.333, 1.2, 1.0, 1.5],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.2, 1.5, 1.2],
+		"arp_step": 0.125,
+		"bass_style": "wobble",
+		"drum_style": "four_on_floor",
+		"brightness": 0.4,
+		"tremolo": 0.0,
+		"voices": 1,
+		"duration": 4.0
+	},
+	# Level 3: Green Base — Biolab Infiltration (Em - C - G - D)
+	{
+		"title": "Biolab Infiltration",
+		"chord_roots": [164.81, 130.81, 196.00, 146.83],
+		"chord_thirds": [1.2, 1.25, 1.25, 1.25],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.2, 1.0, 1.5, 1.333, 1.2, 1.5, 1.778, 2.0],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.25, 1.5, 1.25],
+		"arp_step": 0.125,
+		"bass_style": "walk",
+		"drum_style": "breakbeat",
+		"brightness": 0.35,
+		"tremolo": 0.15,
+		"voices": 1,
+		"duration": 4.0
+	},
+	# Level 4: Brown Fortress — Iron Citadel (Fm - Db - Bbm - C)
+	{
+		"title": "Iron Citadel",
+		"chord_roots": [174.61, 138.59, 116.54, 130.81],
+		"chord_thirds": [1.2, 1.25, 1.2, 1.25],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.0, 1.2, 1.333, 1.5, 1.5, 1.414, 1.2],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.2, 1.5, 1.0],
+		"arp_step": 0.125,
+		"bass_style": "march",
+		"drum_style": "industrial_march",
+		"brightness": 0.45,
+		"tremolo": 0.0,
+		"voices": 1,
+		"duration": 4.0
+	},
+	# Level 5: Purple Alien — Xenomorphic Hive (Gm - Eb - F - Dm)
+	{
+		"title": "Xenomorphic Hive",
+		"chord_roots": [196.00, 155.56, 174.61, 146.83],
+		"chord_thirds": [1.2, 1.25, 1.25, 1.2],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.06, 1.2, 1.414, 1.26, 1.122, 1.0, 0.944],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.122, 1.26, 1.414],
+		"arp_step": 0.125,
+		"bass_style": "drone",
+		"drum_style": "tribal_poly",
+		"brightness": 0.25,
+		"tremolo": 0.35,
+		"voices": 1,
+		"duration": 4.0
+	},
+	# Level 6: Teal Station — Cyber Orbital (Am - F - Dm - Em)
+	{
+		"title": "Cyber Orbital",
+		"chord_roots": [220.00, 174.61, 146.83, 164.81],
+		"chord_thirds": [1.2, 1.25, 1.2, 1.2],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.5, 1.778, 2.0, 1.778, 1.5, 1.333, 1.2, 1.333],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.2, 1.5, 2.0, 1.5, 1.2, 1.0, 0.75],
+		"arp_step": 0.0625,
+		"bass_style": "pulse",
+		"drum_style": "speed_synth",
+		"brightness": 0.5,
+		"tremolo": 0.0,
+		"voices": 1,
+		"duration": 4.0
+	},
+	# Level 7: Crimson Core — Thermal Reactor (Bm - G - Em - F#)
+	{
+		"title": "Thermal Reactor",
+		"chord_roots": [246.94, 196.00, 164.81, 185.00],
+		"chord_thirds": [1.2, 1.25, 1.2, 1.25],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.2, 1.333, 1.5, 1.8, 1.5, 1.333, 1.2],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.333, 1.5, 1.8],
+		"arp_step": 0.125,
+		"bass_style": "stab",
+		"drum_style": "four_on_floor",
+		"brightness": 0.5,
+		"tremolo": 0.0,
+		"voices": 1,
+		"duration": 4.0
+	},
+	# Level 8: Gold Final — Ascent to Glory (C - G - Am - F)
+	{
+		"title": "Ascent to Glory",
+		"chord_roots": [261.63, 196.00, 220.00, 174.61],
+		"chord_thirds": [1.25, 1.25, 1.2, 1.25],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.25, 1.5, 2.0, 1.875, 1.667, 1.5, 1.25],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.25, 1.5, 1.875, 2.0, 1.5],
+		"arp_step": 0.125,
+		"bass_style": "pulse",
+		"drum_style": "four_on_floor",
+		"brightness": 0.55,
+		"tremolo": 0.0,
+		"voices": 2,
+		"duration": 4.0
+	},
+	# Level 9: Cosmic Void — Event Horizon (Dm - Bb - C - Gm)
+	{
+		"title": "Event Horizon",
+		"chord_roots": [146.83, 116.54, 130.81, 98.00],
+		"chord_thirds": [1.2, 1.25, 1.25, 1.2],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.122, 1.333, 1.2, 1.5, 1.414, 1.2, 1.0],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.2, 1.5, 1.778],
+		"arp_step": 0.25,
+		"bass_style": "drone",
+		"drum_style": "ambient_pulse",
+		"brightness": 0.15,
+		"tremolo": 0.25,
+		"voices": 2,
+		"duration": 4.0
+	},
+	# Level 10: Solar Core — Supernova Climax (Em - G - D - Bm)
+	{
+		"title": "Supernova Climax",
+		"chord_roots": [164.81, 196.00, 146.83, 123.47],
+		"chord_thirds": [1.2, 1.25, 1.25, 1.2],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.5, 1.875, 2.0, 2.25, 2.0, 1.875, 1.5, 1.25],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.25, 1.5, 2.0, 2.5, 2.0],
+		"arp_step": 0.0833,
+		"bass_style": "stab",
+		"drum_style": "speed_synth",
+		"brightness": 0.6,
+		"tremolo": 0.0,
+		"voices": 2,
+		"duration": 4.0
+	}
 ]
 
-## Per-boss theme parameters (index matches BossManager.BOSS_SCRIPTS order).
+## 10 Boss Full Scores (matching boss identity & combat mechanics)
 const BOSS_THEMES: Array[Dictionary] = [
-	{ "root": 110.0, "arp": [1.0, 1.0, 1.2, 1.0], "step": 0.30, "bass_style": "stomp", "brightness": 0.1, "percussion": 0.2, "tremolo": 0.0, "voices": 1, "duration": 3.0 },             # Iron Claw — heavy mechanical stomp
-	{ "root": 138.59, "arp": [1.0, 1.122, 1.26, 1.414, 1.26, 1.122], "step": 0.18, "bass_style": "wobble", "brightness": 0.2, "percussion": 0.1, "tremolo": 0.25, "voices": 3, "duration": 3.0 }, # Hydra — 3 interweaving/slithering voices
-	{ "root": 98.0, "arp": [1.0, 1.0, 1.2], "step": 0.4, "bass_style": "stomp", "brightness": 0.0, "percussion": 0.15, "tremolo": 0.0, "voices": 1, "duration": 3.2 },                  # Behemoth — thunderous rumble
-	{ "root": 185.0, "arp": [1.333, 1.5, 1.333, 1.5], "step": 0.15, "bass_style": "pulse", "brightness": 0.3, "percussion": 0.18, "tremolo": 0.0, "voices": 1, "duration": 2.4 },       # Sentinel — mechanical, rotating pulses
-	{ "root": 220.0, "arp": [1.0, 1.06, 1.12, 1.06], "step": 0.10, "bass_style": "wobble", "brightness": 0.3, "percussion": 0.22, "tremolo": 0.4, "voices": 2, "duration": 2.2 },       # Swarm Queen — buzzing, insectoid
-	{ "root": 440.0, "arp": [1.0, 1.125, 1.25, 1.5, 1.25, 1.125], "step": 0.13, "bass_style": "pulse", "brightness": 0.55, "percussion": 0.2, "tremolo": 0.1, "voices": 1, "duration": 2.2 }, # Photon Core — bright laser sweeps
-	{ "root": 130.0, "arp": [1.0, 1.0, 0.944, 1.0], "step": 0.28, "bass_style": "wobble", "brightness": 0.05, "percussion": 0.08, "tremolo": 0.5, "voices": 1, "duration": 3.2 },       # Abyss Gate — dark, warped/dimensional
-	{ "root": 164.81, "arp": [1.0, 1.2, 1.333, 1.5, 1.778, 1.5], "step": 0.16, "bass_style": "march", "brightness": 0.4, "percussion": 0.24, "tremolo": 0.0, "voices": 2, "duration": 2.6 }, # Omega — epic, layered grandeur
-	{ "root": 73.42, "arp": [1.0, 1.06, 1.0, 0.944], "step": 0.5, "bass_style": "drone", "brightness": 0.0, "percussion": 0.05, "tremolo": 0.3, "voices": 2, "duration": 3.6 },         # Dread Star — ominous cosmic horror
-	{ "root": 293.66, "arp": [1.0, 1.25, 1.5, 1.875, 2.0, 1.875, 1.5, 1.25], "step": 0.10, "bass_style": "stab", "brightness": 0.55, "percussion": 0.3, "tremolo": 0.0, "voices": 2, "duration": 2.2 }, # Hyperion — blazing solar intensity
+	# Boss 1: Iron Claw — Titan Pincer
+	{
+		"title": "Titan Pincer",
+		"chord_roots": [110.00, 146.83, 82.41, 138.59],
+		"chord_thirds": [1.2, 1.25, 1.2, 1.2],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.414],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.2, 1.0, 1.414, 1.2, 1.0, 0.9, 1.0],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.0, 1.2, 1.0],
+		"arp_step": 0.125,
+		"bass_style": "stomp",
+		"drum_style": "industrial_march",
+		"brightness": 0.35,
+		"tremolo": 0.0,
+		"voices": 1,
+		"duration": 4.0
+	},
+	# Boss 2: Hydra — Serpentine Triad
+	{
+		"title": "Serpentine Triad",
+		"chord_roots": [103.83, 164.81, 92.50, 155.56],
+		"chord_thirds": [1.2, 1.25, 1.2, 1.2],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.122, 1.26, 1.414, 1.26, 1.122, 1.0, 1.26],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.122, 1.26, 1.414],
+		"arp_step": 0.125,
+		"bass_style": "slither_poly",
+		"drum_style": "tribal_poly",
+		"brightness": 0.4,
+		"tremolo": 0.3,
+		"voices": 3,
+		"duration": 4.0
+	},
+	# Boss 3: Behemoth — Armored Juggernaut
+	{
+		"title": "Armored Juggernaut",
+		"chord_roots": [65.41, 58.27, 51.91, 49.00],
+		"chord_thirds": [1.2, 1.2, 1.25, 1.25],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.0, 1.2, 1.0, 1.5, 1.414, 1.2, 1.0],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.0, 1.2, 1.5],
+		"arp_step": 0.25,
+		"bass_style": "stomp",
+		"drum_style": "industrial_march",
+		"brightness": 0.2,
+		"tremolo": 0.0,
+		"voices": 1,
+		"duration": 4.0
+	},
+	# Boss 4: Sentinel — Orbital Aegis
+	{
+		"title": "Orbital Aegis",
+		"chord_roots": [155.56, 123.47, 138.59, 116.54],
+		"chord_thirds": [1.2, 1.25, 1.2, 1.2],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.333, 1.5, 1.778, 2.0, 1.778, 1.5, 1.333, 1.0],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.333, 1.5, 2.0],
+		"arp_step": 0.125,
+		"bass_style": "stab",
+		"drum_style": "speed_synth",
+		"brightness": 0.5,
+		"tremolo": 0.0,
+		"voices": 1,
+		"duration": 4.0
+	},
+	# Boss 5: Swarm Queen — Hive Carapace
+	{
+		"title": "Hive Carapace",
+		"chord_roots": [220.00, 185.00, 196.00, 164.81],
+		"chord_thirds": [1.2, 1.189, 1.2, 1.189],
+		"chord_fifths": [1.5, 1.414, 1.5, 1.414],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.06, 1.12, 1.06, 1.2, 1.12, 1.06, 1.0],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.06, 1.12, 1.06],
+		"arp_step": 0.0625,
+		"bass_style": "wobble",
+		"drum_style": "breakbeat",
+		"brightness": 0.45,
+		"tremolo": 0.45,
+		"voices": 2,
+		"duration": 4.0
+	},
+	# Boss 6: Photon Core — Particle Overload
+	{
+		"title": "Particle Overload",
+		"chord_roots": [164.81, 138.59, 110.00, 123.47],
+		"chord_thirds": [1.25, 1.2, 1.25, 1.25],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.5, 2.0, 2.5, 3.0, 2.5, 2.0, 1.5, 1.25],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.25, 1.5, 2.0, 2.5, 2.0],
+		"arp_step": 0.0625,
+		"bass_style": "pulse",
+		"drum_style": "speed_synth",
+		"brightness": 0.65,
+		"tremolo": 0.15,
+		"voices": 1,
+		"duration": 4.0
+	},
+	# Boss 7: Abyss Gate — Void Rift
+	{
+		"title": "Void Rift",
+		"chord_roots": [146.83, 155.56, 138.59, 116.54],
+		"chord_thirds": [1.2, 1.189, 1.2, 1.189],
+		"chord_fifths": [1.5, 1.414, 1.5, 1.414],
+		"chord_dur": 1.0,
+		"melody": [1.0, 0.944, 1.0, 1.189, 1.0, 0.891, 0.944, 1.0],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.0, 0.944, 1.0],
+		"arp_step": 0.125,
+		"bass_style": "drone",
+		"drum_style": "ambient_pulse",
+		"brightness": 0.1,
+		"tremolo": 0.5,
+		"voices": 2,
+		"duration": 4.0
+	},
+	# Boss 8: Omega — Apex Flagship Requiem
+	{
+		"title": "Apex Flagship Requiem",
+		"chord_roots": [130.81, 103.83, 87.31, 98.00],
+		"chord_thirds": [1.2, 1.25, 1.2, 1.25],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.2, 1.5, 1.8, 1.5, 1.333, 1.2, 1.0],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.2, 1.5, 1.8, 2.0, 1.5],
+		"arp_step": 0.125,
+		"bass_style": "march",
+		"drum_style": "four_on_floor",
+		"brightness": 0.55,
+		"tremolo": 0.0,
+		"voices": 3,
+		"duration": 4.0
+	},
+	# Boss 9: Dread Star — Cosmic Cataclysm
+	{
+		"title": "Cosmic Cataclysm",
+		"chord_roots": [58.27, 46.25, 41.20, 43.65],
+		"chord_thirds": [1.2, 1.25, 1.2, 1.25],
+		"chord_fifths": [1.5, 1.5, 1.414, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.0, 1.06, 1.0, 0.944, 1.0, 1.12, 1.0, 0.891],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.06, 1.0, 0.944],
+		"arp_step": 0.25,
+		"bass_style": "drone",
+		"drum_style": "ambient_pulse",
+		"brightness": 0.1,
+		"tremolo": 0.4,
+		"voices": 2,
+		"duration": 4.0
+	},
+	# Boss 10: Hyperion — Solar Incandescence
+	{
+		"title": "Solar Incandescence",
+		"chord_roots": [146.83, 123.47, 98.00, 110.00],
+		"chord_thirds": [1.25, 1.2, 1.25, 1.25],
+		"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+		"chord_dur": 1.0,
+		"melody": [1.5, 2.0, 1.875, 1.5, 2.25, 2.0, 1.875, 1.5],
+		"melody_step": 0.5,
+		"arp": [1.0, 1.25, 1.5, 1.875, 2.0, 2.5, 2.0, 1.5],
+		"arp_step": 0.0625,
+		"bass_style": "stab",
+		"drum_style": "speed_synth",
+		"brightness": 0.65,
+		"tremolo": 0.0,
+		"voices": 3,
+		"duration": 4.0
+	}
 ]
 
 func _ready() -> void:
@@ -326,7 +659,7 @@ func _get_or_create_boss_track(boss_index: int) -> AudioStreamWAV:
 
 	const RATE: int = 22050
 	var params: Dictionary = BOSS_THEMES[idx]
-	var sample_count: int = int(RATE * float(params.get("duration", 2.6)))
+	var sample_count: int = int(RATE * float(params.get("duration", 4.0)))
 
 	var track: AudioStreamWAV = _create_wav(sample_count, RATE, true, func(_i: int, t: float, _total: float) -> float:
 		return _synth_theme(t, params)
@@ -430,7 +763,7 @@ func _get_or_create_level_track(lvl: int) -> AudioStreamWAV:
 	const RATE: int = 22050
 	var idx: int = clampi(lvl - 1, 0, LEVEL_THEMES.size() - 1)
 	var params: Dictionary = LEVEL_THEMES[idx]
-	var sample_count: int = int(RATE * float(params.get("duration", 2.8)))
+	var sample_count: int = int(RATE * float(params.get("duration", 4.0)))
 
 	var track: AudioStreamWAV = _create_wav(sample_count, RATE, true, func(_i: int, t: float, _total: float) -> float:
 		return _synth_theme(t, params)
@@ -439,67 +772,191 @@ func _get_or_create_level_track(lvl: int) -> AudioStreamWAV:
 	_level_tracks[lvl] = track
 	return track
 
-## Shared parameterized synthesizer for level/boss themes — a handful of
-## knobs (root pitch, arpeggio interval pattern, tempo, bass rhythm style,
-## brightness/harmonic content, tremolo, percussion density, extra voices)
-## combine into genuinely distinct-sounding, thematically-tuned tracks
-## without needing a bespoke hand-written synth function per level/boss.
+## Full Multi-Layered Score Synthesizer for Levels and Bosses
+## Combines 5 distinct musical layers:
+## 1. Harmonic Pad & Sub-bass (chord progression roots, thirds, fifths)
+## 2. Dynamic Arpeggiator (16th/8th triad textures with overtone sparkles)
+## 3. Melodic Lead Hook (expressive motif with attack/decay envelope & vibrato)
+## 4. Rhythmic Bassline (pulse, stomp, march, wobble, stab, walk, slither, battle march)
+## 5. Drum & Percussion Section (four-on-the-floor, breakbeat, industrial march, speed synth, tribal, ambient)
 func _synth_theme(t: float, p: Dictionary) -> float:
-	var root: float = p.get("root", 220.0)
-	var arp: Array = p.get("arp", [1.0, 1.2, 1.333, 1.5, 1.778])
-	var step: float = p.get("step", 0.2)
-	var brightness: float = p.get("brightness", 0.0)
+	var chord_roots: Array = p.get("chord_roots", [p.get("root", 220.0)])
+	var chord_thirds: Array = p.get("chord_thirds", [1.2])
+	var chord_fifths: Array = p.get("chord_fifths", [1.5])
+	var chord_dur: float = p.get("chord_dur", 1.0)
+	var melody: Array = p.get("melody", [1.0, 1.2, 1.5, 1.2])
+	var melody_step: float = p.get("melody_step", 0.5)
+	var arp: Array = p.get("arp", [1.0, 1.2, 1.5, 1.2])
+	var arp_step: float = p.get("arp_step", 0.125)
+	var bass_style: String = p.get("bass_style", "pulse")
+	var drum_style: String = p.get("drum_style", "four_on_floor")
+	var brightness: float = p.get("brightness", 0.3)
 	var tremolo: float = p.get("tremolo", 0.0)
-	var percussion: float = p.get("percussion", 0.15)
 	var voices: int = p.get("voices", 1)
 
-	var step_idx: int = int(t / step)
-	var arp_idx: int = step_idx % arp.size()
-	var lead_freq: float = root * 2.0 * float(arp[arp_idx])
+	# Determine active chord in progression
+	var chord_idx: int = int(t / chord_dur) % chord_roots.size()
+	var chord_t: float = fmod(t, chord_dur)
+	var root: float = float(chord_roots[chord_idx])
+	var third: float = float(chord_thirds[chord_idx % chord_thirds.size()])
+	var fifth: float = float(chord_fifths[chord_idx % chord_fifths.size()])
 
-	# Lead melody, with optional bright octave-up sparkle and tremolo.
-	var lead: float = sin(TAU * lead_freq * t) * 0.25
+	# 1. Harmonic Pad & Deep Sub-bass Bed
+	var sub: float = sin(TAU * root * 0.5 * t) * 0.18
+	var pad: float = (sin(TAU * root * t) + sin(TAU * root * third * t) * 0.6 + sin(TAU * root * fifth * t) * 0.4) * 0.07
+
+	# 2. Sparkling Arpeggiator Layer
+	var arp_idx: int = int(t / arp_step) % arp.size()
+	var arp_freq: float = root * 2.0 * float(arp[arp_idx])
+	var arp_val: float = sin(TAU * arp_freq * t) * 0.12
 	if brightness > 0.0:
-		lead += sin(TAU * lead_freq * 2.0 * t) * 0.12 * brightness
-	if tremolo > 0.0:
-		lead *= (1.0 - tremolo * 0.5) + tremolo * 0.5 * sin(TAU * 6.0 * t)
+		arp_val += sin(TAU * arp_freq * 2.0 * t) * 0.04 * brightness
 
-	# Extra interweaving voices (e.g. Hydra's 3 heads) — detuned copies of
-	# the lead at slightly offset ratios and phases.
+	# 3. Expressive Melodic Lead Hook
+	var mel_idx: int = int(t / melody_step) % melody.size()
+	var mel_freq: float = root * 2.0 * float(melody[mel_idx])
+	var mel_local_t: float = fmod(t, melody_step)
+	var mel_env: float = 1.0 - pow(mel_local_t / melody_step, 2.0) * 0.4
+	var lead: float = sin(TAU * mel_freq * t) * 0.20 * mel_env
+	if brightness > 0.0:
+		lead += sin(TAU * mel_freq * 2.0 * t) * 0.08 * brightness * mel_env
+	if tremolo > 0.0:
+		lead *= (1.0 - tremolo * 0.5) + tremolo * 0.5 * sin(TAU * 7.0 * t)
+
+	# Multi-voice Polyphony (e.g. Hydra 3-heads, Omega anthem, Hyperion celestial)
 	if voices > 1:
 		for v in range(1, voices):
-			var v_freq: float = lead_freq * (1.0 + 0.08 * v)
-			lead += sin(TAU * v_freq * t + float(v) * 1.7) * 0.12
+			var v_freq: float = mel_freq * (1.0 + 0.006 * float(v))
+			lead += sin(TAU * v_freq * t + float(v) * 1.5) * (0.08 / float(voices)) * mel_env
 
-	# Bass rhythm styles.
-	var bass_style: String = p.get("bass_style", "pulse")
+	# 4. Bassline Synthesizer
 	var bass: float = 0.0
 	match bass_style:
 		"pulse":
-			var bf: float = root * (1.0 if (step_idx % 2 == 0) else 0.5)
+			var step_idx: int = int(t / 0.25)
+			var bf: float = root * (1.0 if step_idx % 2 == 0 else 0.5)
 			bass = (0.22 if sin(TAU * bf * t) > 0.0 else -0.22)
 		"drone":
-			bass = sin(TAU * root * 0.5 * t) * 0.26
+			bass = sin(TAU * root * 0.5 * t) * 0.25
 		"stomp":
-			var beat_t: float = fmod(t, step * 4.0)
-			var env: float = maxf(0.0, 1.0 - beat_t / 0.3)
-			bass = sin(TAU * root * 0.5 * t) * env * 0.38
+			var beat_t: float = fmod(t, 0.5)
+			var env: float = maxf(0.0, 1.0 - beat_t / 0.35)
+			bass = sin(TAU * root * 0.5 * t) * env * 0.35
 		"march":
-			var beat_t2: float = fmod(t, step * 2.0)
-			bass = (0.24 if beat_t2 < step else -0.10)
+			var beat_t: float = fmod(t, 0.25)
+			bass = (0.22 if beat_t < 0.125 else -0.10)
 		"wobble":
-			var wob: float = sin(TAU * 2.0 * t)
-			bass = sin(TAU * (root * 0.5) * (1.0 + 0.15 * wob) * t) * 0.24
+			var wob: float = sin(TAU * 3.0 * t)
+			bass = sin(TAU * (root * 0.5) * (1.0 + 0.18 * wob) * t) * 0.24
 		"stab":
-			var beat_t3: float = fmod(t, step)
-			var env3: float = maxf(0.0, 1.0 - beat_t3 / (step * 0.4))
-			bass = sin(TAU * root * t) * env3 * 0.3
+			var beat_t: float = fmod(t, 0.25)
+			var env: float = maxf(0.0, 1.0 - beat_t / 0.15)
+			bass = sin(TAU * root * t) * env * 0.28
+		"walk":
+			var walk_notes: Array = [1.0, third, fifth, third]
+			var walk_idx: int = int(chord_t / 0.25) % 4
+			var bf: float = root * 0.5 * float(walk_notes[walk_idx])
+			var beat_t: float = fmod(chord_t, 0.25)
+			var env: float = maxf(0.0, 1.0 - beat_t / 0.22)
+			bass = sin(TAU * bf * t) * env * 0.26
+		"slither_poly":
+			var glide: float = sin(TAU * 1.5 * t) * 0.1
+			bass = sin(TAU * (root * 0.5 * (1.0 + glide)) * t) * 0.25
+		"battle_march":
+			var beat_t: float = fmod(t, 0.5)
+			var env: float = maxf(0.0, 1.0 - beat_t / 0.25)
+			bass = sin(TAU * root * 0.5 * t) * env * 0.32 + (0.12 if fmod(t, 0.25) < 0.125 else -0.12)
 
-	# Percussion tick density.
-	var perc_step: float = fmod(t, step * 0.875)
-	var perc: float = (randf_range(-percussion, percussion) if perc_step < 0.02 else 0.0)
+	# 5. Drum & Percussion Section
+	var perc: float = 0.0
+	var beat_1s: float = fmod(t, 1.0)
+	var beat_half: float = fmod(t, 0.5)
+	var beat_quarter: float = fmod(t, 0.25)
+	var beat_16th: float = fmod(t, 0.125)
 
-	return clampf(lead + bass + perc, -0.9, 0.9)
+	match drum_style:
+		"four_on_floor":
+			# Kick on every quarter note
+			if beat_quarter < 0.08:
+				var kick_env: float = 1.0 - (beat_quarter / 0.08)
+				perc += sin(TAU * (140.0 - beat_quarter * 1200.0) * beat_quarter) * kick_env * 0.35
+			# Snare/clap on beats 2 & 4
+			if beat_1s >= 0.5 and beat_1s < 0.65:
+				var snare_t: float = beat_1s - 0.5
+				var snare_env: float = 1.0 - (snare_t / 0.15)
+				var noise: float = fposmod(sin(snare_t * 9999.0) * 43758.5453, 1.0) * 2.0 - 1.0
+				perc += noise * snare_env * 0.22
+			# Hi-hat on 16ths
+			if beat_16th < 0.02:
+				var hat_env: float = 1.0 - (beat_16th / 0.02)
+				var noise: float = fposmod(sin(beat_16th * 12345.0) * 43758.5453, 1.0) * 2.0 - 1.0
+				perc += noise * hat_env * 0.10
+
+		"breakbeat":
+			# Syncopated kick on 0.0, 0.375, 0.75
+			var kick_hit: bool = false
+			var kt: float = 0.0
+			for kp in [0.0, 0.375, 0.75]:
+				if beat_1s >= kp and beat_1s < kp + 0.08:
+					kt = beat_1s - kp
+					kick_hit = true
+					break
+			if kick_hit:
+				var kick_env: float = 1.0 - (kt / 0.08)
+				perc += sin(TAU * (150.0 - kt * 1400.0) * kt) * kick_env * 0.32
+			# Snare on 0.5
+			if beat_1s >= 0.5 and beat_1s < 0.65:
+				var st: float = beat_1s - 0.5
+				var s_env: float = 1.0 - (st / 0.15)
+				var noise: float = fposmod(sin(st * 9999.0) * 43758.5453, 1.0) * 2.0 - 1.0
+				perc += noise * s_env * 0.25
+
+		"speed_synth":
+			# Fast double-time kick
+			if beat_quarter < 0.06:
+				var kt: float = beat_quarter
+				var kick_env: float = 1.0 - (kt / 0.06)
+				perc += sin(TAU * (160.0 - kt * 1800.0) * kt) * kick_env * 0.35
+			# Driving 16th hats
+			if beat_16th < 0.025:
+				var ht: float = beat_16th
+				var h_env: float = 1.0 - (ht / 0.025)
+				var noise: float = fposmod(sin(ht * 15432.0) * 43758.5453, 1.0) * 2.0 - 1.0
+				perc += noise * h_env * 0.12
+
+		"industrial_march":
+			# Heavy downbeat hit
+			if beat_half < 0.12:
+				var kt: float = beat_half
+				var k_env: float = 1.0 - (kt / 0.12)
+				perc += sin(TAU * (110.0 - kt * 600.0) * kt) * k_env * 0.38
+			# Metallic clatter on 16ths
+			if beat_16th < 0.03:
+				var mt: float = beat_16th
+				var m_env: float = 1.0 - (mt / 0.03)
+				perc += sin(TAU * 2400.0 * mt) * m_env * 0.12
+
+		"tribal_poly":
+			# Offbeat syncopated toms
+			var tom_hit: bool = false
+			var tt: float = 0.0
+			for tp in [0.0, 0.25, 0.625, 0.875]:
+				if beat_1s >= tp and beat_1s < tp + 0.08:
+					tt = beat_1s - tp
+					tom_hit = true
+					break
+			if tom_hit:
+				var t_env: float = 1.0 - (tt / 0.08)
+				perc += sin(TAU * 320.0 * tt) * t_env * 0.22
+
+		"ambient_pulse":
+			if beat_1s < 0.15:
+				var kt: float = beat_1s
+				var k_env: float = 1.0 - (kt / 0.15)
+				perc += sin(TAU * (90.0 - kt * 300.0) * kt) * k_env * 0.20
+
+	var combined: float = sub + pad + arp_val + lead + bass + perc
+	return tanh(combined * 1.1) * 0.85
 
 func _create_wav(sample_count: int, sample_rate: int, is_loop: bool, synth_func: Callable) -> AudioStreamWAV:
 	var bytes := PackedByteArray()

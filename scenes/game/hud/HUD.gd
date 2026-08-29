@@ -63,9 +63,9 @@ func set_charge(normalized: float) -> void:
 		if _charge_label:
 			_charge_label.text = "CHARGING 80% [RED]"
 
-func show_charge_bar(visible: bool) -> void:
-	_charge_bar.visible = visible
-	if not visible:
+func show_charge_bar(is_visible: bool) -> void:
+	_charge_bar.visible = is_visible
+	if not is_visible:
 		_charge_level = 0.0
 		_charge_bar.value = 0.0
 		_stop_charge_pulse()
@@ -321,8 +321,7 @@ func _build_warning_banner() -> void:
 	# Perfectly centered Tactical Briefing Warning Box
 	_warning_container = PanelContainer.new()
 	_warning_container.name = "BossWarningContainer"
-	_warning_container.layout_mode = 1
-	_warning_container.anchors_preset = Control.PRESET_CENTER
+	_warning_container.set_anchors_preset(Control.PRESET_CENTER)
 	_warning_container.anchor_left = 0.5
 	_warning_container.anchor_right = 0.5
 	_warning_container.anchor_top = 0.5
