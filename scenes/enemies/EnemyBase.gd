@@ -108,7 +108,7 @@ func _physics_process(delta: float) -> void:
 # ── Override these ────────────────────────────────────────────
 
 ## Override to implement unique movement pattern each frame
-func _move(delta: float) -> void:
+func _move(_delta: float) -> void:
 	velocity.x = -move_speed
 
 ## Override to implement unique shooting behaviour
@@ -123,6 +123,7 @@ func take_damage(amount: int) -> void:
 	if GameState.ultra_mode_enabled:
 		amount = max_health
 	current_health = max(0, current_health - amount)
+	damaged.emit(amount)
 	if current_health > 0 and _sprite and is_inside_tree():
 		var tween := create_tween()
 		tween.tween_property(_sprite, "modulate", Color.WHITE, 0.05)

@@ -141,4 +141,5 @@ static func _detonate_missed_missile(b: Bullet) -> void:
 		parent_node.call_deferred("add_child", fx)
 		if fx.has_method("setup"):
 			fx.setup(pos, Color(1.0, 0.5, 0.0), 0.7)
+	AudioManager.play_explosion_sfx()
 	b.queue_free()

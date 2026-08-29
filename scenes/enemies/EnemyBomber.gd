@@ -59,6 +59,13 @@ func _drop_mine_deferred(spawn_pos: Vector2) -> void:
 		if body.is_in_group("player") or body is Player:
 			if body.has_method("_take_hit"):
 				body._take_hit("projectile")
+			AudioManager.play_explosion_sfx()
+			var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
+			var parent_node: Node = mine.get_parent() if mine.get_parent() else mine.get_tree().current_scene
+			if parent_node:
+				parent_node.call_deferred("add_child", fx)
+				if fx.has_method("setup"):
+					fx.setup(mine.global_position, Color(1.0, 0.5, 0.0), 1.2)
 			mine.queue_free()
 	)
 

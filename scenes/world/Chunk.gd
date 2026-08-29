@@ -28,7 +28,6 @@ var _level_theme: int = 1
 
 var scroll_speed: float = 180.0
 
-@onready var _static_body: StaticBody2D = $StaticBody2D
 @onready var _top_col: CollisionPolygon2D = $StaticBody2D/TopCol
 @onready var _bot_col: CollisionPolygon2D = $StaticBody2D/BotCol
 

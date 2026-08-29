@@ -8,7 +8,6 @@ const SCROLL_SPEED_INCREMENT: float = 18.0  # extra px/s per level
 
 @onready var _background: Node2D = $ScrollingBackground
 @onready var _chunk_parent: Node2D = $World/Chunks
-@onready var _entity_parent: Node2D = $Entities
 @onready var _player_bullets: Node2D = $Entities/PlayerBullets
 @onready var _enemy_bullets: Node2D = $Entities/EnemyBullets
 @onready var _enemies_node: Node2D = $Entities/Enemies

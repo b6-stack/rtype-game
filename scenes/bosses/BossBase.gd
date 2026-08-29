@@ -110,11 +110,11 @@ func _physics_process(delta: float) -> void:
 # ── Override in subclasses ────────────────────────────────────
 
 ## Called every frame during combat — implement attack patterns here
-func _phase_attack(delta: float) -> void:
+func _phase_attack(_delta: float) -> void:
 	pass
 
 ## Called when phase changes — use to switch attack patterns
-func _on_phase_change(new_phase: int) -> void:
+func _on_phase_change(_new_phase: int) -> void:
 	pass
 
 # ── Public API ────────────────────────────────────────────────
@@ -161,7 +161,7 @@ func init_from_data(data: BossData) -> void:
 
 # ── Helpers ───────────────────────────────────────────────────
 
-func _do_entry(delta: float) -> void:
+func _do_entry(_delta: float) -> void:
 	velocity.x = -entry_speed
 	move_and_slide()
 

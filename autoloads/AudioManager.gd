@@ -519,7 +519,7 @@ func play_victory_music() -> void:
 	if stream:
 		_switch_music_track(stream)
 
-func play_music(stream: AudioStream, loop: bool = true) -> void:
+func play_music(stream: AudioStream, _loop: bool = true) -> void:
 	if stream == null:
 		return
 	_switch_music_track(stream)

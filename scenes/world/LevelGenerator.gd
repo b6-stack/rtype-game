@@ -48,7 +48,6 @@ var _rng: RandomNumberGenerator
 var _chunk_index: int = 0
 var _chunks_until_boss: int = 20
 var _boss_chunk_interval: int = 20
-var _next_chunk_x: float = 1920.0
 
 ## The initial look-ahead chunk batch spawns all at once in initialize(),
 ## which would otherwise satisfy a small _chunks_until_boss count (like
@@ -207,7 +206,7 @@ func _spawn_next_chunk_at(spawn_x: float) -> void:
 	_corridor_bottom = new_bot
 	_chunk_index += 1
 
-func _generate_spawn_data(chunk_world_x: float) -> Array:
+func _generate_spawn_data(_chunk_world_x: float) -> Array:
 	var spawns: Array = []
 	# Grace intro period: no enemies for the first 3 chunks (gives player ~10-12s of clear flying).
 	# Boss Rush skips regular waves entirely — it's boss fights back-to-back, nothing else.
@@ -230,7 +229,7 @@ func _generate_spawn_data(chunk_world_x: float) -> Array:
 		spawn_chance = 0.70
 	else:
 		# Standard combat wave: 2-3 enemies
-		enemy_count = _rng.randi_range(2, 3 + int(level / 3))
+		enemy_count = _rng.randi_range(2, 3 + int(float(level) / 3.0))
 		spawn_chance = 0.80
 
 	# Difficulty scaling: higher levels pack in more enemies, more often;

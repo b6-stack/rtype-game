@@ -7,6 +7,7 @@ extends Node
 signal move_input(viewport_pos: Vector2)
 signal charge_start
 signal charge_end
+@warning_ignore("unused_signal")
 signal fire_pressed
 
 # ── Touch state ──────────────────────────────────────────────
@@ -79,7 +80,7 @@ func _on_drag(ev: InputEventScreenDrag) -> void:
 
 # ── Keyboard/mouse fallback ──────────────────────────────────
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	# Only used for PC keyboard fallback
 	var dir := Vector2.ZERO
 	if Input.is_action_pressed("move_right"): dir.x += 1.0
@@ -125,7 +126,7 @@ func _on_mouse_motion(ev: InputEventMouseMotion) -> void:
 		if not _is_in_ui_dead_zone(vp_pos):
 			move_input.emit(vp_pos)
 
-func _on_key(ev: InputEventKey) -> void:
+func _on_key(_ev: InputEventKey) -> void:
 	pass  # handled by Input.is_action_pressed in _process
 
 # ── Accessors ────────────────────────────────────────────────

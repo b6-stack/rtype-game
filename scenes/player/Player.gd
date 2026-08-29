@@ -252,7 +252,7 @@ func _on_hurtbox_body_entered(body: Node) -> void:
 	elif body.is_in_group("enemies") or body.is_in_group("bosses"):
 		_take_hit("enemy")
 
-func _take_hit(source: String = "") -> void:
+func _take_hit(_source: String = "") -> void:
 	if _is_invincible or _is_dead or GameState.god_mode_enabled:
 		return
 
@@ -314,12 +314,13 @@ func _die() -> void:
 	if _shield_ring:
 		_shield_ring.visible = false
 	died.emit()
+	AudioManager.play_explosion_sfx()
 	var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
 	var parent_node: Node = get_parent() if get_parent() else get_tree().current_scene
 	if parent_node:
 		parent_node.call_deferred("add_child", fx)
 		if fx.has_method("setup"):
-			fx.setup(global_position, Color.CYAN, 1.5)
+			fx.setup(global_position, Color.CYAN, 1.8)
 	# Delay then game over scene transition.
 	# process_always=false: don't advance to the game-over scene while paused.
 	await get_tree().create_timer(1.5, false).timeout

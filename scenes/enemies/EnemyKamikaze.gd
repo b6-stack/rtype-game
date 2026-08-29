@@ -37,6 +37,7 @@ func _explode() -> void:
 	if _explosion_triggered:
 		return
 	_explosion_triggered = true
+	AudioManager.play_explosion_sfx()
 	_spawn_death_flash()
 	queue_free()
 
