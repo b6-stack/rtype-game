@@ -356,6 +356,7 @@ func _spawn_grunt() -> void:
 	grunt.set_script(load("res://scenes/enemies/EnemyGrunt.gd"))
 	grunt.bullet_container = bullet_container
 	grunt.player_ref = player_ref
+	grunt.score_value = 0  # Boss minion: zero score to prevent score farming
 	grunt.add_to_group("enemies")
 
 	var parent_node: Node = get_parent() if get_parent() else bullet_container

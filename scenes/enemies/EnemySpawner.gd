@@ -147,6 +147,9 @@ func _apply_difficulty_scaling(enemy: EnemyBase) -> void:
 		enemy.shoot_cooldown = max(DIFFICULTY_MIN_SHOOT_COOLDOWN, enemy.shoot_cooldown / fire_rate_mult)
 
 func _on_enemy_died(pos: Vector2, score_val: int) -> void:
+	if score_val <= 0:
+		return  # Minion/zero-score enemy: no score and no powerup drop to prevent farming
+
 	GameState.add_score(score_val)
 	if powerup_spawner:
 		var roll: float = randf()
