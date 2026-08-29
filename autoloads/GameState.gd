@@ -27,12 +27,10 @@ const STARTING_LIVES: int = 3
 const TOTAL_LEVELS: int = 10
 const SCORE_GOAL_INTERVAL: int = 5000
 
-## Level biome names (index 0 = level 1) — same names already used as
-## comments in LevelGenerator.LEVEL_COLORS / AudioManager.LEVEL_THEMES,
-## exposed as real data here so the HUD can display them.
+## Level sector biome names (index 0 = level 1)
 const LEVEL_NAMES: Array[String] = [
-	"Blue Cave", "Red Cavern", "Green Base", "Brown Fortress", "Purple Alien",
-	"Teal Station", "Crimson Core", "Gold Final", "Cosmic Void", "Solar Core",
+	"Cobalt Abyss", "Infernal Chasm", "Bio-Synth Sector", "Iron Bastion", "Xeno Hive-Spire",
+	"Quantum Nexus", "Thermonuclear Core", "Imperial Citadel", "Void Horizon", "Solar Corona",
 ]
 
 enum Difficulty { EASY, NORMAL, HARD }

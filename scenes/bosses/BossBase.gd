@@ -223,26 +223,92 @@ func _check_phase_transition() -> void:
 		_on_phase_change(current_phase)
 
 func _die() -> void:
+	if _is_dead:
+		return
 	_is_dead = true
-	GameState.add_score(score_value)
-	_spawn_death_explosion()
-	died.emit()
-	queue_free()
 
-func _spawn_death_explosion() -> void:
-	_do_spawn_boss_explosions.call_deferred(global_position, boss_color, size_scale)
+	# Disable all collisions & monitoring immediately
+	collision_layer = 0
+	collision_mask = 0
+	var hurtbox := get_node_or_null("HurtBox") as Area2D
+	if hurtbox:
+		hurtbox.collision_layer = 0
+		hurtbox.monitoring = false
 
-func _do_spawn_boss_explosions(pos: Vector2, col: Color, scale_s: float) -> void:
+	# Clear on-screen enemy bullets
+	var tree := get_tree()
+	if tree:
+		for b in tree.get_nodes_in_group("enemy_bullet"):
+			if is_instance_valid(b):
+				b.queue_free()
+
+	_start_elaborate_boss_death()
+
+func _start_elaborate_boss_death() -> void:
 	var tree := get_tree()
 	var parent_node: Node = get_parent() if get_parent() else (tree.current_scene if tree else null)
-	if parent_node:
-		for i in 6:
+	var origin_pos: Vector2 = global_position
+	var base_scale: Vector2 = _sprite.scale if _sprite else (Vector2(0.165, 0.165) * size_scale)
+
+	# Phase 1: Cascading Hull Detonations & Violent Shudder (1.4s, 14 sequential bursts)
+	const BURST_COUNT: int = 14
+	for i in range(BURST_COUNT):
+		if not is_inside_tree() or not is_instance_valid(self):
+			break
+
+		# Violent hull shudder
+		if _sprite:
+			var shake_offset := Vector2(randf_range(-14, 14), randf_range(-14, 14)) * size_scale
+			_sprite.position = shake_offset
+			var strobe_col := Color(2.5, 2.5, 2.5) if (i % 2 == 0) else Color(2.2, 0.7, 0.2)
+			_sprite.modulate = strobe_col
+
+		# Staggered explosion across the ship hull
+		if parent_node and is_instance_valid(parent_node):
 			var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
 			parent_node.add_child(fx)
-			var offset := Vector2(randf_range(-90, 90), randf_range(-55, 55)) * scale_s
-			fx.global_position = pos + offset
+			var offset := Vector2(randf_range(-85, 85), randf_range(-55, 55)) * size_scale
+			fx.global_position = origin_pos + offset
 			if fx.has_method("setup"):
-				fx.setup(pos + offset, col, scale_s * 1.6)
+				var burst_scale: float = randf_range(1.2, 2.2) * size_scale
+				var burst_col: Color = boss_color.lightened(randf_range(0.2, 0.8))
+				fx.setup(origin_pos + offset, burst_col, burst_scale)
+
+		if i % 3 == 0:
+			AudioManager.play_explosion_sfx()
+
+		await get_tree().create_timer(0.09).timeout
+
+	# Phase 2: Catastrophic Core Detonation (Giant Shockwaves & Vaporization)
+	if is_inside_tree() and is_instance_valid(self):
+		if _sprite:
+			_sprite.position = Vector2.ZERO
+			_sprite.modulate = Color(4.0, 4.0, 4.0)
+
+		AudioManager.play_explosion_sfx()
+
+		# Giant central mega-shockwave sequence
+		if parent_node and is_instance_valid(parent_node):
+			for s in range(3):
+				var mega_fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
+				parent_node.add_child(mega_fx)
+				mega_fx.global_position = origin_pos
+				if mega_fx.has_method("setup"):
+					mega_fx.setup(origin_pos, Color(1.0, 0.85, 0.3), size_scale * (3.2 + s * 0.9))
+
+		# Vaporize / expand & fade sprite
+		if _sprite:
+			var tw := create_tween().set_parallel(true)
+			tw.tween_property(_sprite, "scale", base_scale * 1.6, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tw.tween_property(_sprite, "modulate:a", 0.0, 0.35)
+			await tw.finished
+		else:
+			await get_tree().create_timer(0.35).timeout
+
+	# Phase 3: Award score, emit died signal, and clean up
+	GameState.add_score(score_value)
+	died.emit()
+	queue_free()
 
 ## Fires a bullet toward the player
 func _fire_at_player(speed: float = 500.0, dmg: int = 1, col: Color = Color.ORANGE_RED) -> void:

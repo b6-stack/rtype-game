@@ -70,16 +70,16 @@ var _level_elapsed_time: float = 0.0
 
 ## Level color themes [top wall color, bottom wall color]
 const LEVEL_COLORS: Array[Color] = [
-	Color(0.12, 0.22, 0.38),  # Level 1 - Blue cave
-	Color(0.22, 0.12, 0.12),  # Level 2 - Red cavern
-	Color(0.10, 0.28, 0.18),  # Level 3 - Green base
-	Color(0.28, 0.20, 0.08),  # Level 4 - Brown fortress
-	Color(0.18, 0.10, 0.30),  # Level 5 - Purple alien
-	Color(0.08, 0.25, 0.28),  # Level 6 - Teal station
-	Color(0.30, 0.08, 0.20),  # Level 7 - Crimson core
-	Color(0.25, 0.22, 0.05),  # Level 8 - Gold final
-	Color(0.20, 0.05, 0.35),  # Level 9 - Cosmic Void
-	Color(0.35, 0.15, 0.05),  # Level 10 - Solar Core
+	Color(0.12, 0.22, 0.38),  # Level 1 - Cobalt Abyss
+	Color(0.22, 0.12, 0.12),  # Level 2 - Infernal Chasm
+	Color(0.10, 0.28, 0.18),  # Level 3 - Bio-Synth Sector
+	Color(0.28, 0.20, 0.08),  # Level 4 - Iron Bastion
+	Color(0.18, 0.10, 0.30),  # Level 5 - Xeno Hive-Spire
+	Color(0.08, 0.25, 0.28),  # Level 6 - Quantum Nexus
+	Color(0.30, 0.08, 0.20),  # Level 7 - Thermonuclear Core
+	Color(0.25, 0.22, 0.05),  # Level 8 - Imperial Citadel
+	Color(0.20, 0.05, 0.35),  # Level 9 - Void Horizon
+	Color(0.35, 0.15, 0.05),  # Level 10 - Solar Corona
 ]
 
 func _ready() -> void:

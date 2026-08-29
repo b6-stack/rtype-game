@@ -412,6 +412,44 @@ const BOSS_THEMES: Array[Dictionary] = [
 	}
 ]
 
+## Main Menu Full Score (Anthemic synthwave title theme)
+const MENU_THEME: Dictionary = {
+	"title": "Starlight Vanguard Main Theme",
+	"chord_roots": [220.00, 174.61, 261.63, 196.00], # Am - F - C - G
+	"chord_thirds": [1.2, 1.25, 1.25, 1.25],
+	"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+	"chord_dur": 1.0,
+	"melody": [1.5, 1.2, 1.0, 1.2, 1.5, 1.778, 2.0, 1.5],
+	"melody_step": 0.5,
+	"arp": [1.0, 1.2, 1.5, 2.0, 1.5, 1.2],
+	"arp_step": 0.125,
+	"bass_style": "pulse",
+	"drum_style": "four_on_floor",
+	"brightness": 0.55,
+	"tremolo": 0.05,
+	"voices": 2,
+	"duration": 4.0
+}
+
+## Victory Full Score (Heroic ascending major fanfare)
+const VICTORY_THEME: Dictionary = {
+	"title": "Starlight Fanfare",
+	"chord_roots": [261.63, 329.63, 392.00, 523.25], # C - E - G - C
+	"chord_thirds": [1.25, 1.25, 1.25, 1.25],
+	"chord_fifths": [1.5, 1.5, 1.5, 1.5],
+	"chord_dur": 1.0,
+	"melody": [1.0, 1.25, 1.5, 2.0, 2.25, 2.0, 1.875, 2.0],
+	"melody_step": 0.5,
+	"arp": [1.0, 1.25, 1.5, 2.0],
+	"arp_step": 0.125,
+	"bass_style": "stab",
+	"drum_style": "four_on_floor",
+	"brightness": 0.65,
+	"tremolo": 0.0,
+	"voices": 3,
+	"duration": 4.0
+}
+
 func _ready() -> void:
 	# GameState (autoload order: GameState before AudioManager) has already
 	# loaded the persisted sound setting by the time this runs.
@@ -672,61 +710,10 @@ func _get_or_create_menu_theme_track() -> AudioStreamWAV:
 		return _menu_music_track
 
 	const RATE: int = 22050
-	# Kept at/under the largest track size already proven stable through
-	# extensive real-device testing (~4s / ~88K samples) — an earlier 8s
-	# version (2s/chord) was the prime suspect in a native audio-thread
-	# crash reported after a sustained ~10s hold on the title label, which
-	# would have crossed that longer loop's wrap point. Headless testing
-	# can't catch native audio-thread issues at all (no real audio device
-	# under --headless), so this is a size-based precaution, not a
-	# confirmed-and-verified fix.
-	const CHORD_DUR: float = 1.0
-	const DURATION: float = CHORD_DUR * 4.0  # full i-VI-III-VII progression, 4s
-	var sample_count: int = int(RATE * DURATION)
-
-	# Am - F - C - G (i - VI - III - VII): a driving, heroic progression —
-	# common in synthwave/anthem game themes, fitting "Starlight Vanguard".
-	var chord_roots: Array[float] = [220.00, 174.61, 261.63, 196.00]
-	var chord_thirds: Array[float] = [1.2, 1.25, 1.25, 1.25]  # minor, major, major, major
-
-	# 4-note hook motif per chord (fifth-third-root-third) — a held,
-	# recognizable melodic line layered over the arpeggio wash rather than
-	# just cycling through chord tones uniformly.
-	var hook_pattern: Array[float] = [1.5, 1.2, 1.0, 1.2]
-	const HOOK_NOTE_DUR: float = 0.25
+	var sample_count: int = int(RATE * float(MENU_THEME.get("duration", 4.0)))
 
 	_menu_music_track = _create_wav(sample_count, RATE, true, func(_i: int, t: float, _total: float) -> float:
-		var chord_idx: int = int(t / CHORD_DUR) % 4
-		var chord_t: float = fmod(t, CHORD_DUR)
-		var root: float = chord_roots[chord_idx]
-		var third: float = chord_thirds[chord_idx]
-
-		# Sub-bass drone + driving 8th-note pulse for low-end weight/drive.
-		var sub: float = sin(TAU * root * 0.25 * t) * 0.20
-		var pulse_step: int = int(t / 0.25)
-		var pulse_freq: float = root * 0.5 * (1.0 if pulse_step % 2 == 0 else 1.5)
-		var pulse: float = (0.15 if sin(TAU * pulse_freq * t) > 0.0 else -0.15)
-
-		# 16th-note arpeggio through the triad, one octave up, with a
-		# bright octave-up sparkle layer.
-		var arp_ratios: Array = [1.0, third, 1.5, third]
-		var arp_step: int = int(t / 0.125)
-		var arp_freq: float = root * 2.0 * float(arp_ratios[arp_step % arp_ratios.size()])
-		var arp: float = sin(TAU * arp_freq * t) * 0.15
-		arp += sin(TAU * arp_freq * 2.0 * t) * 0.05
-
-		# Melodic hook — slower, held notes so it reads as an actual tune.
-		var hook_idx: int = int(chord_t / HOOK_NOTE_DUR) % hook_pattern.size()
-		var hook_freq: float = root * 2.0 * float(hook_pattern[hook_idx])
-		var hook_local_t: float = fmod(chord_t, HOOK_NOTE_DUR)
-		var hook_env: float = 1.0 - pow(hook_local_t / HOOK_NOTE_DUR, 2.0) * 0.4
-		var hook: float = sin(TAU * hook_freq * t) * 0.22 * hook_env
-
-		# Light rhythmic percussion accent on the beat.
-		var perc_step: float = fmod(t, 0.25)
-		var perc: float = (randf_range(-0.10, 0.10) if perc_step < 0.015 else 0.0)
-
-		return clampf(sub + pulse + arp + hook + perc, -0.9, 0.9)
+		return _synth_theme(t, MENU_THEME)
 	)
 	return _menu_music_track
 
@@ -735,24 +722,10 @@ func _get_or_create_victory_track() -> AudioStreamWAV:
 		return _victory_music_track
 
 	const RATE: int = 22050
-	const DURATION: float = 4.0
-	var sample_count: int = int(RATE * DURATION)
-
-	# Ascending major arpeggio (C5-E5-G5-C6-E6) with a soft sub-octave and
-	# a bright octave-up sparkle layered on the lead note.
-	var melody: Array[float] = [523.25, 659.25, 783.99, 1046.50, 1318.51]
-	const NOTE_DUR: float = 0.42
+	var sample_count: int = int(RATE * float(VICTORY_THEME.get("duration", 4.0)))
 
 	_victory_music_track = _create_wav(sample_count, RATE, true, func(_i: int, t: float, _total: float) -> float:
-		var note_idx: int = int(t / NOTE_DUR) % melody.size()
-		var freq: float = melody[note_idx]
-		var local_t: float = fmod(t, NOTE_DUR)
-		var env: float = 1.0 - pow(local_t / NOTE_DUR, 2.0) * 0.55
-
-		var lead: float = sin(TAU * freq * t) * 0.45
-		var sub: float = sin(TAU * freq * 0.5 * t) * 0.18
-		var sparkle: float = sin(TAU * freq * 2.0 * t) * 0.10
-		return clampf((lead + sub + sparkle) * env, -0.9, 0.9)
+		return _synth_theme(t, VICTORY_THEME)
 	)
 	return _victory_music_track
 
