@@ -85,13 +85,11 @@ func _update_goal_bar(current: int, goal: int) -> void:
 		_life_goal_bar.value = clamp(progress * 100.0, 0.0, 100.0)
 		_life_goal_label.text = "1-UP GOAL: %d" % goal
 
-## Always a box row, regardless of max lives — box size shrinks as the
-## count grows (Normal/Easy's much higher reserve, 10/15) so it stays a
-## reasonable width instead of running off the HUD.
+## Always a box row, regardless of max lives — updates in-place to prevent
+## any container layout shifts or movement during score/life updates.
 func _refresh_lives() -> void:
-	for child in _lives_container.get_children():
-		child.queue_free()
 	var max_lives: int = GameState.get_max_lives()
+	var current_lives: int = GameState.lives
 	var box_size: Vector2
 	var separation: int
 	if max_lives <= 6:
@@ -103,12 +101,28 @@ func _refresh_lives() -> void:
 	else:
 		box_size = Vector2(12, 14)
 		separation = 3
+
+	_lives_container.alignment = BoxContainer.ALIGNMENT_END
 	_lives_container.add_theme_constant_override("separation", separation)
-	for i in max_lives:
-		var icon := ColorRect.new()
-		icon.custom_minimum_size = box_size
-		icon.color = Color(0.2, 1.0, 0.5) if i < GameState.lives else Color(0.2, 0.2, 0.2)
-		_lives_container.add_child(icon)
+
+	var children: Array = _lives_container.get_children()
+	# If count doesn't match max_lives, rebuild cleanly with immediate removal
+	if children.size() != max_lives:
+		for child in children:
+			_lives_container.remove_child(child)
+			child.queue_free()
+		for i in max_lives:
+			var icon := ColorRect.new()
+			icon.custom_minimum_size = box_size
+			icon.color = Color(0.2, 1.0, 0.5) if i < current_lives else Color(0.2, 0.2, 0.2)
+			_lives_container.add_child(icon)
+	else:
+		# Update existing icons in-place with zero layout disruption
+		for i in range(max_lives):
+			var icon: ColorRect = children[i] as ColorRect
+			if icon:
+				icon.custom_minimum_size = box_size
+				icon.color = Color(0.2, 1.0, 0.5) if i < current_lives else Color(0.2, 0.2, 0.2)
 
 const WEAPON_ICON_PATHS: Array[String] = [
 	"res://assets/sprites/weapons/icon_vulcan.png",

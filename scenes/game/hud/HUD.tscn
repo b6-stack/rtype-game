@@ -55,12 +55,14 @@ theme_override_constants/outline_size = 4
 
 [node name="LivesContainer" type="HBoxContainer" parent="Control"]
 layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -300.0
 offset_right = -16.0
 offset_top = 12.0
 offset_bottom = 46.0
-anchor_left = 1.0
-anchor_right = 1.0
 grow_horizontal = 0
+alignment = 2
 theme_override_constants/separation = 6
 
 [node name="LevelLabel" type="Label" parent="Control"]
