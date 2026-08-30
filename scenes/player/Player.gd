@@ -79,6 +79,9 @@ var _is_invincible: bool = false
 var _invincibility_timer: float = 0.0
 var _is_charging: bool = false
 var _charge_level: float = 0.0
+## Fires the full-charge haptic pulse once per charge-up, right when
+## _charge_level first reaches 1.0 -- not every frame it stays there.
+var _charge_full_vibrated: bool = false
 var _auto_fire: bool = true
 var _is_dead: bool = false
 
@@ -163,6 +166,9 @@ func _physics_process(delta: float) -> void:
 		if hud:
 			hud.set_charge(_charge_level)
 			hud.show_charge_bar(true)
+		if _charge_level >= 1.0 and not _charge_full_vibrated:
+			_charge_full_vibrated = true
+			GameState.vibrate(70, 0.55)
 
 	# God Mode & Invincibility handling
 	if GameState.god_mode_enabled:
@@ -221,6 +227,7 @@ func _on_charge_start() -> void:
 		return
 	_is_charging = true
 	_charge_level = 0.0
+	_charge_full_vibrated = false
 	_auto_fire = false
 	AudioManager.play_charge_sfx()
 	if hud:
@@ -259,6 +266,10 @@ func _take_hit(_source: String = "") -> void:
 	GameState.lose_life()
 	hit.emit(GameState.lives)
 	AudioManager.play_hit_sfx()
+	# Distinct from the death pulse below (weaker, single tap here vs a
+	# sharp double-hit on actual death) so a respawn-costing hit doesn't
+	# feel identical to the run actually ending.
+	GameState.vibrate(90, 0.7)
 
 	# Hit spark FX
 	var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
@@ -315,6 +326,13 @@ func _die() -> void:
 		_shield_ring.visible = false
 	died.emit()
 	AudioManager.play_explosion_sfx()
+	# Sharp double-buzz, deliberately not just a longer/stronger version of
+	# the single-pulse charge (70ms/0.55) and hit (90ms/0.7) vibrations --
+	# a quick 1-2 punch reads as "the run just ended" rather than "another
+	# normal hit."
+	GameState.vibrate(35, 1.0)
+	await get_tree().create_timer(0.09, false).timeout
+	GameState.vibrate(35, 1.0)
 	var fx: Node2D = load("res://scenes/effects/ExplosionFX.tscn").instantiate()
 	var parent_node: Node = get_parent() if get_parent() else get_tree().current_scene
 	if parent_node:

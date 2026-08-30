@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "2.13.0"
+const APP_VERSION := "2.14.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -70,6 +70,9 @@ const FIRE_DENSITY_NAMES: Array[String] = ["LOW", "NORMAL", "HIGH"]
 const FIRE_DENSITY_MULTIPLIERS: Array[float] = [0.7, 1.0, 1.3]
 var sound_enabled: bool = true
 var enemy_fire_density: int = FireDensity.NORMAL
+## Haptic feedback (full-charge ready, taking a hit, dying) — on by
+## default since it's a meaningful gameplay cue, not just a nicety.
+var vibration_enabled: bool = true
 ## Defaults to false (off) — losing your weapon on death is the existing,
 ## established behavior; this is an opt-in convenience, not a rules change.
 var keep_weapon_on_death: bool = false
@@ -234,6 +237,19 @@ func set_keep_weapon_on_death(keep: bool) -> void:
 	keep_weapon_on_death = keep
 	_save()
 
+func set_vibration_enabled(enabled: bool) -> void:
+	vibration_enabled = enabled
+	_save()
+
+## Single gate for every haptic pulse in the game — callers never need to
+## check vibration_enabled themselves. duration_ms/amplitude map straight
+## to Input.vibrate_handheld(); amplitude is ignored pre-Android 26 (the
+## OS just uses a default strength), which is an acceptable degradation.
+func vibrate(duration_ms: int, amplitude: float = -1.0) -> void:
+	if not vibration_enabled:
+		return
+	Input.vibrate_handheld(duration_ms, amplitude)
+
 func unlock_boss_rush() -> void:
 	if boss_rush_unlocked:
 		return
@@ -354,6 +370,7 @@ func _save() -> void:
 	cfg.set_value("data", "sound_enabled", sound_enabled)
 	cfg.set_value("data", "enemy_fire_density", enemy_fire_density)
 	cfg.set_value("data", "keep_weapon_on_death", keep_weapon_on_death)
+	cfg.set_value("data", "vibration_enabled", vibration_enabled)
 	cfg.save("user://save.cfg")
 
 func _load_save() -> void:
@@ -367,3 +384,4 @@ func _load_save() -> void:
 		sound_enabled = cfg.get_value("data", "sound_enabled", true)
 		enemy_fire_density = clampi(cfg.get_value("data", "enemy_fire_density", FireDensity.NORMAL), FireDensity.LOW, FireDensity.HIGH)
 		keep_weapon_on_death = cfg.get_value("data", "keep_weapon_on_death", false)
+		vibration_enabled = cfg.get_value("data", "vibration_enabled", true)
