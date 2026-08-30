@@ -8,7 +8,7 @@ const WIN_SCENE := "res://scenes/game/win_screen/WinScreen.tscn"
 
 ## Bump this alongside export_presets.cfg's version/name on every release
 ## so the main menu version label reflects what's actually installed.
-const APP_VERSION := "2.14.0"
+const APP_VERSION := "2.15.0"
 
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
@@ -64,6 +64,14 @@ const ULTRA_MODE_BOSS_DAMAGE_MULT: float = 3.0
 ## Options menu settings.
 enum FireDensity { LOW, NORMAL, HIGH }
 const FIRE_DENSITY_NAMES: Array[String] = ["LOW", "NORMAL", "HIGH"]
+## DIRECT_OFFSET (default, existing behavior): the ship's target position
+## is your touch position plus a fixed offset -- move your finger to a
+## spot on screen and the ship glides there. RELATIVE_DRAG: the ship
+## instead moves by however much your finger MOVES each frame,
+## establishing a fresh baseline wherever a touch begins, so first-touch
+## never teleports the ship toward your finger.
+enum ControlMode { DIRECT_OFFSET, RELATIVE_DRAG }
+var control_mode: int = ControlMode.DIRECT_OFFSET
 ## Multiplier applied on top of difficulty's own fire-rate scaling — a
 ## player-adjustable knob for how much enemies shoot, independent of
 ## difficulty (which also affects speed/density, not just fire rate).
@@ -250,6 +258,10 @@ func vibrate(duration_ms: int, amplitude: float = -1.0) -> void:
 		return
 	Input.vibrate_handheld(duration_ms, amplitude)
 
+func set_control_mode(mode: int) -> void:
+	control_mode = clampi(mode, ControlMode.DIRECT_OFFSET, ControlMode.RELATIVE_DRAG)
+	_save()
+
 func unlock_boss_rush() -> void:
 	if boss_rush_unlocked:
 		return
@@ -371,6 +383,7 @@ func _save() -> void:
 	cfg.set_value("data", "enemy_fire_density", enemy_fire_density)
 	cfg.set_value("data", "keep_weapon_on_death", keep_weapon_on_death)
 	cfg.set_value("data", "vibration_enabled", vibration_enabled)
+	cfg.set_value("data", "control_mode", control_mode)
 	cfg.save("user://save.cfg")
 
 func _load_save() -> void:
@@ -385,3 +398,4 @@ func _load_save() -> void:
 		enemy_fire_density = clampi(cfg.get_value("data", "enemy_fire_density", FireDensity.NORMAL), FireDensity.LOW, FireDensity.HIGH)
 		keep_weapon_on_death = cfg.get_value("data", "keep_weapon_on_death", false)
 		vibration_enabled = cfg.get_value("data", "vibration_enabled", true)
+		control_mode = clampi(cfg.get_value("data", "control_mode", ControlMode.DIRECT_OFFSET), ControlMode.DIRECT_OFFSET, ControlMode.RELATIVE_DRAG)

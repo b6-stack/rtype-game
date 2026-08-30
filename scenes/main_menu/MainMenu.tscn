@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://rtype_mainmenu"]
+[gd_scene load_steps=6 format=3 uid="uid://rtype_mainmenu"]
 
 [ext_resource type="Script" path="res://scenes/main_menu/MainMenu.gd" id="1_mm"]
 [ext_resource type="Script" path="res://scenes/main_menu/StarContainer.gd" id="2_sc"]
@@ -6,6 +6,8 @@
 [sub_resource type="ButtonGroup" id="ButtonGroup_dg"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_fd"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_cm"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -295,6 +297,35 @@ toggle_mode = true
 button_group = SubResource("ButtonGroup_fd")
 text = "HIGH"
 custom_minimum_size = Vector2(120, 52)
+theme_override_font_sizes/font_size = 20
+
+[node name="ControlModeLabel" type="Label" parent="OptionsOverlay/Panel/VBox"]
+layout_mode = 2
+text = "CONTROL MODE"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.6, 0.8, 1.0, 1)
+
+[node name="ControlModeRow" type="HBoxContainer" parent="OptionsOverlay/Panel/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="DirectBtn" type="Button" parent="OptionsOverlay/Panel/VBox/ControlModeRow"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_cm")
+text = "DIRECT"
+custom_minimum_size = Vector2(190, 52)
+theme_override_font_sizes/font_size = 20
+
+[node name="RelativeBtn" type="Button" parent="OptionsOverlay/Panel/VBox/ControlModeRow"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_cm")
+text = "RELATIVE"
+custom_minimum_size = Vector2(190, 52)
 theme_override_font_sizes/font_size = 20
 
 [node name="KeepWeaponBtn" type="Button" parent="OptionsOverlay/Panel/VBox"]

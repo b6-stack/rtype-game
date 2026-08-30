@@ -31,6 +31,10 @@ extends Control
 	$OptionsOverlay/Panel/VBox/FireDensityRow/NormalBtn,
 	$OptionsOverlay/Panel/VBox/FireDensityRow/HighBtn,
 ]
+@onready var _control_mode_buttons: Array[Button] = [
+	$OptionsOverlay/Panel/VBox/ControlModeRow/DirectBtn,
+	$OptionsOverlay/Panel/VBox/ControlModeRow/RelativeBtn,
+]
 
 const STAR_COUNT: int = 120
 var _stars: Array[Dictionary] = []
@@ -268,6 +272,10 @@ func _setup_options_menu() -> void:
 		var btn: Button = _fire_density_buttons[i]
 		btn.button_pressed = (i == GameState.enemy_fire_density)
 		btn.pressed.connect(_on_fire_density_pressed.bind(i))
+	for i in _control_mode_buttons.size():
+		var cbtn: Button = _control_mode_buttons[i]
+		cbtn.button_pressed = (i == GameState.control_mode)
+		cbtn.pressed.connect(_on_control_mode_pressed.bind(i))
 	_update_options_btn_texts()
 
 func _on_options_open_pressed() -> void:
@@ -294,6 +302,9 @@ func _on_keep_weapon_toggle_pressed() -> void:
 
 func _on_fire_density_pressed(index: int) -> void:
 	GameState.set_enemy_fire_density(index)
+
+func _on_control_mode_pressed(index: int) -> void:
+	GameState.set_control_mode(index)
 
 func _update_options_btn_texts() -> void:
 	if GameState.sound_enabled:

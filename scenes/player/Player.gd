@@ -47,8 +47,9 @@ var corridor_bottom: float = 960.0
 # ── Config ────────────────────────────────────────────────────
 ## Lerp responsiveness toward the touch/mouse target. At 35 the ship reached
 ## the target in ~2-3 frames, reading as a snap/teleport rather than a
-## glide. Halved so movement actually eases through space.
-const MOVE_SMOOTH: float = 17.5
+## glide. Halved to 17.5, then slowed another 3x on top of that so the
+## glide reads as deliberate flight rather than near-instant tracking.
+const MOVE_SMOOTH: float = 17.5 / 3.0
 const SHIP_MARGIN: float = 32.0
 ## Base respawn invincibility, before the difficulty grace multiplier
 ## (GameState.get_respawn_grace_multiplier) is applied — see _respawn_safe().
@@ -150,6 +151,11 @@ func _physics_process(delta: float) -> void:
 	if InputManager.is_touching() and _current_weapon != null:
 		var rate_mult: float = 0.45 if _is_charging else 1.0
 		_current_weapon.fire(_muzzle.global_position, rate_mult)
+	elif _relative_last_pos != RELATIVE_NO_BASELINE:
+		# Touch released: clear the RELATIVE_DRAG baseline so the next touch
+		# starts a fresh one instead of computing a delta from a stale,
+		# possibly far-away position.
+		_relative_last_pos = RELATIVE_NO_BASELINE
 
 	# Weapon charge accumulation
 	if GameState.always_max_charge_enabled:
@@ -212,10 +218,30 @@ func _apply_keyboard_fallback(delta: float) -> void:
 
 const FINGER_OFFSET := Vector2(200.0, 0.0)
 
+## Sentinel meaning "no baseline yet for this touch" in RELATIVE_DRAG
+## mode -- picked far outside any real viewport position so it can never
+## collide with an actual touch coordinate.
+const RELATIVE_NO_BASELINE := Vector2(-99999.0, -99999.0)
+var _relative_last_pos: Vector2 = RELATIVE_NO_BASELINE
+
 func _on_move_input(viewport_pos: Vector2) -> void:
-	var target := viewport_pos + FINGER_OFFSET
-	_target_pos.x = clamp(target.x, 60.0, 1840.0)
-	_target_pos.y = clamp(target.y, corridor_top + SHIP_MARGIN, corridor_bottom - SHIP_MARGIN)
+	if GameState.control_mode == GameState.ControlMode.RELATIVE_DRAG:
+		if _relative_last_pos == RELATIVE_NO_BASELINE:
+			# First event of a fresh touch: just record where the finger
+			# started. Moving the ship here would snap it toward the touch
+			# point exactly like DIRECT_OFFSET, defeating the point of
+			# relative mode.
+			_relative_last_pos = viewport_pos
+			return
+		var move_delta: Vector2 = viewport_pos - _relative_last_pos
+		_relative_last_pos = viewport_pos
+		_target_pos += move_delta
+		_target_pos.x = clamp(_target_pos.x, 60.0, 1840.0)
+		_target_pos.y = clamp(_target_pos.y, corridor_top + SHIP_MARGIN, corridor_bottom - SHIP_MARGIN)
+	else:
+		var target := viewport_pos + FINGER_OFFSET
+		_target_pos.x = clamp(target.x, 60.0, 1840.0)
+		_target_pos.y = clamp(target.y, corridor_top + SHIP_MARGIN, corridor_bottom - SHIP_MARGIN)
 
 func _on_charge_start() -> void:
 	if _is_dead:
